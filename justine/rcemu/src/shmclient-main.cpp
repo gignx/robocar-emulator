@@ -43,7 +43,8 @@ int main ( int argc, char* argv[] )
      ;
 
      boost::program_options::variables_map vm;
-     boost::program_options::store ( boost::program_options::parse_command_line ( argc, argv, desc ), vm );
+     boost::program_options::store (
+       boost::program_options::parse_command_line ( argc, argv, desc ), vm );
      boost::program_options::notify ( vm );
 
      if ( vm.count ( "version" ) ) {
@@ -56,23 +57,23 @@ int main ( int argc, char* argv[] )
      }
 
      if ( vm.count ( "help" ) ) {
-          std::cout << "Robocar City Emulator and Robocar World Championship home page: https://code.google.com/p/robocar-emulator/" << std::endl;
-          std::cout << desc << std::endl;
-          std::cout << "Please report bugs to: nbatfai@gmail.com" << std::endl;
+          std::cout << "Robocar City Emulator and Robocar World Championship home page: https://code.google.com/p/robocar-emulator/" << std::endl
+                    << desc << std::endl
+                    << "Please report bugs to: nbatfai@gmail.com" << std::endl;
           return 0;
      }
 
      std::string shm;
      if ( vm.count ( "shm" ) )
-          shm.assign ( vm["shm"].as < std::string > () );
+      shm.assign ( vm["shm"].as < std::string > () );
      else
-          shm.assign ( "JustineSharedMemory" );
+      shm.assign ( "JustineSharedMemory" );
 
      std::string port;
      if ( vm.count ( "port" ) )
-          port.assign ( vm["port"].as < std::string > () );
+      port.assign ( vm["port"].as < std::string > () );
      else
-          port.assign ( "10007" );
+      port.assign ( "10007" );
 
      // If you use this sample you should add your copyright information here too:
      /*
@@ -90,11 +91,13 @@ int main ( int argc, char* argv[] )
 
      justine::sampleclient::ShmClient shmClient {shm.c_str() };
 
-     try {
-          boost::asio::io_service io_service;
-          shmClient.start ( io_service, port.c_str() );
-     } catch ( std::exception& e ) {
-          std::cerr << "Exception: " << e.what() << "\n";
+     try
+     {
+       boost::asio::io_service io_service;
+       shmClient.start ( io_service, port.c_str() );
      }
-
+     catch ( std::exception& e )
+     {
+       std::cerr << "Exception: " << e.what() << "\n";
+     }
 }

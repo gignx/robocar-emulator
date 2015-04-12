@@ -90,7 +90,6 @@ public:
 
   virtual void print ( std::ostream & os ) const
   {
-
     os << m_from
        << " "
        << to_node()
@@ -100,16 +99,13 @@ public:
        << get_step()
        << " "
        << static_cast<unsigned int> ( get_type() );
-
   }
 
   friend std::ostream & operator<< ( std::ostream & os, Car & c )
   {
-
     c.print ( os );
 
     return os;
-
   }
 
 protected:
@@ -132,7 +128,6 @@ public:
 
   virtual void print ( std::ostream & os ) const
   {
-
     os << m_from
        << " "
        << to_node()
@@ -142,21 +137,18 @@ public:
        << get_step()
        << " "
        << static_cast<unsigned int> ( get_type() );
-
   }
 
-  osmium::unsigned_object_id_type ant ( void );  
-  osmium::unsigned_object_id_type ant_rnd ( void );  
-  osmium::unsigned_object_id_type ant_rernd ( void );  
-  osmium::unsigned_object_id_type ant_mrernd ( void );  
-  
+  osmium::unsigned_object_id_type ant ( void );
+  osmium::unsigned_object_id_type ant_rnd ( void );
+  osmium::unsigned_object_id_type ant_rernd ( void );
+  osmium::unsigned_object_id_type ant_mrernd ( void );
+
   static AdjacencyList alist;
   static AdjacencyList alist_evaporate;
-  
 
 private:
   bool rnd {true};
-
 };
 
 
@@ -170,7 +162,6 @@ public:
 
   virtual void print ( std::ostream & os ) const
   {
-
     os << m_from
        << " "
        << to_node()
@@ -180,7 +171,6 @@ public:
        << get_step()
        << " "
        << static_cast<unsigned int> ( get_type() );
-
   }
 
   bool get_guided() const
@@ -197,7 +187,6 @@ private:
   bool m_routed {false};
 
   std::vector<unsigned int> route;
-
 };
 
 class CopCar : public SmartCar
@@ -207,7 +196,6 @@ public:
 
   virtual void print ( std::ostream & os ) const
   {
-
     os << m_from
        << " "
        << to_node()
@@ -221,7 +209,6 @@ public:
        << get_num_captured_gangsters()
        << " "
        << m_name;
-
   }
 
   std::string get_name() const
@@ -239,10 +226,8 @@ public:
     ++m_num_captured_gangsters;
   }
 protected:
-
   int m_num_captured_gangsters {0};
   std::string m_name;
-
 };
 
 }
@@ -250,4 +235,3 @@ protected:
 
 
 #endif // ROBOCAR_CAR_HPP
-

@@ -34,11 +34,11 @@
 
 int main ( int argc, char* argv[] )
 {
-
   int t = std::time ( nullptr );
-#ifdef DEBUG
+
+  #ifdef DEBUG
   std::cout << "srand init =  " << t << std::endl;
-#endif
+  #endif
 
   std::srand ( t );
   // std::srand ( 10007 );
@@ -54,60 +54,71 @@ int main ( int argc, char* argv[] )
   ( "catchdist", boost::program_options::value<double>(), "the catch distance of cop cars" )
   ( "traffict", boost::program_options::value< std::string > (), "traffic type = NORMAL|ANTS|ANTS_RND|ANTS_RERND|ANTS_MRERND" )
   ;
-  
+
   boost::program_options::variables_map vm;
-  boost::program_options::store ( boost::program_options::parse_command_line ( argc, argv, desc ), vm );
+
+  boost::program_options::store (
+    boost::program_options::parse_command_line ( argc, argv, desc ), vm );
+
   boost::program_options::notify ( vm );
 
   if ( vm.count ( "version" ) )
-    {
-      std::cout << "Robocar City Emulator and Robocar World Championship, Traffic Server" << std::endl
-                << "Copyright (C) 2014, 2015 Norbert Bátfai\n" << std::endl
-                << "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>" << std::endl
-                << "This is free software: you are free to change and redistribute it." << std::endl
-                << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
-      return 0;
-    }
+  {
+    std::cout << "Robocar City Emulator and Robocar World Championship, Traffic Server" << std::endl
+              << "Copyright (C) 2014, 2015 Norbert Bátfai\n" << std::endl
+              << "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>" << std::endl
+              << "This is free software: you are free to change and redistribute it." << std::endl
+              << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
+
+    return 0;
+  }
 
   if ( vm.count ( "help" ) )
-    {
-      std::cout << "Robocar City Emulator and Robocar World Championship home page: https://code.google.com/p/robocar-emulator/" << std::endl;
-      std::cout << desc << std::endl;
-      std::cout << "Please report bugs to: nbatfai@gmail.com" << std::endl;
-      return 0;
-    }
+  {
+    std::cout << "Robocar City Emulator and Robocar World Championship home page: https://code.google.com/p/robocar-emulator/" << std::endl
+              << desc << std::endl
+              << "Please report bugs to: nbatfai@gmail.com" << std::endl;
+    return 0;
+  }
 
   std::string shm;
+
   if ( vm.count ( "shm" ) )
     shm.assign ( vm["shm"].as < std::string > () );
   else
     shm.assign ( "JustineSharedMemory" );
 
   std::string port;
+
   if ( vm.count ( "port" ) )
     port.assign ( vm["port"].as < std::string > () );
   else
     port.assign ( "10007" );
 
   int nrcars {100};
+
   if ( vm.count ( "nrcars" ) )
     nrcars = vm["nrcars"].as < int > ();
 
   int minutes {10};
+
   if ( vm.count ( "minutes" ) )
     minutes = vm["minutes"].as < int > ();
-  
+
   int catchdist {15.5};
+
   if ( vm.count ( "catchdist" ) )
     catchdist = vm["catchdist"].as < int > ();
 
   std::string traffict;
+
   if ( vm.count ( "traffict" ) )
     traffict.assign ( vm["traffict"].as < std::string > () );
   else
     traffict.assign ( "NORMAL" );
-  
+
   justine::robocar::TrafficType type;
+
   if(traffict == "ANTS_RND")
     type = justine::robocar::TrafficType::ANT_RND;
   else if(traffict == "ANTS_RERND")
@@ -118,17 +129,16 @@ int main ( int argc, char* argv[] )
     type = justine::robocar::TrafficType::ANT;
   else
     type = justine::robocar::TrafficType::NORMAL;
-  
+
   justine::robocar::Traffic traffic {nrcars, shm.c_str(), catchdist, type, minutes };
 
   try
-    {
-      boost::asio::io_service io_service;
-      traffic.start_server ( io_service, std::atoi ( port.c_str() ) );
-    }
+  {
+    boost::asio::io_service io_service;
+    traffic.start_server ( io_service, std::atoi ( port.c_str() ) );
+  }
   catch ( std::exception& e )
-    {
-      std::cerr << "Exception: " << e.what() << "\n";
-    }
-
+  {
+    std::cerr << "Exception: " << e.what() << "\n";
+  }
 }

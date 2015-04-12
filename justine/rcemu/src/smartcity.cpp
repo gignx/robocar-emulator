@@ -44,51 +44,49 @@ double justine::robocar::SmartCity::busWayLength ( bool verbose )
   double sum_bus_length {0.0};
   for ( auto busit = begin ( m_busWayNodesMap );
         busit != end ( m_busWayNodesMap ); ++busit )
+  {
+
+    if ( verbose )
+      std::cout << busit->first << ": ";
+
+    double bus_length {sum_bus_length};
+
+    for ( auto ref : busit->second )
     {
+      int i {1};
 
-      if ( verbose )
-        std::cout << busit->first << ": ";
+      osmium::Location prev_loc;
 
-      double bus_length {sum_bus_length};
-      for ( auto ref : busit->second )
+      for ( auto node_ref : m_way2nodes[ref] )
+      {
+        try
         {
+          //osmium::Location loc = m_waynode_locations.get ( node_ref );
+		      osmium::Location loc = m_waynode_locations[node_ref];
 
-          int i {1};
+          if ( verbose )
+            std::cout << loc << std::endl;
 
-          osmium::Location prev_loc;
-          for ( auto node_ref : m_way2nodes[ref] )
-            {
+          if ( i++>1 )
+          {
+            osmium::geom::Coordinates coords {loc};
+            osmium::geom::Coordinates prev_coords {prev_loc};
+            sum_bus_length += osmium::geom::haversine::distance ( coords, prev_coords );
+          }
 
-              try
-                {
-
-                  //osmium::Location loc = m_waynode_locations.get ( node_ref );
-		  osmium::Location loc = m_waynode_locations[node_ref];
-		  
-                  if ( verbose )
-                    std::cout << loc << std::endl;
-
-                  if ( i++>1 )
-                    {
-                      osmium::geom::Coordinates coords {loc};
-                      osmium::geom::Coordinates prev_coords {prev_loc};
-                      sum_bus_length += osmium::geom::haversine::distance ( coords, prev_coords );
-                    }
-                  prev_loc = loc;
-
-                }
-              catch ( std::exception& e )
-                {
-                  std::cerr << " No such node on the map. "<< e.what() << std::endl;
-                }
-
-            }
+          prev_loc = loc;
 
         }
-      if ( verbose )
-        std::cout << ( sum_bus_length-bus_length ) /1000.0 << " km"<< std::endl;
-
+        catch ( std::exception& e )
+        {
+          std::cerr << " No such node on the map. "<< e.what() << std::endl;
+        }
+      }
     }
+
+    if ( verbose )
+      std::cout << ( sum_bus_length-bus_length ) /1000.0 << " km"<< std::endl;
+  }
 
   return sum_bus_length/1000.0;
 }
@@ -106,46 +104,55 @@ int main ( int argc, char* argv[] )
   ;
 
   boost::program_options::variables_map vm;
-  boost::program_options::store ( boost::program_options::parse_command_line ( argc, argv, desc ), vm );
+
+  boost::program_options::store (
+    boost::program_options::parse_command_line ( argc, argv, desc ), vm );
+
   boost::program_options::notify ( vm );
 
   if ( vm.count ( "version" ) )
-    {
-      std::cout << "Robocar City Emulator and Robocar World Championship, City Server" << std::endl
-                << "Copyright (C) 2014, 2015 Norbert Bátfai\n" << std::endl
-                << "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>" << std::endl
-                << "This is free software: you are free to change and redistribute it." << std::endl
-                << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
-      return 0;
-    }
+  {
+    std::cout << "Robocar City Emulator and Robocar World Championship, City Server" << std::endl
+              << "Copyright (C) 2014, 2015 Norbert Bátfai\n" << std::endl
+              << "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>" << std::endl
+              << "This is free software: you are free to change and redistribute it." << std::endl
+              << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
+
+    return 0;
+  }
 
   if ( vm.count ( "help" ) )
-    {
-      std::cout << "Robocar City Emulator and Robocar World Championship home page: https://code.google.com/p/robocar-emulator/" << std::endl;
-      std::cout << desc << std::endl;
-      std::cout << "Please report bugs to: nbatfai@gmail.com" << std::endl;
-      return 0;
-    }
+  {
+    std::cout << "Robocar City Emulator and Robocar World Championship home page: https://code.google.com/p/robocar-emulator/" << std::endl
+              << desc << std::endl
+              << "Please report bugs to: nbatfai@gmail.com" << std::endl;
+
+    return 0;
+  }
 
   std::string osm_input;
+  
   if ( vm.count ( "osm" ) )
     osm_input.assign ( vm["osm"].as < std::string > () );
   else
     osm_input.assign ( "../debrecen.osm" );
 
   std::string node2gps_output;
+
   if ( vm.count ( "node2gps" ) )
     node2gps_output.assign ( vm["node2gps"].as < std::string > () );
   else
     node2gps_output.assign ( "../lmap.txt" );
 
   std::string city;
+
   if ( vm.count ( "city" ) )
     city.assign ( vm["city"].as < std::string > () );
   else
     city.assign ( "Debrecen" );
 
   std::string shm;
+
   if ( vm.count ( "shm" ) )
     shm.assign ( vm["shm"].as < std::string > () );
   else
@@ -160,23 +167,20 @@ int main ( int argc, char* argv[] )
 
   std::cout << city << " is... " << std::flush;
   try
-    {
+  {
+    if ( vm.count ( "node2gps" ) )
+      justine::robocar::SmartCity smartCity ( osm_input.c_str(), shm.c_str(), node2gps_output.c_str() );
+    else
+      justine::robocar::SmartCity smartCity ( osm_input.c_str(), shm.c_str() );
 
-      if ( vm.count ( "node2gps" ) )
-        justine::robocar::SmartCity smartCity ( osm_input.c_str(), shm.c_str(), node2gps_output.c_str() );
-      else
-        justine::robocar::SmartCity smartCity ( osm_input.c_str(), shm.c_str() );
+    std::cout << "ready."<<  std::endl;
 
-      std::cout << "ready."<<  std::endl;
-      for ( ;; );
+    for ( ;; );
 
-    }
+  }
   catch ( std::exception &err )
-    {
-
-      std::cout << "SmartCity cannot be built for "+city << std::endl;
-      std::cout << err.what() <<std::endl;
-
-    }
-
+  {
+    std::cout << "SmartCity cannot be built for "+city << std::endl;
+    std::cout << err.what() <<std::endl;
+  }
 }

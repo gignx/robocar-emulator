@@ -113,18 +113,17 @@ public:
    * This constructor creates the BGL graph from the map graph that
    * is placed in the shared memory segment.
    */
-  MyShmClient ( const char * shm_segment, std::string teamname ) : ShmClient ( shm_segment ), m_teamname ( teamname )
+  MyShmClient ( const char * shm_segment, std::string teamname ) :
+    ShmClient ( shm_segment ), m_teamname ( teamname )
   {
-
     nr_graph = bgl_graph();
 
-#ifdef DEBUG
+    #ifdef DEBUG
     print_vertices ( 10 );
     print_edges ( 10 );
     std::fstream graph_log( teamname+".dot" , std::ios_base::out );
-    boost::write_graphviz(graph_log, *nr_graph);		   
-#endif
-
+    boost::write_graphviz(graph_log, *nr_graph);
+    #endif
   }
 
   /**
@@ -133,9 +132,7 @@ public:
    */
   ~MyShmClient()
   {
-
     delete nr_graph;
-
   }
 
   /**
@@ -161,22 +158,20 @@ public:
    */
   int num_vertices ( int &sum_edges )
   {
-
     std::set<osmium::unsigned_object_id_type> sum_vertices;
 
     for ( justine::robocar::shm_map_Type::iterator iter=shm_map->begin();
           iter!=shm_map->end(); ++iter )
+    {
+      sum_vertices.insert ( iter->first );
+      sum_edges+=iter->second.m_alist.size();
+
+      for ( auto noderef : iter->second.m_alist )
       {
-
-        sum_vertices.insert ( iter->first );
-        sum_edges+=iter->second.m_alist.size();
-
-        for ( auto noderef : iter->second.m_alist )
-          {
-            sum_vertices.insert ( noderef );
-          }
-
+        sum_vertices.insert ( noderef );
       }
+
+    }
 
     return sum_vertices.size();
   }
@@ -188,7 +183,6 @@ public:
    */
   void print_edges ( unsigned more )
   {
-
     VertexNameMap vertexNameMap = boost::get ( boost::vertex_name, *nr_graph );
 
     std::pair<NRGVertexIter, NRGVertexIter> vi;
@@ -196,14 +190,16 @@ public:
     unsigned count {0};
 
     for ( vi = boost::vertices ( *nr_graph ); vi.first != vi.second; ++vi.first )
+    {
+      if ( more )
       {
-        if ( more )
-          if ( ++count > more ) break;
+        if ( ++count > more )
+          break;
+      }
 
         std::cout << vertexNameMap[*vi.first] <<  " ";
-      }
+    }
     std::cout << std::endl;
-
   }
 
   /**
@@ -220,25 +216,29 @@ public:
     osmium::unsigned_object_id_type prev = 0;
     NRGEdgeIter ei, ei_end;
 
-    for ( boost::tie ( ei, ei_end ) = boost::edges ( *nr_graph ); ei != ei_end; ++ei )
-      {
-        auto ii = vertexNameMap[boost::source ( *ei, *nr_graph )];
+    for ( boost::tie ( ei, ei_end ) = boost::edges ( *nr_graph );
+          ei != ei_end; ++ei )
+    {
+      auto ii = vertexNameMap[boost::source ( *ei, *nr_graph )];
 
-        if ( ii != prev )
+      if ( ii != prev )
           std::cout << std::endl;
 
-        std::cout << "(" << ii
-                  << " -> " << vertexNameMap[boost::target ( *ei, *nr_graph )] << ") ";
+      std::cout << "(" << ii
+                << " -> " << vertexNameMap[boost::target ( *ei, *nr_graph )]
+                << ") ";
 
-        prev = ii;
+      prev = ii;
 
-        if ( more )
-          if ( ++count > more ) break;
-
+      if ( more )
+      {
+          if ( ++count > more )
+            break;
       }
 
-    std::cout << std::endl;
+    }
 
+    std::cout << std::endl;
   }
 
   /**
@@ -248,72 +248,61 @@ public:
    */
   NodeRefGraph* bgl_graph ( void )
   {
-
     NodeRefGraph* nr_graph = new NodeRefGraph();
 
     int count {0};
 
     for ( justine::robocar::shm_map_Type::iterator iter=shm_map->begin();
           iter!=shm_map->end(); ++iter )
+    {
+      osmium::unsigned_object_id_type u = iter->first;
+
+      for ( justine::robocar::uint_vector::iterator noderefi = iter->second.m_alist.begin();
+            noderefi!=iter->second.m_alist.end();
+            ++noderefi )
       {
+        NodeRefGraph::vertex_descriptor f;
+        std::map<osmium::unsigned_object_id_type, NRGVertex>::iterator it = nr2v.find ( u );
 
-        osmium::unsigned_object_id_type u = iter->first;
+        if ( it == nr2v.end() )
+        {
+          f = boost::add_vertex ( u, *nr_graph );
+          nr2v[u] = f;
 
-        for ( justine::robocar::uint_vector::iterator noderefi = iter->second.m_alist.begin();
-              noderefi!=iter->second.m_alist.end();
-              ++noderefi )
-          {
+          ++count;
+        }
+        else
+        {
+          f = it->second;
+        }
 
-            NodeRefGraph::vertex_descriptor f;
-            std::map<osmium::unsigned_object_id_type, NRGVertex>::iterator it = nr2v.find ( u );
+        NodeRefGraph::vertex_descriptor t;
+        it = nr2v.find ( *noderefi );
 
-            if ( it == nr2v.end() )
-              {
+        if ( it == nr2v.end() )
+        {
+          t = boost::add_vertex ( *noderefi, *nr_graph );
+          nr2v[*noderefi] = t;
 
-                f = boost::add_vertex ( u, *nr_graph );
-                nr2v[u] = f;
+          ++count;
+        }
+        else
+        {
+          t = it->second;
+        }
 
-                ++count;
+        int to = std::distance ( iter->second.m_alist.begin(), noderefi );
 
-              }
-            else
-              {
-
-                f = it->second;
-
-              }
-
-            NodeRefGraph::vertex_descriptor t;
-            it = nr2v.find ( *noderefi );
-            if ( it == nr2v.end() )
-              {
-
-                t = boost::add_vertex ( *noderefi, *nr_graph );
-                nr2v[*noderefi] = t;
-
-                ++count;
-
-              }
-            else
-              {
-
-                t = it->second;
-
-              }
-
-            int to = std::distance ( iter->second.m_alist.begin(), noderefi );
-
-            boost::add_edge ( f, t, palist ( iter->first, to ), *nr_graph );
-
-          }
+        boost::add_edge ( f, t, palist ( iter->first, to ), *nr_graph );
 
       }
+    }
 
-#ifdef DEBUG
-    std::cout << "# vertices count: " << count << std::endl;;
-    std::cout << "# BGF edges: " << boost::num_edges ( *nr_graph ) << std::endl;;
-    std::cout << "# BGF vertices: " << boost::num_vertices ( *nr_graph ) << std::endl;;
-#endif
+    #ifdef DEBUG
+    std::cout << "# vertices count: " << count << std::endl
+              << "# BGF edges: " << boost::num_edges ( *nr_graph ) << std::endl
+              << "# BGF vertices: " << boost::num_vertices ( *nr_graph ) << std::endl;;
+    #endif
 
     return nr_graph;
   }
@@ -326,12 +315,13 @@ public:
    *
    * This function determines the shortest path from the source node to the target node.
    */
-  std::vector<osmium::unsigned_object_id_type> hasDijkstraPath ( osmium::unsigned_object_id_type from, osmium::unsigned_object_id_type to )
+  std::vector<osmium::unsigned_object_id_type> hasDijkstraPath (
+    osmium::unsigned_object_id_type from,
+    osmium::unsigned_object_id_type to )
   {
-
-#ifdef DEBUG
+    #ifdef DEBUG
     auto start = std::chrono::high_resolution_clock::now();
-#endif
+    #endif
 
     std::vector<NRGVertex> parents ( boost::num_vertices ( *nr_graph ) );
     std::vector<int> distances ( boost::num_vertices ( *nr_graph ) );
@@ -341,8 +331,9 @@ public:
     PredecessorMap predecessorMap ( &parents[0], vertexIndexMap );
     DistanceMap distanceMap ( &distances[0], vertexIndexMap );
 
-    boost::dijkstra_shortest_paths ( *nr_graph, nr2v[from],
-                                     boost::distance_map ( distanceMap ).predecessor_map ( predecessorMap ) );
+    boost::dijkstra_shortest_paths (
+      *nr_graph, nr2v[from],
+      boost::distance_map ( distanceMap ).predecessor_map ( predecessorMap ) );
 
     VertexNameMap vertexNameMap = boost::get ( boost::vertex_name, *nr_graph );
 
@@ -351,43 +342,42 @@ public:
     NRGVertex tov = nr2v[to];
     NRGVertex fromv = predecessorMap[tov];
 
-#ifdef DEBUG
+    #ifdef DEBUG
     int dist {0};
-#endif
+    #endif
 
     while ( fromv != tov )
-      {
+    {
+      NRGEdge edge = boost::edge ( fromv, tov, *nr_graph ).first;
 
-        NRGEdge edge = boost::edge ( fromv, tov, *nr_graph ).first;
+      #ifdef DEBUG
+      std::cout << vertexNameMap[boost::source ( edge, *nr_graph )]
+                << " -> "
+                << vertexNameMap[boost::target ( edge, *nr_graph )] << std::endl;
+      dist += distanceMap[fromv];
+      #endif
 
-#ifdef DEBUG
-        std::cout << vertexNameMap[boost::source ( edge, *nr_graph )]
-                  << " -> "
-                  << vertexNameMap[boost::target ( edge, *nr_graph )] << std::endl;
-        dist += distanceMap[fromv];
-#endif
+      path.push_back ( vertexNameMap[boost::target ( edge, *nr_graph )] );
 
-        path.push_back ( vertexNameMap[boost::target ( edge, *nr_graph )] );
+      tov = fromv;
+      fromv = predecessorMap[tov];
+    }
 
-        tov = fromv;
-        fromv = predecessorMap[tov];
-      }
     path.push_back ( from );
 
     std::reverse ( path.begin(), path.end() );
 
-#ifdef DEBUG
+    #ifdef DEBUG
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds> (
-                std::chrono::high_resolution_clock::now() - start ).count()
+                  std::chrono::high_resolution_clock::now() - start ).count()
               << " ms " << dist << " meters" << std::endl;
 
     std::copy ( path.begin(), path.end(),
                 std::ostream_iterator<osmium::unsigned_object_id_type> ( std::cout, " " ) );
-#endif
+    #endif
 
     return path;
   }
-
 
   /**
    * @brief This function solves the shortest path problem using Bellman-Ford algorithm.
@@ -397,12 +387,13 @@ public:
    *
    * This function determines the shortest path from the source node to the target node.
    */
-  std::vector<osmium::unsigned_object_id_type> hasBellmanFordPath ( osmium::unsigned_object_id_type from, osmium::unsigned_object_id_type to )
+  std::vector<osmium::unsigned_object_id_type> hasBellmanFordPath (
+    osmium::unsigned_object_id_type from,
+    osmium::unsigned_object_id_type to )
   {
-
-#ifdef DEBUG
+    #ifdef DEBUG
     auto start = std::chrono::high_resolution_clock::now();
-#endif
+    #endif
 
     std::vector<NRGVertex> parents ( boost::num_vertices ( *nr_graph ) );
     for ( int i = 0; i < boost::num_vertices ( *nr_graph ); ++i )
@@ -417,9 +408,10 @@ public:
     PredecessorMap predecessorMap ( &parents[0], vertexIndexMap );
     DistanceMap distanceMap ( &distances[0], vertexIndexMap );
 
-    boost::bellman_ford_shortest_paths ( *nr_graph, boost::num_vertices ( *nr_graph ),
-                                         boost::weight_map ( weightMap ).
-                                         distance_map ( distanceMap ).predecessor_map ( predecessorMap ) );
+    boost::bellman_ford_shortest_paths (
+      *nr_graph, boost::num_vertices ( *nr_graph ),
+      boost::weight_map ( weightMap ).
+      distance_map ( distanceMap ).predecessor_map ( predecessorMap ) );
 
     VertexNameMap vertexNameMap = boost::get ( boost::vertex_name, *nr_graph );
 
@@ -428,46 +420,44 @@ public:
     NRGVertex tov = nr2v[to];
     NRGVertex fromv = predecessorMap[tov];
 
-#ifdef DEBUG
+    #ifdef DEBUG
     int dist {0};
-#endif
+    #endif
 
     while ( fromv != tov )
-      {
+    {
+      NRGEdge edge = boost::edge ( fromv, tov, *nr_graph ).first;
 
-        NRGEdge edge = boost::edge ( fromv, tov, *nr_graph ).first;
+      #ifdef DEBUG
+      std::cout << vertexNameMap[boost::source ( edge, *nr_graph )]
+                << " -> "
+                << vertexNameMap[boost::target ( edge, *nr_graph )] << std::endl;
+      dist += distanceMap[fromv];
+      #endif
 
-#ifdef DEBUG
-        std::cout << vertexNameMap[boost::source ( edge, *nr_graph )]
-                  << " -> "
-                  << vertexNameMap[boost::target ( edge, *nr_graph )] << std::endl;
-        dist += distanceMap[fromv];
-#endif
+      path.push_back ( vertexNameMap[boost::target ( edge, *nr_graph )] );
 
-        path.push_back ( vertexNameMap[boost::target ( edge, *nr_graph )] );
-
-        tov = fromv;
-        fromv = predecessorMap[tov];
-      }
+      tov = fromv;
+      fromv = predecessorMap[tov];
+    }
     path.push_back ( from );
 
     std::reverse ( path.begin(), path.end() );
 
-#ifdef DEBUG
+    #ifdef DEBUG
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds> (
-                std::chrono::high_resolution_clock::now() - start ).count()
+                  std::chrono::high_resolution_clock::now() - start ).count()
               << " ms " << dist << " meters" << std::endl;
 
     std::copy ( path.begin(), path.end(),
                 std::ostream_iterator<osmium::unsigned_object_id_type> ( std::cout, " " ) );
-#endif
+    #endif
 
     return path;
   }
 
 
 protected:
-
   NodeRefGraph* nr_graph;
   std::string m_teamname;
 
@@ -483,15 +473,21 @@ private:
    */
   void foo ( void )
   {
+    std::cout << std::endl;
+
+    std::vector<osmium::unsigned_object_id_type> pathD =
+      hasDijkstraPath ( 2969934868, 1348670117 );
 
     std::cout << std::endl;
-    std::vector<osmium::unsigned_object_id_type> pathD = hasDijkstraPath ( 2969934868, 1348670117 );
-    std::cout << std::endl;
+
     std::copy ( pathD.begin(), pathD.end(),
                 std::ostream_iterator<osmium::unsigned_object_id_type> ( std::cout, "  -D-> " ) );
 
-    std::vector<osmium::unsigned_object_id_type> pathBF = hasBellmanFordPath ( 2969934868, 1348670117 );
+    std::vector<osmium::unsigned_object_id_type> pathBF =
+      hasBellmanFordPath ( 2969934868, 1348670117 );
+
     std::cout << std::endl;
+
     std::copy ( pathBF.begin(), pathBF.end(),
                 std::ostream_iterator<osmium::unsigned_object_id_type> ( std::cout, " -BF-> " ) );
 
@@ -521,16 +517,26 @@ private:
   typedef SmartCar Gangster;
   typedef int Cop;
 
-  std::vector<Gangster> gangsters ( boost::asio::ip::tcp::socket & socket, int id, osmium::unsigned_object_id_type cop );
-  std::vector<Cop> initcops ( boost::asio::ip::tcp::socket & socket );
-  void pos ( boost::asio::ip::tcp::socket & socket, int id );
-  void car ( boost::asio::ip::tcp::socket & socket, int id, unsigned *f, unsigned *t, unsigned* s );
-  void route ( boost::asio::ip::tcp::socket & socket, int id, std::vector<osmium::unsigned_object_id_type> & );
+  std::vector<Gangster> gangsters (
+    boost::asio::ip::tcp::socket & socket,
+    int id, osmium::unsigned_object_id_type cop );
+    
+  std::vector<Cop> initcops (
+    boost::asio::ip::tcp::socket & socket );
+
+  void pos (
+    boost::asio::ip::tcp::socket & socket, int id );
+
+  void car (
+    boost::asio::ip::tcp::socket & socket, int id,
+    unsigned *f, unsigned *t, unsigned* s );
+
+  void route (
+    boost::asio::ip::tcp::socket & socket, int id,
+    std::vector<osmium::unsigned_object_id_type> & );
 };
 
 }
 } // justine::sampleclient::
 
 #endif // ROBOCAR_SHMCLIENT_HPP
-
-

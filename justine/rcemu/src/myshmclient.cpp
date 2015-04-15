@@ -30,21 +30,23 @@
  */
 
 #include <myshmclient.hpp>
-//#include <trafficlexer.hpp>
 
 char data[524288];
 
-std::vector<justine::sampleclient::MyShmClient::Gangster> justine::sampleclient::MyShmClient::gangsters ( boost::asio::ip::tcp::socket & socket, int id,
-    osmium::unsigned_object_id_type cop )
+std::vector<justine::sampleclient::MyShmClient::Gangster>
+justine::sampleclient::MyShmClient::AcquireGangstersFromServer(
+    boost::asio::ip::tcp::socket &socket,
+    int id,
+    osmium::unsigned_object_id_type cop)
 {
   boost::system::error_code err;
 
-  size_t length = std::sprintf ( data, "<gangsters " );
-  length += std::sprintf ( data+length, "%d>", id );
+  size_t length = std::sprintf (data, "<gangsters ");
+  length += std::sprintf (data + length, "%d>", id);
 
-  socket.send ( boost::asio::buffer ( data, length ) );
+  socket.send (boost::asio::buffer(data, length));
 
-  length = socket.read_some ( boost::asio::buffer ( data ), err );
+  length = socket.read_some (boost::asio::buffer (data), err);
 
   if ( err == boost::asio::error::eof )
   {
@@ -68,10 +70,10 @@ std::vector<justine::sampleclient::MyShmClient::Gangster> justine::sampleclient:
     gangsters.push_back ( Gangster {idd, f, t, s} );
   }
 
-  /*std::sort ( gangsters.begin(), gangsters.end(), [this, cop] ( Gangster x, Gangster y )
+  std::sort ( gangsters.begin(), gangsters.end(), [this, cop] ( Gangster x, Gangster y )
   {
     return dst ( cop, x.to ) < dst ( cop, y.to );
-  } );*/
+  } );
 
   std::cout.write ( data, length );
   std::cout << "Command GANGSTER sent." << std::endl;
@@ -242,7 +244,7 @@ void justine::sampleclient::MyShmClient::start(
     {
       car ( socket, cop, &f, &t, &s );
 
-      gngstrs = gangsters ( socket, cop, t );
+      gngstrs = AcquireGangstersFromServer(socket, cop, t);
 
       if ( gngstrs.size() > 0 )
       {

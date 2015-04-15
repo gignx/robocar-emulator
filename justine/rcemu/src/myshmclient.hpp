@@ -528,10 +528,11 @@ private:
     int step;
   };
 
-  typedef SmartCar Gangster;
-  typedef int Cop;
+  using Gangster = SmartCar;
 
-  std::vector<Gangster> gangsters (
+  using Cop = int;
+
+  std::vector<Gangster> AcquireGangstersFromServer (
     boost::asio::ip::tcp::socket & socket,
     int id, osmium::unsigned_object_id_type cop );
 

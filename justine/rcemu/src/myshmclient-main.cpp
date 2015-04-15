@@ -105,7 +105,7 @@ int main ( int argc, char* argv[] )
    try
    {
      boost::asio::io_service io_service;
-     myShmClient.start10 ( io_service, port.c_str() );
+     myShmClient.start( io_service, port.c_str(), 10);
      // myShmClient.start ( io_service, port.c_str() ); //
    }
    catch ( std::exception& e )

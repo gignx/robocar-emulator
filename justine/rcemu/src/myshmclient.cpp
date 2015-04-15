@@ -68,10 +68,10 @@ std::vector<justine::sampleclient::MyShmClient::Gangster> justine::sampleclient:
     gangsters.push_back ( Gangster {idd, f, t, s} );
   }
 
-  std::sort ( gangsters.begin(), gangsters.end(), [this, cop] ( Gangster x, Gangster y )
+  /*std::sort ( gangsters.begin(), gangsters.end(), [this, cop] ( Gangster x, Gangster y )
   {
     return dst ( cop, x.to ) < dst ( cop, y.to );
-  } );
+  } );*/
 
   std::cout.write ( data, length );
   std::cout << "Command GANGSTER sent." << std::endl;
@@ -80,11 +80,13 @@ std::vector<justine::sampleclient::MyShmClient::Gangster> justine::sampleclient:
 }
 
 std::vector<justine::sampleclient::MyShmClient::Cop>
-justine::sampleclient::MyShmClient::initcops ( boost::asio::ip::tcp::socket & socket )
+justine::sampleclient::MyShmClient::initcops(
+    boost::asio::ip::tcp::socket & socket,
+    unsigned cop_count)
 {
   boost::system::error_code err;
 
-  size_t length = std::sprintf ( data, "<init guided %s 10 c>", m_teamname.c_str() );
+  size_t length = std::sprintf ( data, "<init guided %s %d c>", m_teamname.c_str(), cop_count );
 
   socket.send ( boost::asio::buffer ( data, length ) );
 
@@ -118,36 +120,6 @@ justine::sampleclient::MyShmClient::initcops ( boost::asio::ip::tcp::socket & so
   std::cout << "Command INIT sent." << std::endl;
 
   return cops;
-}
-
-
-int justine::sampleclient::MyShmClient::init ( boost::asio::ip::tcp::socket & socket )
-{
-  boost::system::error_code err;
-
-  size_t length = std::sprintf ( data, "<init guided %s 1 c>", m_teamname.c_str() );
-
-  socket.send ( boost::asio::buffer ( data, length ) );
-
-  length = socket.read_some ( boost::asio::buffer ( data ), err );
-
-  if ( err == boost::asio::error::eof )
-  {
-      // TODO
-  }
-  else if ( err )
-  {
-      throw boost::system::system_error ( err );
-  }
-
-  int id {0};
-  std::sscanf ( data, "<OK %d", &id );
-
-  std::cout.write ( data, length );
-  std::cout << "Command INIT sent." << std::endl;
-
-  return id;
-
 }
 
 void justine::sampleclient::MyShmClient::pos ( boost::asio::ip::tcp::socket & socket, int id )
@@ -236,62 +208,11 @@ void justine::sampleclient::MyShmClient::route (
   std::cout << "Command ROUTE sent." << std::endl;
 }
 
-void justine::sampleclient::MyShmClient::start (
-  boost::asio::io_service& io_service, const char * port )
-{
 
-  #ifdef DEBUG
-  foo();
-  #endif
-
-  boost::asio::ip::tcp::resolver resolver ( io_service );
-  boost::asio::ip::tcp::resolver::query query ( boost::asio::ip::tcp::v4(), "localhost", port );
-  boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve ( query );
-
-  boost::asio::ip::tcp::socket socket ( io_service );
-  boost::asio::connect ( socket, iterator );
-
-  int id = init ( socket );
-
-  pos ( socket, id );
-
-  unsigned int g {0u};
-  unsigned int f {0u};
-  unsigned int t {0u};
-  unsigned int s {0u};
-
-  std::vector<Gangster> gngstrs;
-
-  for ( ;; )
-  {
-    std::this_thread::sleep_for ( std::chrono::milliseconds ( 200 ) );
-
-    car ( socket, id, &f, &t, &s );
-
-    gngstrs = gangsters ( socket, id, t );
-
-    if ( gngstrs.size() > 0 )
-      g = gngstrs[0].to;
-    else
-      g = 0;
-
-    if ( g > 0 )
-    {
-      std::vector<osmium::unsigned_object_id_type> path = hasDijkstraPath ( t, g );
-
-      if ( path.size() > 1 )
-      {
-        std::copy ( path.begin(), path.end(),
-                    std::ostream_iterator<osmium::unsigned_object_id_type> ( std::cout, " -> " ) );
-
-        route ( socket, id, path );
-      }
-    }
-  }
-}
-
-void justine::sampleclient::MyShmClient::start10 (
-  boost::asio::io_service& io_service, const char * port )
+void justine::sampleclient::MyShmClient::start(
+    boost::asio::io_service& io_service,
+    const char * port,
+    unsigned cop_count)
 {
   #ifdef DEBUG
   foo();
@@ -304,7 +225,7 @@ void justine::sampleclient::MyShmClient::start10 (
   boost::asio::ip::tcp::socket socket ( io_service );
   boost::asio::connect ( socket, iterator );
 
-  std::vector<Cop> cops = initcops ( socket );
+  std::vector<Cop> cops = initcops ( socket, cop_count);
 
   unsigned int g {0u};
   unsigned int f {0u};
@@ -324,9 +245,13 @@ void justine::sampleclient::MyShmClient::start10 (
       gngstrs = gangsters ( socket, cop, t );
 
       if ( gngstrs.size() > 0 )
+      {
         g = gngstrs[0].to;
+      }
       else
+      {
         g = 0;
+      }
 
       if ( g > 0 )
       {

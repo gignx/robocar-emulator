@@ -77,22 +77,39 @@ namespace justine
 namespace sampleclient
 {
 
-typedef boost::adjacency_list<boost::listS, boost::vecS, boost::directedS,
-        boost::property<boost::vertex_name_t, osmium::unsigned_object_id_type>,
-        boost::property<boost::edge_weight_t, int>> NodeRefGraph;
+using NodeRefGraph =
+        boost::adjacency_list<boost::listS, boost::vecS, boost::directedS,
+          boost::property<boost::vertex_name_t, osmium::unsigned_object_id_type>,
+          boost::property<boost::edge_weight_t, int>>;
 
-typedef boost::graph_traits<NodeRefGraph>::vertex_descriptor NRGVertex;
-typedef boost::graph_traits<NodeRefGraph>::vertex_iterator NRGVertexIter;
-typedef boost::graph_traits<NodeRefGraph>::edge_descriptor NRGEdge;
-typedef boost::graph_traits<NodeRefGraph>::edge_iterator NRGEdgeIter;
+using NRGVertex =
+        boost::graph_traits<NodeRefGraph>::vertex_descriptor;
 
-typedef boost::property_map<NodeRefGraph, boost::vertex_name_t>::type VertexNameMap;
-typedef boost::property_map<NodeRefGraph, boost::vertex_index_t>::type VertexIndexMap;
+using NRGVertexIter =
+        boost::graph_traits<NodeRefGraph>::vertex_iterator;
 
-typedef boost::iterator_property_map <NRGVertex*, VertexIndexMap, NRGVertex, NRGVertex&> PredecessorMap;
-typedef boost::iterator_property_map <int*, VertexIndexMap, int, int&> DistanceMap;
+using NRGEdge =
+        boost::graph_traits<NodeRefGraph>::edge_descriptor;
 
-typedef boost::property_map<NodeRefGraph, boost::edge_weight_t>::type EdgeWeightMap;
+using NRGEdgeIter =
+        boost::graph_traits<NodeRefGraph>::edge_iterator;
+
+
+using VertexNameMap =
+        boost::property_map<NodeRefGraph, boost::vertex_name_t>::type;
+
+using VertexIndexMap =
+        boost::property_map<NodeRefGraph, boost::vertex_index_t>::type;
+
+using PredecessorMap =
+        boost::iterator_property_map <NRGVertex*, VertexIndexMap,
+          NRGVertex, NRGVertex&>;
+
+using DistanceMap =
+        boost::iterator_property_map <int*, VertexIndexMap, int, int&>;
+
+using EdgeWeightMap =
+        boost::property_map<NodeRefGraph, boost::edge_weight_t>::type;
 
 /**
  * @brief A sample class used for testing the routing algorithms.
@@ -144,9 +161,8 @@ public:
    * then establishes a connection with the traffic server, finally
    * sends some client commands.
    */
-  void start ( boost::asio::io_service& io_service, const char * port );
 
-  void start10 ( boost::asio::io_service& io_service, const char * port );
+  void start ( boost::asio::io_service& io_service, const char * port, unsigned cop_count);
 
   /**
    * @brief This function counts the number of vertices and number of edges in the map graph.
@@ -504,8 +520,6 @@ private:
 
   }
 
-  int init ( boost::asio::ip::tcp::socket & socket );
-
   struct SmartCar
   {
     int id;
@@ -520,9 +534,10 @@ private:
   std::vector<Gangster> gangsters (
     boost::asio::ip::tcp::socket & socket,
     int id, osmium::unsigned_object_id_type cop );
-    
+
   std::vector<Cop> initcops (
-    boost::asio::ip::tcp::socket & socket );
+    boost::asio::ip::tcp::socket & socket,
+    unsigned cop_count);
 
   void pos (
     boost::asio::ip::tcp::socket & socket, int id );

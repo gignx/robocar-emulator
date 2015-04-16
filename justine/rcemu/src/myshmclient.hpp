@@ -77,6 +77,8 @@ namespace justine
 namespace sampleclient
 {
 
+const int kMaxBufferLen = 524288;
+
 using NodeRefGraph =
         boost::adjacency_list<boost::listS, boost::vecS, boost::directedS,
           boost::property<boost::vertex_name_t, osmium::unsigned_object_id_type>,
@@ -131,8 +133,12 @@ public:
    * This constructor creates the BGL graph from the map graph that
    * is placed in the shared memory segment.
    */
-  MyShmClient(const char * shm_segment, std::string team_name) :
-    ShmClient(shm_segment), m_team_name_(team_name), num_cops_(0)
+  MyShmClient(
+    const char *shm_segment,
+    std::string team_name,
+    const char *port = "10007",
+    int num_cops = 10):
+      ShmClient(shm_segment), m_team_name_(team_name), port_(port), num_cops_(num_cops)
   {
     nr_graph_ = BuildGraph();
 
@@ -158,6 +164,11 @@ public:
     return this->num_cops_;
   }
 
+  const char* get_port(void)
+  {
+    return this->port_;
+  }
+
   /**
    * @brief This function starts the client.
    * @param io_service
@@ -167,7 +178,7 @@ public:
    * then establishes a connection with the traffic server, finally
    * sends some client commands.
    */
-  void SimulateCarsLoop(boost::asio::io_service& io_service, const char * port);
+  void SimulateCarsLoop(void);
 
   /**
    * @brief This function counts the number of vertices and number of edges in the map graph.
@@ -489,11 +500,13 @@ protected:
 
   NodeRefGraph* nr_graph_;
   std::string m_team_name_;
+
+  const char *port_;
   int num_cops_;
+
   std::vector<Cop> cops_;
 
 private:
-
   /**
    * Helper structure to create the BGL graph.
    */
@@ -549,7 +562,7 @@ private:
     boost::asio::ip::tcp::socket & socket,
     int id, osmium::unsigned_object_id_type cop);
 
-  size_t InitializeCops(
+  int InitializeCops(
     boost::asio::ip::tcp::socket & socket,
     unsigned cop_count);
 

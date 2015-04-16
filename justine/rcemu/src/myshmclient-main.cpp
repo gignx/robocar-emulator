@@ -34,83 +34,91 @@
 
 int main ( int argc, char* argv[] )
 {
-   boost::program_options::options_description desc ( "Options" );
-   desc.add_options()
-   ( "version", "produce version message" )
-   ( "help", "produce help message" )
-   ( "shm", boost::program_options::value< std::string > (), "shared memory segment name" )
-   ( "port", boost::program_options::value< std::string > (), "the TCP port that the traffic server is listening on to allow agents to communicate with the traffic simulation, the default value is 10007" )
-   ( "team", boost::program_options::value< std::string > (), "team name" )
-   ;
+  boost::program_options::options_description desc ( "Options" );
+  desc.add_options()
+  ( "version", "produce version message" )
+  ( "help", "produce help message" )
+  ( "shm",  boost::program_options::value<std::string> (), "shared memory segment name" )
+  ( "port", boost::program_options::value<std::string> (), "the TCP port that the traffic server is listening on to allow agents to communicate with the traffic simulation, the default value is 10007" )
+  ( "team", boost::program_options::value<std::string> (), "team name" )
+  ( "cops", boost::program_options::value<int>(), "the number of cop cars, the default value is 10")
+  ;
 
-   boost::program_options::variables_map vm;
+  boost::program_options::variables_map vm;
 
-   boost::program_options::store (
-     boost::program_options::parse_command_line ( argc, argv, desc ), vm );
+  boost::program_options::store (
+   boost::program_options::parse_command_line ( argc, argv, desc ), vm );
 
-   boost::program_options::notify ( vm );
+  boost::program_options::notify ( vm );
 
-   if ( vm.count ( "version" ) ) {
-        std::cout << "Robocar City Emulator and Robocar World Championship, Sample (My) SHM Client" << std::endl
-                  << "Copyright (C) 2014, 2015 Norbert Bátfai\n" << std::endl
-                  << "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>" << std::endl
-                  << "This is free software: you are free to change and redistribute it." << std::endl
-                  << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
+  if ( vm.count ( "version" ) ) {
+    std::cout << "Robocar City Emulator and Robocar World Championship, Sample (My) SHM Client" << std::endl
+              << "Copyright (C) 2014, 2015 Norbert Bátfai\n" << std::endl
+              << "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>" << std::endl
+              << "This is free software: you are free to change and redistribute it." << std::endl
+              << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
 
-        return 0;
-   }
+    return 0;
+  }
 
-   if ( vm.count ( "help" ) ) {
-        std::cout << "Robocar City Emulator and Robocar World Championship home page: https://code.google.com/p/robocar-emulator/" << std::endl
-                  << desc << std::endl
-                  << "Please report bugs to: nbatfai@gmail.com" << std::endl;
+  if ( vm.count ( "help" ) ) {
+    std::cout << "Robocar City Emulator and Robocar World Championship home page: https://code.google.com/p/robocar-emulator/" << std::endl
+              << desc << std::endl
+              << "Please report bugs to: nbatfai@gmail.com" << std::endl;
 
-        return 0;
-   }
+    return 0;
+  }
 
-   std::string shm;
-   if ( vm.count ( "shm" ) )
-        shm.assign ( vm["shm"].as < std::string > () );
-   else
-        shm.assign ( "JustineSharedMemory" );
+  std::string shm;
+  if ( vm.count ( "shm" ) )
+    shm.assign ( vm["shm"].as < std::string > () );
+  else
+    shm.assign ( "JustineSharedMemory" );
 
-   std::string port;
-   if ( vm.count ( "port" ) )
-        port.assign ( vm["port"].as < std::string > () );
-   else
-        port.assign ( "10007" );
+  std::string port;
+  if ( vm.count ( "port" ) )
+    port.assign ( vm["port"].as < std::string > () );
+  else
+    port.assign ( "10007" );
 
-   std::string team;
-   if ( vm.count ( "team" ) )
-     team.assign ( vm["team"].as < std::string > () );
-   else
-     team.assign ( "Norbi" );
+  std::string team;
+  if ( vm.count ( "team" ) )
+    team.assign ( vm["team"].as < std::string > () );
+  else
+    team.assign ( "Norbi" );
 
-   // If you use this sample you should add your copyright information here too:
-   /*
-   std::cout << "This SHM Client program has been modified by <Your Name>" << std::endl
-   << "Copyright (C) 2014, 2015 Norbert Bátfai" << std::endl
-   << "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>" << std::endl
-   */
+  int num_cops;
+  if (vm.count("cops"))
+    num_cops = vm["cops"].as<int>();
+  else
+    num_cops = 10;
 
-   // Do not remove this copyright notice!
-   std::cout << "Robocar City Emulator and Robocar World Championship, Sample (My) SHM Client" << std::endl
-             << "Copyright (C) 2014, 2015 Norbert Bátfai" << std::endl
-             << "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>" << std::endl
-             << "This is free software: you are free to change and redistribute it." << std::endl
-             << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
 
-   justine::sampleclient::MyShmClient myShmClient {shm.c_str(), team };
+  // If you use this sample you should add your copyright information here too:
+  /*
+  std::cout << "This SHM Client program has been modified by <Your Name>" << std::endl
+  << "Copyright (C) 2014, 2015 Norbert Bátfai" << std::endl
+  << "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>" << std::endl
+  */
 
-   try
-   {
-     boost::asio::io_service io_service;
-     //myShmClient.InitializeCops()
-     myShmClient.SimulateCarsLoop( io_service, port.c_str());
-     // myShmClient.start ( io_service, port.c_str() ); //
-   }
-   catch ( std::exception& e )
-   {
-        std::cerr << "Exception: " << e.what() << "\n";
-   }
+  // Do not remove this copyright notice!
+  std::cout << "Robocar City Emulator and Robocar World Championship, Sample (My) SHM Client" << std::endl
+            << "Copyright (C) 2014, 2015 Norbert Bátfai" << std::endl
+            << "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>" << std::endl
+            << "This is free software: you are free to change and redistribute it." << std::endl
+            << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
+
+  justine::sampleclient::MyShmClient myShmClient {shm.c_str(),
+                                                  team,
+                                                  port.c_str(),
+                                                  num_cops};
+
+  try
+  {
+    myShmClient.SimulateCarsLoop();
+  }
+  catch (std::exception& e)
+  {
+    std::cerr << "Exception: " << e.what() << "\n";
+  }
 }

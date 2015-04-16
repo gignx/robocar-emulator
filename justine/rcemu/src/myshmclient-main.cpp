@@ -32,26 +32,35 @@
 #include <myshmclient.hpp>
 #include <boost/program_options.hpp>
 
-int main ( int argc, char* argv[] )
+int main (int argc, char* argv[])
 {
-  boost::program_options::options_description desc ( "Options" );
+  boost::program_options::options_description desc ("Options");
   desc.add_options()
-  ( "version", "produce version message" )
-  ( "help", "produce help message" )
-  ( "shm",  boost::program_options::value<std::string> (), "shared memory segment name" )
-  ( "port", boost::program_options::value<std::string> (), "the TCP port that the traffic server is listening on to allow agents to communicate with the traffic simulation, the default value is 10007" )
-  ( "team", boost::program_options::value<std::string> (), "team name" )
-  ( "cops", boost::program_options::value<int>(), "the number of cop cars, the default value is 10")
-  ;
+  ("version",  "produce version message")
+  ("help,h",   "produce help message")
+  ("shm,s",    boost::program_options::value<std::string>()->required(), "shared memory segment name, required")
+  ("port,p",   boost::program_options::value<std::string>()->default_value("10007"), "the TCP port that the traffic server is listening on to allow agents to communicate with the traffic simulation")
+  ("team,t",   boost::program_options::value<std::string>()->default_value("Police"), "team name")
+  ("cops,c",   boost::program_options::value<int>()->default_value(10), "the number of cop cars");
 
   boost::program_options::variables_map vm;
 
-  boost::program_options::store (
-   boost::program_options::parse_command_line ( argc, argv, desc ), vm );
+  try
+  {
+    boost::program_options::store (
+      boost::program_options::parse_command_line (argc, argv, desc), vm);
 
-  boost::program_options::notify ( vm );
+    boost::program_options::notify (vm);
+  }
+  catch (boost::program_options::error &e)
+  {
+    std::cerr << "ERROR: " << e.what() << std::endl << std::endl
+              << desc << std::endl;
 
-  if ( vm.count ( "version" ) ) {
+    return -1;
+  }
+
+  if (vm.count( "version" )) {
     std::cout << "Robocar City Emulator and Robocar World Championship, Sample (My) SHM Client" << std::endl
               << "Copyright (C) 2014, 2015 Norbert Bátfai\n" << std::endl
               << "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>" << std::endl
@@ -61,7 +70,7 @@ int main ( int argc, char* argv[] )
     return 0;
   }
 
-  if ( vm.count ( "help" ) ) {
+  if (vm.count ("help")) {
     std::cout << "Robocar City Emulator and Robocar World Championship home page: https://code.google.com/p/robocar-emulator/" << std::endl
               << desc << std::endl
               << "Please report bugs to: nbatfai@gmail.com" << std::endl;
@@ -69,30 +78,14 @@ int main ( int argc, char* argv[] )
     return 0;
   }
 
-  std::string shm;
-  if ( vm.count ( "shm" ) )
-    shm.assign ( vm["shm"].as < std::string > () );
-  else
-    shm.assign ( "JustineSharedMemory" );
+  // required: must have a value set
+  std::string shm   = vm["shm"].as<std::string>();
 
-  std::string port;
-  if ( vm.count ( "port" ) )
-    port.assign ( vm["port"].as < std::string > () );
-  else
-    port.assign ( "10007" );
+  //these have default values so they're always set
+  std::string port  = vm["port"].as<std::string>();
+  std::string team  = vm["team"].as<std::string>();
 
-  std::string team;
-  if ( vm.count ( "team" ) )
-    team.assign ( vm["team"].as < std::string > () );
-  else
-    team.assign ( "Norbi" );
-
-  int num_cops;
-  if (vm.count("cops"))
-    num_cops = vm["cops"].as<int>();
-  else
-    num_cops = 10;
-
+  int num_cops = vm["cops"].as<int>();
 
   // If you use this sample you should add your copyright information here too:
   /*
@@ -121,4 +114,6 @@ int main ( int argc, char* argv[] )
   {
     std::cerr << "Exception: " << e.what() << "\n";
   }
+
+  return 0;
 }

@@ -38,37 +38,41 @@ justine::sampleclient::MyShmClient::AcquireGangstersFromServer(
     int id,
     osmium::unsigned_object_id_type cop)
 {
-  boost::system::error_code err;
+  boost::system::error_code error_code;
 
   char buffer[kMaxBufferLen];
 
-  size_t length = std::sprintf(buffer, "<gangsters ");
-  length += std::sprintf(buffer + length, "%d>", id);
+  size_t msg_length = std::sprintf(buffer, "<gangsters ");
+  msg_length += std::sprintf(buffer + msg_length, "%d>", id);
 
-  socket.send(boost::asio::buffer(buffer, length));
+  socket.send(boost::asio::buffer(buffer,msg_length));
 
-  length = socket.read_some(boost::asio::buffer(buffer), err);
+  msg_length = socket.read_some(boost::asio::buffer(buffer), error_code);
 
-  if(err == boost::asio::error::eof)
+  if(error_code == boost::asio::error::eof)
   {
     // TODO
   }
-  else if(err)
+  else if(error_code)
   {
-    throw boost::system::system_error(err);
+    throw boost::system::system_error(error_code);
   }
 
   /* reading all gangsters into a vector */
-  int idd {0};
-  unsigned f, t, s;
-  int n {0};
-  int nn {0};
+  int gangster_car_id {0};
+
+  int bytes_read      {0};
+  int seek_pointer    {0};
+
+  unsigned from_node, to_node, step;
+
   std::vector<Gangster> gangsters;
 
-  while(std::sscanf(buffer+nn, "<OK %d %u %u %u>%n", &idd, &f, &t, &s, &n) == 4)
+  while(std::sscanf(buffer+seek_pointer, "<OK %d %u %u %u>%n",
+                    &gangster_car_id, &from_node, &to_node, &step, &bytes_read) == 4)
   {
-    nn += n;
-    gangsters.emplace_back(Gangster {idd, f, t, s});
+    seek_pointer += bytes_read;
+    gangsters.emplace_back(Gangster {gangster_car_id, from_node, to_node, step});
   }
 
   std::sort(gangsters.begin(), gangsters.end(), [this, cop](Gangster x, Gangster y)
@@ -76,7 +80,7 @@ justine::sampleclient::MyShmClient::AcquireGangstersFromServer(
     return dst(cop, x.to) < dst(cop, y.to);
   });
 
-  std::cout.write(buffer, length);
+  std::cout.write(buffer, msg_length);
   std::cout << "Command GANGSTER sent." << std::endl;
 
   return gangsters;

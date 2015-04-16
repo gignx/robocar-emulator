@@ -111,6 +111,7 @@ using DistanceMap =
 using EdgeWeightMap =
         boost::property_map<NodeRefGraph, boost::edge_weight_t>::type;
 
+
 /**
  * @brief A sample class used for testing the routing algorithms.
  *
@@ -133,13 +134,13 @@ public:
   MyShmClient(const char * shm_segment, std::string team_name) :
     ShmClient(shm_segment), m_team_name_(team_name), num_cops_(0)
   {
-    nr_graph = BuildGraph();
+    nr_graph_ = BuildGraph();
 
     #ifdef DEBUG
     PrintVertices(10);
     PrintEdges(10);
     std::fstream graph_log(team_name+".dot" , std::ios_base::out);
-    boost::write_graphviz(graph_log, *nr_graph);
+    boost::write_graphviz(graph_log, *nr_graph_);
     #endif
   }
 
@@ -149,7 +150,7 @@ public:
    */
   ~MyShmClient()
   {
-    delete nr_graph;
+    delete nr_graph_;
   }
 
   int get_num_cops(void)
@@ -204,13 +205,13 @@ public:
   void PrintEdges(unsigned more)
   {
     VertexNameMap vertexNameMap =
-      boost::get(boost::vertex_name, *nr_graph);
+      boost::get(boost::vertex_name, *nr_graph_);
 
     std::pair<NRGVertexIter, NRGVertexIter> vi;
 
     unsigned count {0};
 
-    for(vi = boost::vertices(*nr_graph); vi.first != vi.second; ++vi.first)
+    for(vi = boost::vertices(*nr_graph_); vi.first != vi.second; ++vi.first)
     {
       if(more)
       {
@@ -232,23 +233,23 @@ public:
   void PrintVertices(unsigned more)
   {
     VertexNameMap vertexNameMap =
-      boost::get(boost::vertex_name, *nr_graph);
+      boost::get(boost::vertex_name, *nr_graph_);
 
     unsigned count {0};
 
     osmium::unsigned_object_id_type prev = 0;
     NRGEdgeIter ei, ei_end;
 
-    for(boost::tie(ei, ei_end) = boost::edges(*nr_graph);
+    for(boost::tie(ei, ei_end) = boost::edges(*nr_graph_);
          ei != ei_end; ++ei)
     {
-      auto ii = vertexNameMap[boost::source(*ei, *nr_graph)];
+      auto ii = vertexNameMap[boost::source(*ei, *nr_graph_)];
 
       if(ii != prev)
           std::cout << std::endl;
 
       std::cout << "(" << ii
-                << " -> " << vertexNameMap[boost::target(*ei, *nr_graph)]
+                << " -> " << vertexNameMap[boost::target(*ei, *nr_graph_)]
                 << ") ";
 
       prev = ii;
@@ -270,7 +271,7 @@ public:
    */
   NodeRefGraph* BuildGraph(void)
   {
-    NodeRefGraph* nr_graph = new NodeRefGraph();
+    NodeRefGraph* nr_graph_ = new NodeRefGraph();
 
     int count {0};
 
@@ -291,7 +292,7 @@ public:
 
         if(it == nr2v.end())
         {
-          f = boost::add_vertex(u, *nr_graph);
+          f = boost::add_vertex(u, *nr_graph_);
           nr2v[u] = f;
 
           ++count;
@@ -307,7 +308,7 @@ public:
 
         if(it == nr2v.end())
         {
-          t = boost::add_vertex(*noderefi, *nr_graph);
+          t = boost::add_vertex(*noderefi, *nr_graph_);
           nr2v[*noderefi] = t;
 
           ++count;
@@ -319,17 +320,17 @@ public:
 
         int to = std::distance(iter->second.m_alist.begin(), noderefi);
 
-        boost::add_edge(f, t, palist(iter->first, to), *nr_graph);
+        boost::add_edge(f, t, palist(iter->first, to), *nr_graph_);
       }
     }
 
     #ifdef DEBUG
     std::cout << "# vertices count: " << count << std::endl
-              << "# BGF edges: " << boost::num_edges(*nr_graph) << std::endl
-              << "# BGF vertices: " << boost::num_vertices(*nr_graph) << std::endl;;
+              << "# BGF edges: " << boost::num_edges(*nr_graph_) << std::endl
+              << "# BGF vertices: " << boost::num_vertices(*nr_graph_) << std::endl;;
     #endif
 
-    return nr_graph;
+    return nr_graph_;
   }
 
   /**
@@ -348,19 +349,19 @@ public:
     auto start = std::chrono::high_resolution_clock::now();
     #endif
 
-    std::vector<NRGVertex> parents(boost::num_vertices(*nr_graph));
-    std::vector<int> distances(boost::num_vertices(*nr_graph));
+    std::vector<NRGVertex> parents(boost::num_vertices(*nr_graph_));
+    std::vector<int> distances(boost::num_vertices(*nr_graph_));
 
-    VertexIndexMap vertexIndexMap = boost::get(boost::vertex_index, *nr_graph);
+    VertexIndexMap vertexIndexMap = boost::get(boost::vertex_index, *nr_graph_);
 
     PredecessorMap predecessorMap(&parents[0], vertexIndexMap);
     DistanceMap distanceMap(&distances[0], vertexIndexMap);
 
     boost::dijkstra_shortest_paths(
-      *nr_graph, nr2v[from],
+      *nr_graph_, nr2v[from],
       boost::distance_map(distanceMap).predecessor_map(predecessorMap));
 
-    VertexNameMap vertexNameMap = boost::get(boost::vertex_name, *nr_graph);
+    VertexNameMap vertexNameMap = boost::get(boost::vertex_name, *nr_graph_);
 
     std::vector<osmium::unsigned_object_id_type> path;
 
@@ -373,16 +374,16 @@ public:
 
     while(fromv != tov)
     {
-      NRGEdge edge = boost::edge(fromv, tov, *nr_graph).first;
+      NRGEdge edge = boost::edge(fromv, tov, *nr_graph_).first;
 
       #ifdef DEBUG
-      std::cout << vertexNameMap[boost::source(edge, *nr_graph)]
+      std::cout << vertexNameMap[boost::source(edge, *nr_graph_)]
                 << " -> "
-                << vertexNameMap[boost::target(edge, *nr_graph)] << std::endl;
+                << vertexNameMap[boost::target(edge, *nr_graph_)] << std::endl;
       dist += distanceMap[fromv];
       #endif
 
-      path.push_back(vertexNameMap[boost::target(edge, *nr_graph)]);
+      path.push_back(vertexNameMap[boost::target(edge, *nr_graph_)]);
 
       tov = fromv;
       fromv = predecessorMap[tov];
@@ -420,26 +421,26 @@ public:
     auto start = std::chrono::high_resolution_clock::now();
     #endif
 
-    std::vector<NRGVertex> parents(boost::num_vertices(*nr_graph));
+    std::vector<NRGVertex> parents(boost::num_vertices(*nr_graph_));
 
-    for(int i = 0; i < boost::num_vertices(*nr_graph); ++i)
+    for(size_t i = 0; i < boost::num_vertices(*nr_graph_); ++i)
       parents[i] = i;
 
-    std::vector<int> distances(boost::num_vertices(*nr_graph),(std::numeric_limits<int>::max)());
+    std::vector<int> distances(boost::num_vertices(*nr_graph_),(std::numeric_limits<int>::max)());
     distances[nr2v[from]] = 0;
 
-    VertexIndexMap vertexIndexMap = boost::get(boost::vertex_index, *nr_graph);
-    EdgeWeightMap weightMap = boost::get(boost::edge_weight_t(), *nr_graph);
+    VertexIndexMap vertexIndexMap = boost::get(boost::vertex_index, *nr_graph_);
+    EdgeWeightMap weightMap = boost::get(boost::edge_weight_t(), *nr_graph_);
 
     PredecessorMap predecessorMap(&parents[0], vertexIndexMap);
     DistanceMap distanceMap(&distances[0], vertexIndexMap);
 
     boost::bellman_ford_shortest_paths(
-      *nr_graph, boost::num_vertices(*nr_graph),
+      *nr_graph_, boost::num_vertices(*nr_graph_),
       boost::weight_map(weightMap).
       distance_map(distanceMap).predecessor_map(predecessorMap));
 
-    VertexNameMap vertexNameMap = boost::get(boost::vertex_name, *nr_graph);
+    VertexNameMap vertexNameMap = boost::get(boost::vertex_name, *nr_graph_);
 
     std::vector<osmium::unsigned_object_id_type> path;
 
@@ -452,16 +453,16 @@ public:
 
     while(fromv != tov)
     {
-      NRGEdge edge = boost::edge(fromv, tov, *nr_graph).first;
+      NRGEdge edge = boost::edge(fromv, tov, *nr_graph_).first;
 
       #ifdef DEBUG
-      std::cout << vertexNameMap[boost::source(edge, *nr_graph)]
+      std::cout << vertexNameMap[boost::source(edge, *nr_graph_)]
                 << " -> "
-                << vertexNameMap[boost::target(edge, *nr_graph)] << std::endl;
+                << vertexNameMap[boost::target(edge, *nr_graph_)] << std::endl;
       dist += distanceMap[fromv];
       #endif
 
-      path.push_back(vertexNameMap[boost::target(edge, *nr_graph)]);
+      path.push_back(vertexNameMap[boost::target(edge, *nr_graph_)]);
 
       tov = fromv;
       fromv = predecessorMap[tov];
@@ -484,9 +485,12 @@ public:
 
 
 protected:
-  NodeRefGraph* nr_graph;
+  using Cop = int;
+
+  NodeRefGraph* nr_graph_;
   std::string m_team_name_;
   int num_cops_;
+  std::vector<Cop> cops_;
 
 private:
 
@@ -536,18 +540,16 @@ private:
     int id;
     unsigned from;
     unsigned to;
-    int step;
+    unsigned step;
   };
 
   using Gangster = SmartCar;
-
-  using Cop = int;
 
   std::vector<Gangster> AcquireGangstersFromServer(
     boost::asio::ip::tcp::socket & socket,
     int id, osmium::unsigned_object_id_type cop);
 
-  std::vector<Cop> InitializeCops(
+  size_t InitializeCops(
     boost::asio::ip::tcp::socket & socket,
     unsigned cop_count);
 

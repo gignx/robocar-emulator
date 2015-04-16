@@ -67,7 +67,7 @@ justine::sampleclient::MyShmClient::AcquireGangstersFromServer(
   while(std::sscanf(data+nn, "<OK %d %u %u %u>%n", &idd, &f, &t, &s, &n) == 4)
   {
     nn += n;
-    gangsters.push_back(Gangster {idd, f, t, s});
+    gangsters.emplace_back(Gangster {idd, f, t, s});
   }
 
   std::sort(gangsters.begin(), gangsters.end(), [this, cop](Gangster x, Gangster y)
@@ -81,7 +81,8 @@ justine::sampleclient::MyShmClient::AcquireGangstersFromServer(
   return gangsters;
 }
 
-std::vector<justine::sampleclient::MyShmClient::Cop>
+//std::vector<justine::sampleclient::MyShmClient::Cop>
+size_t
 justine::sampleclient::MyShmClient::InitializeCops(
     boost::asio::ip::tcp::socket & socket,
     unsigned cop_count)
@@ -89,6 +90,7 @@ justine::sampleclient::MyShmClient::InitializeCops(
   boost::system::error_code err;
 
   this->num_cops_ = cop_count;
+
 
   size_t length = std::sprintf(data, "<init guided %s %d c>",
                                m_team_name_.c_str(), num_cops_);
@@ -106,24 +108,24 @@ justine::sampleclient::MyShmClient::InitializeCops(
       throw boost::system::system_error(err);
   }
 
-  /* reading all gangsters into a vector */
-  int idd {0};
+  int cop_car_id {0};
   int f, t;
   char c;
   int n {0};
   int nn {0};
-  std::vector<Cop> cops;
 
-  while(std::sscanf(data+nn, "<OK %d %d/%d %c>%n", &idd, &f, &t, &c, &n) == 4)
+  while(std::sscanf(data+nn, "<OK %d %d/%d %c>%n", &cop_car_id, &f, &t, &c, &n) == 4)
   {
     nn += n;
-    cops.push_back(idd);
+    cops_.push_back(cop_car_id);
   }
 
   std::cout.write(data, length);
   std::cout << "Command INIT sent." << std::endl;
 
-  return cops;
+  return cops_.size();
+
+  //return cops;
 }
 
 /*
@@ -189,10 +191,10 @@ void justine::sampleclient::MyShmClient::route(
   boost::system::error_code err;
 
   size_t length = std::sprintf(data,
-                                 "<route %d %d", path.size(), id);
+                                 "<route %zu %d", path.size(), id);
 
   for(auto ui: path)
-    length += std::sprintf(data+length, " %u", ui);
+    length += std::sprintf(data+length, " %lu", ui);
 
   length += std::sprintf(data+length, ">");
 
@@ -229,7 +231,7 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(
   boost::asio::ip::tcp::socket socket(io_service);
   boost::asio::connect(socket, iterator);
 
-  std::vector<Cop> cops = InitializeCops(socket, num_cops_);
+  //std::vector<Cop> cops = InitializeCops(socket, num_cops_);
 
   unsigned int g {0u};
   unsigned int f {0u};
@@ -242,7 +244,7 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(
   {
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-    for(auto cop:cops)
+    for(auto cop:cops_)
     {
       car(socket, cop, &f, &t, &s);
 

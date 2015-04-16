@@ -135,9 +135,9 @@ public:
    */
   MyShmClient(
     const char *shm_segment,
-    std::string team_name,
-    const char *port = "10007",
-    int num_cops = 10):
+    std::string team_name = "Police",
+    const char *port      = "10007",
+    int num_cops          = 10):
       ShmClient(shm_segment), m_team_name_(team_name), port_(port), num_cops_(num_cops)
   {
     nr_graph_ = BuildGraph();
@@ -563,17 +563,16 @@ private:
     int id, osmium::unsigned_object_id_type cop);
 
   int InitializeCops(
-    boost::asio::ip::tcp::socket & socket,
-    unsigned cop_count);
+    boost::asio::ip::tcp::socket & socket);
 
   /*void pos(
     boost::asio::ip::tcp::socket & socket, int id);*/
 
-  void car(
+  void AcquireCarDataFromServer(
     boost::asio::ip::tcp::socket & socket, int id,
     unsigned *f, unsigned *t, unsigned* s);
 
-  void route(
+  void SendRouteToServer(
     boost::asio::ip::tcp::socket & socket, int id,
     std::vector<osmium::unsigned_object_id_type> &);
 };

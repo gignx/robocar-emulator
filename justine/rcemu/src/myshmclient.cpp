@@ -30,7 +30,6 @@
  */
 
 #include <myshmclient.hpp>
-#include <stdint.h>
 
 std::vector<justine::sampleclient::MyShmClient::Gangster>
 justine::sampleclient::MyShmClient::AcquireGangstersFromServer(
@@ -89,14 +88,11 @@ justine::sampleclient::MyShmClient::AcquireGangstersFromServer(
 //std::vector<justine::sampleclient::MyShmClient::Cop>
 int
 justine::sampleclient::MyShmClient::InitializeCops(
-    boost::asio::ip::tcp::socket & socket,
-    unsigned cop_count)
+    boost::asio::ip::tcp::socket & socket)
 {
   boost::system::error_code error_code;
 
   char buffer[kMaxBufferLen];
-
-  this->num_cops_ = cop_count;
 
   size_t msg_length = std::sprintf(buffer, "<init guided %s %d c>",
                                    m_team_name_.c_str(), num_cops_);
@@ -157,7 +153,7 @@ void justine::sampleclient::MyShmClient::pos(boost::asio::ip::tcp::socket & sock
   std::cout << "Command POS sent." << std::endl;
 }*/
 
-void justine::sampleclient::MyShmClient::car(
+void justine::sampleclient::MyShmClient::AcquireCarDataFromServer(
   boost::asio::ip::tcp::socket & socket,
   int id, unsigned *f, unsigned *t, unsigned* s)
 {
@@ -187,7 +183,7 @@ void justine::sampleclient::MyShmClient::car(
   std::cout << "Command CAR sent." << std::endl;
 }
 
-void justine::sampleclient::MyShmClient::route(
+void justine::sampleclient::MyShmClient::SendRouteToServer(
   boost::asio::ip::tcp::socket & socket,
   int id,
   std::vector<osmium::unsigned_object_id_type> & path
@@ -204,6 +200,7 @@ void justine::sampleclient::MyShmClient::route(
   {
     msg_length += std::sprintf(buffer + msg_length, " %lu", ui);
   }
+
   msg_length += std::sprintf(buffer + msg_length, ">");
 
   socket.send(boost::asio::buffer(buffer, msg_length));
@@ -239,17 +236,17 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
   boost::asio::ip::tcp::socket socket(io_service);
   boost::asio::connect(socket, iterator);
 
-  int cops_initialized = InitializeCops(socket, num_cops_);
+  int cops_initialized = InitializeCops(socket);
 
   if (cops_initialized < num_cops_)
   {
-    std::cout << "WARNING: Failed to initialize the number of cops requested: " << std::endl
+    std::cerr << "WARNING: Failed to initialize the number of cops requested: " << std::endl
               << cops_initialized << " out of " << num_cops_  <<  "initialized" << std::endl;
   }
 
-  unsigned from_node     {0u};
-  unsigned to_node       {0u};
-  unsigned step          {0u};
+  unsigned from_node  {0u};
+  unsigned to_node    {0u};
+  unsigned step       {0u};
 
   std::vector<Gangster> gangsters;
 
@@ -259,7 +256,7 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
 
     for(auto cop:cops_)
     {
-      car(socket, cop, &from_node, &to_node, &step);
+      AcquireCarDataFromServer(socket, cop, &from_node, &to_node, &step);
 
       gangsters = AcquireGangstersFromServer(socket, cop, to_node);
 
@@ -273,7 +270,7 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
           std::copy(path.begin(), path.end(),
                     std::ostream_iterator<osmium::unsigned_object_id_type>(std::cout, " -> "));
 
-          route(socket, cop, path);
+          SendRouteToServer(socket, cop, path);
         }
       }
     }

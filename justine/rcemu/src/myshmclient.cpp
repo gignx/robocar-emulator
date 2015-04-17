@@ -31,8 +31,12 @@
 
 #include <myshmclient.hpp>
 
+// The following two function could be merged into one, or
+// an overloaded function could be used but I prefer using
+// two distinct functions since they do something
+
 void
-justine::sampleclient::MyShmClient::LogServerResponse(
+justine::sampleclient::MyShmClient::LogMessage(
   const char *command,
   char *response_buffer)
 {
@@ -41,7 +45,7 @@ justine::sampleclient::MyShmClient::LogServerResponse(
 
   if ((verbose_mode_) || (warn_user))
   {
-    std::cout << command << " sent:"        << std::endl;
+    std::cout << command << " sent:" << std::endl;
 
     // so much C-style...
     char *start_position = response_buffer, *end_position;
@@ -54,6 +58,18 @@ justine::sampleclient::MyShmClient::LogServerResponse(
 
       start_position = end_position + 1;
     }
+  }
+}
+
+void
+justine::sampleclient::MyShmClient::LogMessage(std::string &&msg)
+{
+  bool warn_user = (msg.find("WARN") == std::string::npos) ||
+                   (msg.find("ERR")  == std::string::npos);
+
+  if ((verbose_mode_) || (warn_user))
+  {
+    std::cout << msg;
   }
 }
 
@@ -105,7 +121,7 @@ justine::sampleclient::MyShmClient::AcquireGangstersFromServer(
     return dst(cop, x.to) < dst(cop, y.to);
   });
 
-  LogServerResponse("GANGSTER", buffer);
+  LogMessage("GANGSTER", buffer);
 
   return gangsters;
 }
@@ -145,7 +161,7 @@ justine::sampleclient::MyShmClient::InitializeCops(
     cops_.push_back(cop_car_id);
   }
 
-  LogServerResponse("INIT", buffer);
+  LogMessage("INIT", buffer);
 
   return cops_.size();
 }
@@ -201,7 +217,7 @@ void justine::sampleclient::MyShmClient::AcquireCarDataFromServer(
 
   std::sscanf(buffer, "<OK %*d %u %u %u", f, t, s);
 
-  LogServerResponse("CAR", buffer);
+  LogMessage("CAR", buffer);
 }
 
 void justine::sampleclient::MyShmClient::SendRouteToServer(
@@ -237,7 +253,7 @@ void justine::sampleclient::MyShmClient::SendRouteToServer(
     throw boost::system::system_error(error_code);
   }
 
-  LogServerResponse("ROUTE", buffer);
+  LogMessage("ROUTE", buffer);
 }
 
 
@@ -256,8 +272,11 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
 
   if (cops_initialized < num_cops_)
   {
-    std::cerr << "WARNING: Failed to initialize the number of cops requested: " << std::endl
-              << cops_initialized << " out of " << num_cops_  <<  "initialized" << std::endl;
+    LogMessage("WARN:\n\tFailed to initialize the number of cops requested\n");
+  }
+  else
+  {
+    LogMessage("NOTE:\n\tAll cops have been initialized succesfully\n");
   }
 
   unsigned from_node  {0u};

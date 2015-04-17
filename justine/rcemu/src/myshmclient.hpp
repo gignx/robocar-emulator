@@ -528,7 +528,10 @@ private:
 
   using Gangster = SmartCar;
 
-  void LogServerResponse(const char *command, char *response_buffer);
+  // For server responses
+  void LogMessage(const char *command, char *response_buffer);
+  // For internal messages
+  void LogMessage(std::string &&msg);
 
   std::vector<Gangster> AcquireGangstersFromServer(
     boost::asio::ip::tcp::socket & socket,

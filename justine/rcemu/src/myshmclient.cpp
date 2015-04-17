@@ -12,7 +12,7 @@
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
- *(at your option) any later version.
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,10 +30,6 @@
  */
 
 #include <myshmclient.hpp>
-
-// The following two function could be merged into one, or
-// an overloaded function could be used but I prefer using
-// two distinct functions since they do something
 
 void
 justine::sampleclient::MyShmClient::LogMessage(
@@ -311,6 +307,7 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
           SendRouteToServer(socket, cop, path);
         }
       }
+
     }
-  }
+  } 
 }

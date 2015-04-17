@@ -67,8 +67,6 @@
 #include <chrono>
 #endif
 
-#include <boost/graph/bellman_ford_shortest_paths.hpp>
-
 #include <boost/graph/graphviz.hpp>
 #include <fstream>
 #include <string.h>
@@ -81,38 +79,38 @@ namespace sampleclient
 // 512 KiB, should be enough for all messages received and sent
 const int kMaxBufferLen = 524288;
 
-using NodeRefGraph =
+using NodeRefGraph    =
         boost::adjacency_list<boost::listS, boost::vecS, boost::directedS,
           boost::property<boost::vertex_name_t, osmium::unsigned_object_id_type>,
           boost::property<boost::edge_weight_t, int>>;
 
-using NRGVertex =
+using NRGVertex       =
         boost::graph_traits<NodeRefGraph>::vertex_descriptor;
 
-using NRGVertexIter =
+using NRGVertexIter   =
         boost::graph_traits<NodeRefGraph>::vertex_iterator;
 
-using NRGEdge =
+using NRGEdge         =
         boost::graph_traits<NodeRefGraph>::edge_descriptor;
 
-using NRGEdgeIter =
+using NRGEdgeIter     =
         boost::graph_traits<NodeRefGraph>::edge_iterator;
 
 
-using VertexNameMap =
+using VertexNameMap   =
         boost::property_map<NodeRefGraph, boost::vertex_name_t>::type;
 
-using VertexIndexMap =
+using VertexIndexMap  =
         boost::property_map<NodeRefGraph, boost::vertex_index_t>::type;
 
-using PredecessorMap =
+using PredecessorMap  =
         boost::iterator_property_map <NRGVertex*, VertexIndexMap,
           NRGVertex, NRGVertex&>;
 
-using DistanceMap =
+using DistanceMap     =
         boost::iterator_property_map <int*, VertexIndexMap, int, int&>;
 
-using EdgeWeightMap =
+using EdgeWeightMap   =
         boost::property_map<NodeRefGraph, boost::edge_weight_t>::type;
 
 
@@ -135,14 +133,15 @@ public:
    * This constructor creates the BGL graph from the map graph that
    * is placed in the shared memory segment.
    */
+   
   MyShmClient(
     const char *shm_segment,
     std::string team_name = "Police",
     const char *port      = "10007",
     int num_cops          = 10,
     bool verbose_mode     = false):
-      ShmClient(shm_segment), m_team_name_(team_name), port_(port), num_cops_(num_cops),
-      verbose_mode_(verbose_mode)
+      ShmClient(shm_segment), num_cops_(num_cops), verbose_mode_(verbose_mode),
+      port_(port), m_team_name_(team_name)
   {
     nr_graph_ = BuildGraph();
 
@@ -280,7 +279,7 @@ public:
   }
 
   /**
-   * @brief This function create the BGL graph.
+   * @brief This function creates the BGL graph.
    * @return he pointer of the created BGL graph.
    *
    */
@@ -420,104 +419,7 @@ public:
     return path;
   }
 
-  /**
-   * @brief This function solves the shortest path problem using Bellman-Ford algorithm.
-   * @param source the source node
-   * @param target the target node
-   * @return the shortest path between nodes source and target
-   *
-   * This function determines the shortest path from the source node to the target node.
-   */
-  std::vector<osmium::unsigned_object_id_type> DetermineBellmanFordPath(
-    osmium::unsigned_object_id_type from,
-    osmium::unsigned_object_id_type to)
-  {
-    #ifdef DEBUG
-    auto start = std::chrono::high_resolution_clock::now();
-    #endif
-
-    std::vector<NRGVertex> parents(boost::num_vertices(*nr_graph_));
-
-    for(size_t i = 0; i < boost::num_vertices(*nr_graph_); ++i)
-      parents[i] = i;
-
-    std::vector<int> distances(boost::num_vertices(*nr_graph_),(std::numeric_limits<int>::max)());
-    distances[nr2v[from]] = 0;
-
-    VertexIndexMap vertexIndexMap = boost::get(boost::vertex_index, *nr_graph_);
-    EdgeWeightMap weightMap = boost::get(boost::edge_weight_t(), *nr_graph_);
-
-    PredecessorMap predecessorMap(&parents[0], vertexIndexMap);
-    DistanceMap distanceMap(&distances[0], vertexIndexMap);
-
-    boost::bellman_ford_shortest_paths(
-      *nr_graph_, boost::num_vertices(*nr_graph_),
-      boost::weight_map(weightMap).
-      distance_map(distanceMap).predecessor_map(predecessorMap));
-
-    VertexNameMap vertexNameMap = boost::get(boost::vertex_name, *nr_graph_);
-
-    std::vector<osmium::unsigned_object_id_type> path;
-
-    NRGVertex tov = nr2v[to];
-    NRGVertex fromv = predecessorMap[tov];
-
-    #ifdef DEBUG
-    int dist {0};
-    #endif
-
-    while(fromv != tov)
-    {
-      NRGEdge edge = boost::edge(fromv, tov, *nr_graph_).first;
-
-      #ifdef DEBUG
-      std::cout << vertexNameMap[boost::source(edge, *nr_graph_)]
-                << " -> "
-                << vertexNameMap[boost::target(edge, *nr_graph_)] << std::endl;
-      dist += distanceMap[fromv];
-      #endif
-
-      path.push_back(vertexNameMap[boost::target(edge, *nr_graph_)]);
-
-      tov = fromv;
-      fromv = predecessorMap[tov];
-    }
-    path.push_back(from);
-
-    std::reverse(path.begin(), path.end());
-
-    #ifdef DEBUG
-    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(
-                  std::chrono::high_resolution_clock::now() - start).count()
-              << " ms " << dist << " meters" << std::endl;
-
-    std::copy(path.begin(), path.end(),
-                std::ostream_iterator<osmium::unsigned_object_id_type>(std::cout, " "));
-    #endif
-
-    return path;
-  }
-
-
-protected:
-  using Cop = int;
-
-  NodeRefGraph* nr_graph_;
-  std::string m_team_name_;
-
-  const char *port_;
-  int num_cops_;
-
-  std::vector<Cop> cops_;
-
-  bool verbose_mode_;
-
 private:
-  /**
-   * Helper structure to create the BGL graph.
-   */
-  std::map<osmium::unsigned_object_id_type, NRGVertex> nr2v;
-
   struct SmartCar
   {
     int id;
@@ -527,6 +429,22 @@ private:
   };
 
   using Gangster = SmartCar;
+  using Cop = int;
+
+  int num_cops_;
+  bool verbose_mode_;
+  const char *port_;
+
+  std::string m_team_name_;
+
+  NodeRefGraph *nr_graph_;
+
+  std::vector<Cop> cops_;
+
+  /**
+   * Helper structure to create the BGL graph.
+   */
+  std::map<osmium::unsigned_object_id_type, NRGVertex> nr2v;
 
   // For server responses
   void LogMessage(const char *command, char *response_buffer);

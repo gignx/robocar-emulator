@@ -25,7 +25,7 @@
  * @section DESCRIPTION
  * Robocar City Emulator and Robocar World Championship
  *
- * desc
+ *
  *
  */
 

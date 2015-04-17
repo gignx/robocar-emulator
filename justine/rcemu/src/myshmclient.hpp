@@ -71,12 +71,14 @@
 
 #include <boost/graph/graphviz.hpp>
 #include <fstream>
+#include <string.h>
 
 namespace justine
 {
 namespace sampleclient
 {
 
+// 512 KiB, should be enough for all messages received and sent
 const int kMaxBufferLen = 524288;
 
 using NodeRefGraph =
@@ -137,8 +139,10 @@ public:
     const char *shm_segment,
     std::string team_name = "Police",
     const char *port      = "10007",
-    int num_cops          = 10):
-      ShmClient(shm_segment), m_team_name_(team_name), port_(port), num_cops_(num_cops)
+    int num_cops          = 10,
+    bool verbose_mode     = false):
+      ShmClient(shm_segment), m_team_name_(team_name), port_(port), num_cops_(num_cops),
+      verbose_mode_(verbose_mode)
   {
     nr_graph_ = BuildGraph();
 
@@ -388,8 +392,8 @@ public:
       NRGEdge edge = boost::edge(fromv, tov, *nr_graph_).first;
 
       #ifdef DEBUG
-      std::cout << vertexNameMap[boost::source(edge, *nr_graph_)]
-                << " -> "
+      std::f << vertexNameMap[boost::source(edge, *nr_graph_)]
+                << " lol-> "
                 << vertexNameMap[boost::target(edge, *nr_graph_)] << std::endl;
       dist += distanceMap[fromv];
       #endif
@@ -506,47 +510,13 @@ protected:
 
   std::vector<Cop> cops_;
 
+  bool verbose_mode_;
+
 private:
   /**
    * Helper structure to create the BGL graph.
    */
   std::map<osmium::unsigned_object_id_type, NRGVertex> nr2v;
-
-  /**
-   * To test the shortest path finding.
-   */
-  void foo(void)
-  {
-    std::cout << std::endl;
-
-    std::vector<osmium::unsigned_object_id_type> pathD =
-      DetermineDijkstraPath(2969934868, 1348670117);
-
-    std::cout << std::endl;
-
-    std::copy(pathD.begin(), pathD.end(),
-                std::ostream_iterator<osmium::unsigned_object_id_type>(std::cout, "  -D-> "));
-
-    std::vector<osmium::unsigned_object_id_type> pathBF =
-      DetermineBellmanFordPath(2969934868, 1348670117);
-
-    std::cout << std::endl;
-
-    std::copy(pathBF.begin(), pathBF.end(),
-                std::ostream_iterator<osmium::unsigned_object_id_type>(std::cout, " -BF-> "));
-
-    std::cout << std::endl;
-    pathD = DetermineDijkstraPath(2969934868, 1402222861);
-    std::copy(pathD.begin(), pathD.end(),
-                std::ostream_iterator<osmium::unsigned_object_id_type>(std::cout, "  -D-> "));
-
-    std::cout << std::endl;
-    pathBF = DetermineBellmanFordPath(2969934868, 1402222861);
-    std::cout << std::endl;
-    std::copy(pathBF.begin(), pathBF.end(),
-                std::ostream_iterator<osmium::unsigned_object_id_type>(std::cout, " -BF-> "));
-
-  }
 
   struct SmartCar
   {
@@ -557,6 +527,8 @@ private:
   };
 
   using Gangster = SmartCar;
+
+  void LogServerResponse(const char *command, char *response_buffer);
 
   std::vector<Gangster> AcquireGangstersFromServer(
     boost::asio::ip::tcp::socket & socket,

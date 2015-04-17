@@ -36,12 +36,13 @@ int main (int argc, char* argv[])
 {
   boost::program_options::options_description desc ("Options");
   desc.add_options()
-  ("version",  "produce version message")
-  ("help,h",   "produce help message")
-  ("shm,s",    boost::program_options::value<std::string>()->required(), "shared memory segment name, required")
-  ("port,p",   boost::program_options::value<std::string>()->default_value("10007"), "the TCP port that the traffic server is listening on to allow agents to communicate with the traffic simulation")
-  ("team,t",   boost::program_options::value<std::string>()->default_value("Police"), "team name")
-  ("cops,c",   boost::program_options::value<int>()->default_value(10), "the number of cop cars");
+  ("version",   "produce version message")
+  ("help,h",    "produce help message")
+  ("verbose,v", boost::program_options::bool_switch(), "verbose mode")
+  ("shm,s",     boost::program_options::value<std::string>()->default_value("JustineSharedMemory"), "shared memory segment name, required")
+  ("port,p",    boost::program_options::value<std::string>()->default_value("10007"), "the TCP port that the traffic server is listening on to allow agents to communicate with the traffic simulation")
+  ("team,t",    boost::program_options::value<std::string>()->default_value("Police"), "team name")
+  ("cops,c",    boost::program_options::value<int>()->default_value(10), "the number of cop cars");
 
   boost::program_options::variables_map vm;
 
@@ -78,14 +79,14 @@ int main (int argc, char* argv[])
     return 0;
   }
 
-  // required: must have a value set
-  std::string shm   = vm["shm"].as<std::string>();
-
   //these have default values so they're always set
+  std::string shm   = vm["shm"].as<std::string>();
   std::string port  = vm["port"].as<std::string>();
   std::string team  = vm["team"].as<std::string>();
 
   int num_cops = vm["cops"].as<int>();
+
+  bool isVerbose = vm["verbose"].as<bool>();
 
   // If you use this sample you should add your copyright information here too:
   /*
@@ -104,7 +105,8 @@ int main (int argc, char* argv[])
   justine::sampleclient::MyShmClient myShmClient {shm.c_str(),
                                                   team,
                                                   port.c_str(),
-                                                  num_cops};
+                                                  num_cops,
+                                                  isVerbose};
 
   try
   {

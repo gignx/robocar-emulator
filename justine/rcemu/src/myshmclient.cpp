@@ -31,6 +31,32 @@
 
 #include <myshmclient.hpp>
 
+void
+justine::sampleclient::MyShmClient::LogServerResponse(
+  const char *command,
+  char *response_buffer)
+{
+  bool warn_user =
+    (strstr(response_buffer, "WARN") || strstr(response_buffer, "ERR"));
+
+  if ((verbose_mode_) || (warn_user))
+  {
+    std::cout << command << " sent:"        << std::endl;
+
+    // so much C-style...
+    char *start_position = response_buffer, *end_position;
+
+    while ( (end_position = strchr(start_position, '>')) )
+    {
+      std::cout << "\t";
+      std::cout.write(start_position, end_position - start_position + 1);
+      std::cout << "\n";
+
+      start_position = end_position + 1;
+    }
+  }
+}
+
 std::vector<justine::sampleclient::MyShmClient::Gangster>
 justine::sampleclient::MyShmClient::AcquireGangstersFromServer(
     boost::asio::ip::tcp::socket &socket,
@@ -79,8 +105,7 @@ justine::sampleclient::MyShmClient::AcquireGangstersFromServer(
     return dst(cop, x.to) < dst(cop, y.to);
   });
 
-  std::cout.write(buffer, msg_length);
-  std::cout << "Command GANGSTER sent." << std::endl;
+  LogServerResponse("GANGSTER", buffer);
 
   return gangsters;
 }
@@ -120,12 +145,9 @@ justine::sampleclient::MyShmClient::InitializeCops(
     cops_.push_back(cop_car_id);
   }
 
-  std::cout.write(buffer, msg_length);
-  std::cout << "Command INIT sent." << std::endl;
+  LogServerResponse("INIT", buffer);
 
   return cops_.size();
-
-  //return cops;
 }
 
 /*
@@ -179,8 +201,7 @@ void justine::sampleclient::MyShmClient::AcquireCarDataFromServer(
 
   std::sscanf(buffer, "<OK %*d %u %u %u", f, t, s);
 
-  std::cout.write(buffer, msg_length);
-  std::cout << "Command CAR sent." << std::endl;
+  LogServerResponse("CAR", buffer);
 }
 
 void justine::sampleclient::MyShmClient::SendRouteToServer(
@@ -216,17 +237,12 @@ void justine::sampleclient::MyShmClient::SendRouteToServer(
     throw boost::system::system_error(error_code);
   }
 
-  std::cout.write(buffer, msg_length);
-  std::cout << "Command ROUTE sent." << std::endl;
+  LogServerResponse("ROUTE", buffer);
 }
 
 
 void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
 {
-  #ifdef DEBUG
-  foo();
-  #endif
-
   boost::asio::io_service io_service;
 
   boost::asio::ip::tcp::resolver resolver(io_service);
@@ -267,8 +283,11 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
 
         if(path.size() > 1)
         {
-          std::copy(path.begin(), path.end(),
-                    std::ostream_iterator<osmium::unsigned_object_id_type>(std::cout, " -> "));
+          if (verbose_mode_)
+          {
+            std::copy(path.begin(), path.end(),
+                      std::ostream_iterator<osmium::unsigned_object_id_type>(std::cout, " -> "));
+          }
 
           SendRouteToServer(socket, cop, path);
         }

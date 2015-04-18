@@ -2,4 +2,6 @@
 *.po
 *.class
 *.pdf
+*.out
+*.txt
 *~

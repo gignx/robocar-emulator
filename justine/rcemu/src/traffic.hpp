@@ -10,12 +10,12 @@
  *
  * @section LICENSE
  *
- * Copyright (C) 2014 Norbert Bátfai, batfai.norbert@inf.unideb.hu
+ * Copyright(C) 2014 Norbert Bátfai, batfai.norbert@inf.unideb.hu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ *(at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -82,11 +82,11 @@ enum class TrafficType: unsigned int
 class Traffic
 {
 public:
-  Traffic ( int size, const char * shm_segment,
+  Traffic(int size, const char * shm_segment,
             double catchdist, TrafficType type = TrafficType::NORMAL,
-            int minutes = 10 ):
-              m_size ( size ), m_catchdist ( catchdist ),
-              m_type ( type ), m_minutes ( minutes )
+            int minutes = 10):
+              m_catchdist(catchdist), m_size(size),
+              m_minutes(minutes), m_type(type)
   {
     #ifdef DEBUG
     std::cout << "Attaching shared memory segment called "
@@ -94,48 +94,48 @@ public:
               << "... " << std::endl;
     #endif
 
-    segment = new boost::interprocess::managed_shared_memory (
+    segment = new boost::interprocess::managed_shared_memory(
       boost::interprocess::open_only,
-      shm_segment );
+      shm_segment);
 
     shm_map =
-      segment->find<shm_map_Type> ( "JustineMap" ).first;
+      segment->find<shm_map_Type>("JustineMap").first;
 
     #ifdef DEBUG
     std::cout << "Initializing routine cars ... " << std::endl;
     #endif
 
-    if ( type != TrafficType::NORMAL )
+    if(type != TrafficType::NORMAL)
     {
-      for ( shm_map_Type::iterator iter=shm_map->begin();
-            iter!=shm_map->end(); ++iter )
+      for(shm_map_Type::iterator iter=shm_map->begin();
+            iter!=shm_map->end(); ++iter)
       {
-        for ( auto noderef : iter->second.m_alist )
+        for(auto noderef : iter->second.m_alist)
         {
-          AntCar::alist[iter->first].push_back ( 1 );
-          AntCar::alist_evaporate[iter->first].push_back ( 1 );
+          AntCar::alist[iter->first].push_back(1);
+          AntCar::alist_evaporate[iter->first].push_back(1);
         }
       }
     }
 
-    for ( int i {0}; i < m_size; ++i )
+    for(int i {0}; i < m_size; ++i)
     {
         //std::unique_ptr<Car> car(std::make_unique<Car>(*this)); //14, 4.9
         //std::unique_ptr<Car> car(new Car {*this});
 
-      if ( type == TrafficType::NORMAL )
+      if(type == TrafficType::NORMAL)
       {
-        std::shared_ptr<Car> car ( new Car {*this} );
+        std::shared_ptr<Car> car(new Car {*this});
 
         car->init();
-        cars.push_back ( car );
+        cars.push_back(car);
       }
       else
       {
-        std::shared_ptr<AntCar> car ( new AntCar {*this} );
+        std::shared_ptr<AntCar> car(new AntCar {*this});
 
         car->init();
-        cars.push_back ( car );
+        cars.push_back(car);
 
       }
     }
@@ -146,8 +146,8 @@ public:
 
     boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
 
-    logfile = boost::posix_time::to_simple_string ( now );
-    logFile = new std::fstream ( logfile.c_str() , std::ios_base::out );
+    logfile = boost::posix_time::to_simple_string(now);
+    logFile = new std::fstream(logfile.c_str() , std::ios_base::out);
 
     m_cv.notify_one();
 
@@ -158,24 +158,24 @@ public:
   {
     m_run = false;
     m_thread.join();
-    segment->destroy<shm_map_Type> ( "JustineMap" );
+    segment->destroy<shm_map_Type>("JustineMap");
 
     delete segment;
   }
 
-  void processes ( )
+  void processes()
   {
-    std::unique_lock<std::mutex> lk ( m_mutex );
-    m_cv.wait ( lk );
+    std::unique_lock<std::mutex> lk(m_mutex);
+    m_cv.wait(lk);
 
     #ifdef DEBUG
     std::cout << "Traffic simul started." << std::endl;
     #endif
 
 
-    for ( ; m_run; )
+    for(; m_run;)
     {
-      if ( ++m_time > ( m_minutes*60*1000 ) /m_delay )
+      if(++m_time >(m_minutes*60*1000) /m_delay)
       {
         m_run = false;
         break;
@@ -183,34 +183,34 @@ public:
       else
       {
         traffic_run();
-        std::this_thread::sleep_for ( std::chrono::milliseconds ( m_delay ) );
+        std::this_thread::sleep_for(std::chrono::milliseconds(m_delay));
       }
     }
 
     std::cout << "The traffic simulation is over." << std::endl;
 
-    for ( auto c:m_cop_cars )
+    for(auto c:m_cop_cars)
       *logFile  << *c << std::endl;
 
-    logFile->close ();
+    logFile->close();
 
-    boost::filesystem::rename (
-      boost::filesystem::path ( logfile ),
-      boost::filesystem::path ( get_title ( logfile ) )
-      );
+    boost::filesystem::rename(
+      boost::filesystem::path(logfile),
+      boost::filesystem::path(get_title(logfile))
+     );
   }
 
-  std::string get_title ( std::string name )
+  std::string get_title(std::string name)
   {
     std::map <std::string, int> res;
-    for ( auto c:m_cop_cars )
+    for(auto c:m_cop_cars)
     {
       res[c->get_name()] += c->get_num_captured_gangsters();
     }
 
     std::ostringstream ss;
 
-    for ( auto r: res )
+    for(auto r: res)
       ss << r.first << " " << res[r.first] << " ";
 
     ss << name << ".txt";
@@ -221,7 +221,7 @@ public:
   osmium::unsigned_object_id_type virtual node()
   {
     shm_map_Type::iterator iter=shm_map->begin();
-    std::advance ( iter, std::rand() % shm_map->size() );
+    std::advance(iter, std::rand() % shm_map->size());
 
     return iter->first;
   }
@@ -240,7 +240,7 @@ public:
 
   void steps()
   {
-    std::lock_guard<std::mutex> lock ( cars_mutex );
+    std::lock_guard<std::mutex> lock(cars_mutex);
 
     *logFile <<
              m_time <<
@@ -249,7 +249,7 @@ public:
              " "    <<
              cars.size() << std::endl;
 
-    for ( auto car:cars )
+    for(auto car:cars)
     {
       car->step();
 
@@ -258,56 +258,56 @@ public:
     }
   }
 
-  inline void pursuit ( void )
+  inline void pursuit(void)
   {
-    for ( auto car1:m_cop_cars )
+    for(auto car1:m_cop_cars)
     {
       double lon1 {0.0}, lat1 {0.0};
-      toGPS ( car1->from(), car1->to() , car1->get_step(), &lon1, &lat1 );
+      toGPS(car1->from(), car1->to() , car1->get_step(), &lon1, &lat1);
 
       double lon2 {0.0}, lat2 {0.0};
-      for ( auto car:m_smart_cars )
+      for(auto car:m_smart_cars)
       {
-        if ( car->get_type() == CarType::GANGSTER )
+        if(car->get_type() == CarType::GANGSTER)
         {
-          toGPS ( car->from(), car->to() , car->get_step(), &lon2, &lat2 );
-          double d = dst ( lon1, lat1, lon2, lat2 );
+          toGPS(car->from(), car->to() , car->get_step(), &lon2, &lat2);
+          double d = dst(lon1, lat1, lon2, lat2);
 
-          if ( d < m_catchdist )
+          if(d < m_catchdist)
           {
             car1->captured_gangster();
-            car->set_type ( CarType::CAUGHT );
+            car->set_type(CarType::CAUGHT);
           }
         }
       } // for - smart cars
     } // for -cop cars
   }
 
-  size_t nedges ( osmium::unsigned_object_id_type from ) const
+  size_t nedges(osmium::unsigned_object_id_type from) const
   {
-    shm_map_Type::iterator iter=shm_map->find ( from );
+    shm_map_Type::iterator iter=shm_map->find(from);
     return iter->second.m_alist.size();
   }
 
-  osmium::unsigned_object_id_type alist ( osmium::unsigned_object_id_type from, int to ) const
+  osmium::unsigned_object_id_type alist(osmium::unsigned_object_id_type from, int to) const
   {
-    shm_map_Type::iterator iter=shm_map->find ( from );
+    shm_map_Type::iterator iter=shm_map->find(from);
     return iter->second.m_alist[to];
   }
 
-  int alist_inv ( osmium::unsigned_object_id_type from, osmium::unsigned_object_id_type to ) const
+  int alist_inv(osmium::unsigned_object_id_type from, osmium::unsigned_object_id_type to) const
   {
-    shm_map_Type::iterator iter=shm_map->find ( from );
+    shm_map_Type::iterator iter=shm_map->find(from);
 
     int ret = -1;
 
-    for ( uint_vector::iterator noderefi = iter->second.m_alist.begin();
+    for(uint_vector::iterator noderefi = iter->second.m_alist.begin();
           noderefi!=iter->second.m_alist.end();
-          ++noderefi )
+          ++noderefi)
     {
-      if ( to == *noderefi )
+      if(to == *noderefi)
       {
-        ret = std::distance ( iter->second.m_alist.begin(), noderefi );
+        ret = std::distance(iter->second.m_alist.begin(), noderefi);
         break;
       }
     }
@@ -315,35 +315,35 @@ public:
     return ret;
   }
 
-  osmium::unsigned_object_id_type salist ( osmium::unsigned_object_id_type from, int to ) const
+  osmium::unsigned_object_id_type salist(osmium::unsigned_object_id_type from, int to) const
   {
-    shm_map_Type::iterator iter=shm_map->find ( from );
+    shm_map_Type::iterator iter=shm_map->find(from);
     return iter->second.m_salist[to];
   }
 
-  void set_salist ( osmium::unsigned_object_id_type from, int to , osmium::unsigned_object_id_type value )
+  void set_salist(osmium::unsigned_object_id_type from, int to , osmium::unsigned_object_id_type value)
   {
-    shm_map_Type::iterator iter=shm_map->find ( from );
+    shm_map_Type::iterator iter=shm_map->find(from);
     iter->second.m_salist[to] = value;
   }
 
-  osmium::unsigned_object_id_type palist ( osmium::unsigned_object_id_type from, int to ) const
+  osmium::unsigned_object_id_type palist(osmium::unsigned_object_id_type from, int to) const
   {
-    shm_map_Type::iterator iter=shm_map->find ( from );
+    shm_map_Type::iterator iter=shm_map->find(from);
     return iter->second.m_palist[to];
   }
 
-  bool hasNode ( osmium::unsigned_object_id_type node )
+  bool hasNode(osmium::unsigned_object_id_type node)
   {
-    shm_map_Type::iterator iter=shm_map->find ( node );
-    return ! ( iter == shm_map->end() );
+    shm_map_Type::iterator iter=shm_map->find(node);
+    return !(iter == shm_map->end());
   }
 
-  void start_server ( boost::asio::io_service& io_service, unsigned short port );
+  void start_server(boost::asio::io_service& io_service, unsigned short port);
 
-  void cmd_session ( boost::asio::ip::tcp::socket sock );
+  void cmd_session(boost::asio::ip::tcp::socket sock);
 
-  friend std::ostream & operator<< ( std::ostream & os, Traffic & t )
+  friend std::ostream & operator<<(std::ostream & os, Traffic & t)
   {
 
     os << t.m_time <<
@@ -351,8 +351,8 @@ public:
        t.shm_map->size()
        << std::endl;
 
-    for ( shm_map_Type::iterator iter=t.shm_map->begin();
-          iter!=t.shm_map->end(); ++iter )
+    for(shm_map_Type::iterator iter=t.shm_map->begin();
+          iter!=t.shm_map->end(); ++iter)
     {
       os  << iter->first
           << " "
@@ -363,19 +363,19 @@ public:
           << iter->second.m_alist.size()
           << " ";
 
-      for ( auto noderef : iter->second.m_alist )
+      for(auto noderef : iter->second.m_alist)
       {
         os  << noderef
             << " ";
       }
 
-      for ( auto noderef : iter->second.m_salist )
+      for(auto noderef : iter->second.m_salist)
       {
         os  << noderef
             << " ";
       }
 
-      for ( auto noderef : iter->second.m_palist )
+      for(auto noderef : iter->second.m_palist)
       {
         os  << noderef
             << " ";
@@ -387,26 +387,26 @@ public:
     return os;
   }
 
-  osmium::unsigned_object_id_type naive_node_for_nearest_gangster (
+  osmium::unsigned_object_id_type naive_node_for_nearest_gangster(
       osmium::unsigned_object_id_type from,
       osmium::unsigned_object_id_type to,
-      osmium::unsigned_object_id_type step );
+      osmium::unsigned_object_id_type step);
 
-  double dst ( osmium::unsigned_object_id_type n1,
-               osmium::unsigned_object_id_type n2 ) const;
+  double dst(osmium::unsigned_object_id_type n1,
+               osmium::unsigned_object_id_type n2) const;
 
-  double dst ( double lon1, double lat1, double lon2, double lat2 ) const;
+  double dst(double lon1, double lat1, double lon2, double lat2) const;
 
 
-  void toGPS ( osmium::unsigned_object_id_type from,
+  void toGPS(osmium::unsigned_object_id_type from,
                osmium::unsigned_object_id_type to,
                osmium::unsigned_object_id_type step,
-               double *lo, double *la ) const;
+               double *lo, double *la) const;
 
-  osmium::unsigned_object_id_type naive_nearest_gangster (
+  osmium::unsigned_object_id_type naive_nearest_gangster(
       osmium::unsigned_object_id_type from,
       osmium::unsigned_object_id_type to,
-      osmium::unsigned_object_id_type step );
+      osmium::unsigned_object_id_type step);
 
   TrafficType get_type() const
   {
@@ -427,8 +427,8 @@ protected:
   double m_catchdist {15.5};
 
 private:
-  int addCop ( CarLexer& cl );
-  int addGangster ( CarLexer& cl );
+  int addCop(CarLexer& cl);
+  int addGangster(CarLexer& cl);
 
   int m_size {10000};
   int m_time {0};

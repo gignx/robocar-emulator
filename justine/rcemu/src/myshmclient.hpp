@@ -162,9 +162,20 @@ public:
     delete nr_graph_;
   }
 
+  // Getters
   int get_num_cops(void)
   {
     return this->num_cops_;
+  }
+
+  bool get_verbose_mode(void)
+  {
+    return this->verbose_mode_;
+  }
+
+  std::string get_team_name(void)
+  {
+    return this->m_team_name_;
   }
 
   const char* get_port(void)
@@ -183,6 +194,8 @@ public:
    */
   void SimulateCarsLoop(void);
 
+  // The following functions serve testing purposes
+
   /**
    * @brief This function counts the number of vertices and number of edges in the map graph.
    * @param [out] sum_edges the number of edges
@@ -191,7 +204,7 @@ public:
    * This function counts the number of vertices and number of edges in the map graph that
    * is placed in the shared memory segment.
    */
-  int get_num_vertices(int &sum_edges);
+   int get_num_vertices(int &sum_edges);
 
   /**
    * @brief This function prints the edges of the map graph.
@@ -206,25 +219,6 @@ public:
    *
    */
   void PrintVertices(unsigned more);
-
-  /**
-   * @brief This function creates the BGL graph.
-   * @return he pointer of the created BGL graph.
-   *
-   */
-  void BuildGraph(void);
-
-  /**
-   * @brief This function solves the shortest path problem using Dijkstra algorithm.
-   * @param source the source node
-   * @param target the target node
-   * @return the shortest path between nodes source and target
-   *
-   * This function determines the shortest path from the source node to the target node.
-   */
-  std::vector<osmium::unsigned_object_id_type> DetermineDijkstraPath(
-    osmium::unsigned_object_id_type from,
-    osmium::unsigned_object_id_type to);
 
 private:
   struct SmartCar
@@ -253,14 +247,30 @@ private:
    */
   std::map<osmium::unsigned_object_id_type, NRGVertex> nr2v;
 
+
   // For server responses
   void LogMessage(const char *command, char *response_buffer);
   // For internal messages
   void LogMessage(std::string &&msg);
 
-  std::vector<Gangster> AcquireGangstersFromServer(
-    boost::asio::ip::tcp::socket & socket,
-    int id, osmium::unsigned_object_id_type cop);
+  /**
+   * @brief This function creates the BGL graph.
+   * @return he pointer of the created BGL graph.
+   *
+   */
+  void BuildGraph(void);
+
+  /**
+   * @brief This function solves the shortest path problem using Dijkstra algorithm.
+   * @param source the source node
+   * @param target the target node
+   * @return the shortest path between nodes source and target
+   *
+   * This function determines the shortest path from the source node to the target node.
+   */
+  std::vector<osmium::unsigned_object_id_type> DetermineDijkstraPath(
+    osmium::unsigned_object_id_type from,
+    osmium::unsigned_object_id_type to);
 
   int InitializeCops(
     boost::asio::ip::tcp::socket & socket);
@@ -271,6 +281,10 @@ private:
   void AcquireCarDataFromServer(
     boost::asio::ip::tcp::socket & socket, int id,
     unsigned *f, unsigned *t, unsigned* s);
+
+  std::vector<Gangster> AcquireGangstersFromServer(
+    boost::asio::ip::tcp::socket & socket,
+    int id, osmium::unsigned_object_id_type cop);  
 
   void SendRouteToServer(
     boost::asio::ip::tcp::socket & socket, int id,

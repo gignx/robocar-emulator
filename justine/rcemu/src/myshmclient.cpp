@@ -112,6 +112,44 @@ justine::sampleclient::MyShmClient::PrintVertices(unsigned more)
 }
 
 void
+justine::sampleclient::MyShmClient::LogMessage(
+  const char *command,
+  char *response_buffer)
+{
+  bool warn_user =
+    (strstr(response_buffer, "WARN") || strstr(response_buffer, "ERR"));
+
+  if ((verbose_mode_) || (warn_user))
+  {
+    std::cout << command << " sent:" << std::endl;
+
+    // so much C-style...
+    char *start_position = response_buffer, *end_position;
+
+    while ( (end_position = strchr(start_position, '>')) )
+    {
+      std::cout << "\t";
+      std::cout.write(start_position, end_position - start_position + 1);
+      std::cout << "\n";
+
+      start_position = end_position + 1;
+    }
+  }
+}
+
+void
+justine::sampleclient::MyShmClient::LogMessage(std::string &&msg)
+{
+  bool warn_user = (msg.find("WARN") != std::string::npos) ||
+                   (msg.find("ERR")  != std::string::npos);
+
+  if ((verbose_mode_) || (warn_user))
+  {
+    std::cout << msg;
+  }
+}
+
+void
 justine::sampleclient::MyShmClient::BuildGraph(void)
 {
   this->nr_graph_ = new NodeRefGraph();
@@ -239,42 +277,33 @@ justine::sampleclient::MyShmClient::DetermineDijkstraPath(
   return path;
 }
 
-void
-justine::sampleclient::MyShmClient::LogMessage(
-  const char *command,
-  char *response_buffer)
+void justine::sampleclient::MyShmClient::AcquireCarDataFromServer(
+  boost::asio::ip::tcp::socket & socket,
+  int id, unsigned *f, unsigned *t, unsigned* s)
 {
-  bool warn_user =
-    (strstr(response_buffer, "WARN") || strstr(response_buffer, "ERR"));
+  boost::system::error_code error_code;
 
-  if ((verbose_mode_) || (warn_user))
+  char buffer[kMaxBufferLen];
+
+  size_t msg_length = std::sprintf(buffer, "<car ");
+  msg_length += std::sprintf(buffer + msg_length, "%d>", id);
+
+  socket.send(boost::asio::buffer(buffer, msg_length));
+
+  msg_length = socket.read_some(boost::asio::buffer(buffer), error_code);
+
+  if(error_code == boost::asio::error::eof)
   {
-    std::cout << command << " sent:" << std::endl;
-
-    // so much C-style...
-    char *start_position = response_buffer, *end_position;
-
-    while ( (end_position = strchr(start_position, '>')) )
-    {
-      std::cout << "\t";
-      std::cout.write(start_position, end_position - start_position + 1);
-      std::cout << "\n";
-
-      start_position = end_position + 1;
-    }
+    // TODO
   }
-}
-
-void
-justine::sampleclient::MyShmClient::LogMessage(std::string &&msg)
-{
-  bool warn_user = (msg.find("WARN") != std::string::npos) ||
-                   (msg.find("ERR")  != std::string::npos);
-
-  if ((verbose_mode_) || (warn_user))
+  else if(error_code)
   {
-    std::cout << msg;
+    throw boost::system::system_error(error_code);
   }
+
+  std::sscanf(buffer, "<OK %*d %u %u %u", f, t, s);
+
+  LogMessage("CAR", buffer);
 }
 
 std::vector<justine::sampleclient::MyShmClient::Gangster>
@@ -395,35 +424,6 @@ void justine::sampleclient::MyShmClient::pos(boost::asio::ip::tcp::socket & sock
   std::cout << "Command POS sent." << std::endl;
 }*/
 
-void justine::sampleclient::MyShmClient::AcquireCarDataFromServer(
-  boost::asio::ip::tcp::socket & socket,
-  int id, unsigned *f, unsigned *t, unsigned* s)
-{
-  boost::system::error_code error_code;
-
-  char buffer[kMaxBufferLen];
-
-  size_t msg_length = std::sprintf(buffer, "<car ");
-  msg_length += std::sprintf(buffer + msg_length, "%d>", id);
-
-  socket.send(boost::asio::buffer(buffer, msg_length));
-
-  msg_length = socket.read_some(boost::asio::buffer(buffer), error_code);
-
-  if(error_code == boost::asio::error::eof)
-  {
-    // TODO
-  }
-  else if(error_code)
-  {
-    throw boost::system::system_error(error_code);
-  }
-
-  std::sscanf(buffer, "<OK %*d %u %u %u", f, t, s);
-
-  LogMessage("CAR", buffer);
-}
-
 void justine::sampleclient::MyShmClient::SendRouteToServer(
   boost::asio::ip::tcp::socket & socket,
   int id,
@@ -480,7 +480,7 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
   }
   else
   {
-    LogMessage("NOTE:\n\tAll cops have been initialized succesfully\n");
+    LogMessage("NOTE:\n\tAll cops have been initialized successfully\n");
   }
 
   unsigned from_node  {0u};

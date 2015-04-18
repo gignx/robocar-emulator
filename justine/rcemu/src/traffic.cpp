@@ -127,9 +127,9 @@ void justine::robocar::Traffic::cmd_session(boost::asio::ip::tcp::socket client_
           std::stringstream ss;
 
           ss  <<
-              m_time <<
+              running_time_elapsed_ <<
               " " <<
-              m_minutes <<
+              running_time_minutes_ <<
               " " <<
               cars_copy.size() << std::endl;
 
@@ -327,8 +327,8 @@ double justine::robocar::Traffic::dst(
   osmium::unsigned_object_id_type n2) const
 {
 
-  shm_map_Type::iterator iter1=shm_map->find(n1);
-  shm_map_Type::iterator iter2=shm_map->find(n2);
+  shm_map_Type::iterator iter1=shm_map_->find(n1);
+  shm_map_Type::iterator iter2=shm_map_->find(n2);
 
   osmium::geom::Coordinates c1 {iter1->second.lon/10000000.0, iter1->second.lat/10000000.0};
   osmium::geom::Coordinates c2 {iter2->second.lon/10000000.0, iter2->second.lat/10000000.0};
@@ -350,10 +350,10 @@ void justine::robocar::Traffic::toGPS(
   osmium::unsigned_object_id_type to,
   osmium::unsigned_object_id_type step, double *lo, double *la) const
 {
-  shm_map_Type::iterator iter1=shm_map->find(from);
+  shm_map_Type::iterator iter1=shm_map_->find(from);
   double lon1 {iter1->second.lon/10000000.0}, lat1 {iter1->second.lat/10000000.0};
 
-  shm_map_Type::iterator iter2=shm_map->find(alist(from, to));
+  shm_map_Type::iterator iter2=shm_map_->find(alist(from, to));
   double lon2 {iter2->second.lon/10000000.0}, lat2 {iter2->second.lat/10000000.0};
 
   osmium::unsigned_object_id_type maxstep = palist(from, to);
@@ -412,7 +412,7 @@ osmium::unsigned_object_id_type justine::robocar::Traffic::naive_node_for_neares
 
   osmium::unsigned_object_id_type car = naive_nearest_gangster(from, to , step);
 
-  shm_map_Type::iterator iter=shm_map->find(from);
+  shm_map_Type::iterator iter=shm_map_->find(from);
 
   double maxd = std::numeric_limits<double>::max();
 

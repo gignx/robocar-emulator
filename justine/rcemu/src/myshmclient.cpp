@@ -149,6 +149,35 @@ justine::sampleclient::MyShmClient::LogMessage(std::string &&msg)
   }
 }
 
+// csak, hogy szem előtt legyenek
+#ifdef NEVER_DEFINED
+class SharedData
+{
+public:
+  uint_vector m_alist; //std::vector of unsigned ints
+  uint_vector m_salist;
+  uint_vector m_palist;
+
+  int lon;
+  int lat;
+
+  SharedData ( const void_allocator &void_alloc )
+  :  m_alist ( void_alloc ), m_salist ( void_alloc ), m_palist ( void_alloc )
+  {}
+
+};
+
+using map_pair_Type =
+  std::pair<const unsigned int, SharedData>;
+
+using map_pair_Type_allocator =
+  boost::interprocess::allocator<map_pair_Type, segment_manager_Type>;
+
+using shm_map_Type =
+  boost::interprocess::map< unsigned int, SharedData, std::less<unsigned int>,
+    map_pair_Type_allocator>;
+#endif
+
 void
 justine::sampleclient::MyShmClient::BuildGraph(void)
 {
@@ -156,21 +185,40 @@ justine::sampleclient::MyShmClient::BuildGraph(void)
 
   int count {0};
 
+  // végigmegyünk a map osszes párján
+  // az egyes párok first-je (key) egy unsigned int, ami
+  // az azonosítója az adott csomópontnak
   for(justine::robocar::shm_map_Type::iterator iter = shm_map->begin();
        iter!=shm_map->end();
        ++iter)
   {
+    // az adott csomópont azonosítója
     osmium::unsigned_object_id_type u = iter->first;
 
+    // minden csomópont second-ja (value)
+    // egy SharedData objektum, ami a csomópont adjacency listjét
+    // is tárolja (azoknak a csomópontoknak az azonosítói, amelyekkel kapcsolatban van
+    //  az adott csomópont)
+    // Tehát ez a belső ciklus megy végig az osszes olyan csomoponton,
+    // ami a kulso ciklus csomopontjaval kapcsolatban van
     for(justine::robocar::uint_vector::iterator noderefi = iter->second.m_alist.begin();
         noderefi != iter->second.m_alist.end();
         ++noderefi)
     {
-      NodeRefGraph::vertex_descriptor f;
+      NodeRefGraph::vertex_descriptor f; // az adott csomópont adatait írja le
+                                         // a csomópont neve, ID-ja
+                                         // ugyanaz, mint az NRGVertex típus
 
+      // megnézzük, hogy a kis helper struktúránkba benne van-e már
+      // a külső csomópont
       std::map<osmium::unsigned_object_id_type, NRGVertex>::iterator it =
-        nr2v.find(u);
+        nr2v.find(u); // FIXME: külső ciklusban nem lehetne?
 
+      // ha nincs benne, akkor belerakjuk
+      // létrehozunk egy új csomópontot
+
+      // az nr2v minden azonosítóhoz hozzárendeli a csomópont adatait
+      // amit a gráf tartalmaz
       if(it == nr2v.end())
       {
         f = boost::add_vertex(u, *nr_graph_);
@@ -178,13 +226,14 @@ justine::sampleclient::MyShmClient::BuildGraph(void)
 
         ++count;
       }
-      else
+      else // ha már benne van, akkor egyszerűen csak fogjuk az adatokat
       {
         f = it->second;
       }
 
       NodeRefGraph::vertex_descriptor t;
 
+      // most a belső ciklus nodejára csináljuk meg ugyanezt
       it = nr2v.find(*noderefi);
 
       if(it == nr2v.end())
@@ -199,8 +248,14 @@ justine::sampleclient::MyShmClient::BuildGraph(void)
         t = it->second;
       }
 
+      // megnézzük, hogy az adott elem hanyadik is az adjacency listben
+      // ez amolyan index lesz
       int to = std::distance(iter->second.m_alist.begin(), noderefi);
 
+      // a palist tárolja a súlyozást
+      // tehát ezzel a függvénnnyel hozzáadunk egy új élt a csomópontok kozott
+      // a grafban, melynek súlyát az eredeti SharedData objektum palist-je tárolta
+      // ezt a shmclient.palist() fv adja vissza
       boost::add_edge(f, t, palist(iter->first, to), *nr_graph_);
     }
   }

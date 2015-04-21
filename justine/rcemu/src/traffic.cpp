@@ -322,7 +322,7 @@ void justine::robocar::Traffic::start_server(
   }
 }
 
-double justine::robocar::Traffic::dst(
+double justine::robocar::Traffic::Distance(
   osmium::unsigned_object_id_type n1,
   osmium::unsigned_object_id_type n2) const
 {
@@ -336,7 +336,7 @@ double justine::robocar::Traffic::dst(
   return osmium::geom::haversine::distance(c1, c2);
 }
 
-double justine::robocar::Traffic::dst(
+double justine::robocar::Traffic::Distance(
   double lon1, double lat1, double lon2, double lat2) const
 {
   osmium::geom::Coordinates c1 {lon1, lat1};
@@ -389,7 +389,7 @@ osmium::unsigned_object_id_type justine::robocar::Traffic::naive_nearest_gangste
     {
       toGPS(car->from(), car->to() , car->get_step(), &lon2, &lat2);
 
-      double d = dst(lon1, lat1, lon2, lat2);
+      double d = Distance(lon1, lat1, lon2, lat2);
 
       if(d < maxd)
       {
@@ -419,7 +419,7 @@ osmium::unsigned_object_id_type justine::robocar::Traffic::naive_node_for_neares
   for(uint_vector::iterator noderefi = iter->second.m_alist.begin();
         noderefi!=iter->second.m_alist.end(); ++noderefi)
   {
-    double d = dst(car, *noderefi);
+    double d = Distance(car, *noderefi);
 
     if(d < maxd)
     {

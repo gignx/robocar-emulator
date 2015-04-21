@@ -165,11 +165,6 @@ public:
 
   void SimulationLoop()
   {
-
-  }
-
-  void processes()
-  {
     std::unique_lock<std::mutex> lock(m_mutex);
 
     m_cv.wait(lock);
@@ -188,7 +183,8 @@ public:
       }
       else
       {
-        traffic_run();
+        UpdateTraffic();
+
         std::this_thread::sleep_for(std::chrono::milliseconds(delay_));
       }
     }
@@ -232,14 +228,14 @@ public:
     return iter->first;
   }
 
-  virtual void traffic_run()
+  virtual void UpdateTraffic()
   {
-    pursuit();
+    UpdateCops();
 
-    steps();
+    StepCars();
   }
 
-  void steps()
+  void StepCars()
   {
     std::lock_guard<std::mutex> lock(cars_mutex);
 
@@ -259,25 +255,25 @@ public:
     }
   }
 
-  inline void pursuit(void)
+  inline void UpdateCops(void)
   {
-    for(auto car1:m_cop_cars)
+    for(auto cop_car:m_cop_cars)
     {
-      double lon1 {0.0}, lat1 {0.0};
-      toGPS(car1->from(), car1->to() , car1->get_step(), &lon1, &lat1);
+      double lon {0.0}, lat1 {0.0};
+      toGPS(cop_car->from(), cop_car->to() , cop_car->get_step(), &lon1, &lat1);
 
       double lon2 {0.0}, lat2 {0.0};
-      for(auto car:m_smart_cars)
+      for(auto smart_car:m_smart_cars) //gangsters?
       {
-        if(car->get_type() == CarType::GANGSTER)
+        if(smart_car->get_type() == CarType::GANGSTER)
         {
-          toGPS(car->from(), car->to() , car->get_step(), &lon2, &lat2);
-          double d = dst(lon1, lat1, lon2, lat2);
+          toGPS(smart_car->from(), smart_car->to() , smart_car->get_step(), &lon2, &lat2);
+          double d = Distance(lon1, lat1, lon2, lat2);
 
           if(d < catch_distance_)
           {
-            car1->captured_gangster();
-            car->set_type(CarType::CAUGHT);
+            cop_car->captured_gangster();
+            smart_car->set_type(CarType::CAUGHT);
           }
         }
       } // for - smart cars
@@ -392,10 +388,10 @@ public:
       osmium::unsigned_object_id_type to,
       osmium::unsigned_object_id_type step);
 
-  double dst(osmium::unsigned_object_id_type n1,
+  double Distance(osmium::unsigned_object_id_type n1,
                osmium::unsigned_object_id_type n2) const;
 
-  double dst(double lon1, double lat1, double lon2, double lat2) const;
+  double Distance(double lon1, double lat1, double lon2, double lat2) const;
 
 
   void toGPS(osmium::unsigned_object_id_type from,
@@ -439,7 +435,7 @@ private:
 
   std::mutex m_mutex;
   std::condition_variable m_cv;
-  std::thread m_thread {&Traffic::processes, this};
+  std::thread m_thread {&Traffic::SimulationLoop, this};
 
   std::vector<std::shared_ptr<Car>> cars;
   std::vector<std::shared_ptr<SmartCar>> m_smart_cars;

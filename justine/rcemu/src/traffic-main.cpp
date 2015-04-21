@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
  ("shm,s",        boost::program_options::value<std::string>()->default_value("JustineSharedMemory"), "shared memory segment name")
  ("port,p",       boost::program_options::value<std::string>()->default_value("10007"), "the TCP port that the traffic server is listening on to allow agents to communicate with the traffic simulation, the default value is 10007")
  ("cars,c",       boost::program_options::value<int>()->default_value(100), "number of the random cars")
- ("delay,d",    boost::program_options::value<int>()->default_value(200), "sleep duration between calculations")
+ ("delay,d",      boost::program_options::value<int>()->default_value(200), "sleep duration between calculations")
  ("minutes,m",    boost::program_options::value<int>()->default_value(10), "how long does the traffic simulation run for?")
  ("catchdist",    boost::program_options::value<double>()->default_value(15.5), "the catch distance of cop cars")
  ("traffictype",  boost::program_options::value<std::string>()->default_value("NORMAL"), "traffic type = NORMAL|ANTS|ANTS_RND|ANTS_RERND|ANTS_MRERND");
@@ -143,6 +143,7 @@ int main(int argc, char* argv[])
   try
   {
     boost::asio::io_service io_service;
+    
     traffic.start_server(io_service, std::atoi(port.c_str()));
   }
   catch(std::exception& e)

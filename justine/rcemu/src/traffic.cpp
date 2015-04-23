@@ -35,20 +35,20 @@ int justine::robocar::Traffic::addCop(CarLexer& cl)
 {
   std::shared_ptr<CopCar> c;
 
-  c = std::make_shared<CopCar>(*this, cl.get_guided(), cl.get_name());
-
-  //TODO majd ráér később inicializálni, hogy ne lassítsa a szimulációt
-  c->init();
-
-  cars.push_back(c);
-  m_cop_cars.push_back(c);
-
   int id {0};
   do
   {
     id = std::rand();
   }
   while(m_smart_cars_map.find(id) != m_smart_cars_map.end());
+
+  c = std::make_shared<CopCar>(*this, cl.get_guided(), cl.get_name(), id);
+
+  //TODO majd ráér később inicializálni, hogy ne lassítsa a szimulációt
+  c->init();
+
+  cars.push_back(c);
+  m_cop_cars.push_back(c);
 
   m_smart_cars_map[id] = c;
 
@@ -59,20 +59,20 @@ int justine::robocar::Traffic::addGangster(CarLexer& cl)
 {
   std::shared_ptr<SmartCar> c;
 
-  c = std::make_shared<SmartCar>(*this, CarType::GANGSTER, cl.get_guided());
-
-  //TODO majd ráér később inicializálni, hogy ne lassítsa a szimulációt
-  c->init();
-
-  cars.push_back(c);
-  m_smart_cars.push_back(c);
-
   int id {0};
   do
   {
     id = std::rand();
   }
   while(m_smart_cars_map.find(id) != m_smart_cars_map.end());
+
+  c = std::make_shared<SmartCar>(*this, CarType::GANGSTER, cl.get_guided(), id);
+
+  //TODO majd ráér később inicializálni, hogy ne lassítsa a szimulációt
+  c->init();
+
+  cars.push_back(c);
+  m_smart_cars.push_back(c);
 
   m_smart_cars_map[id] = c;
 
@@ -216,7 +216,7 @@ void justine::robocar::Traffic::cmd_session(boost::asio::ip::tcp::socket client_
             if(c->get_type() == CarType::GANGSTER)
             {
               length += std::sprintf(data+length,
-                                       "<OK %d %lu %lu %lu>", cl.get_id(), c->from(),
+                                       "<OK %d %lu %lu %lu>", c->get_id(), c->from(),
                                        c->to_node(), c->get_step());
 
               if(length > network_buffer_size - 512)

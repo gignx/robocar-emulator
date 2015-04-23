@@ -101,7 +101,15 @@ public:
     shm_map_ =
       shm_segment_->find<shm_map_Type>("JustineMap").first;
 
-    running_time_allowed_ = running_time_minutes_ * 60 * 1000;
+    // infinite mode
+    if (running_time_minutes_ == -1)
+    {
+      running_time_allowed_ = std::numeric_limits<int>::max();
+    }
+    else
+    {
+      running_time_allowed_ = running_time_minutes_ * 60 * 1000;
+    }
 
     #ifdef DEBUG
     std::cout << "Initializing routine cars ... " << std::endl;
@@ -149,6 +157,8 @@ public:
     logfile = boost::posix_time::to_simple_string(now);
     logFile = new std::fstream(logfile.c_str() , std::ios_base::out);
 
+    is_running_ = true;
+
     m_cv.notify_one();
 
     std::cout << "The traffic server is ready." << std::endl;
@@ -157,6 +167,7 @@ public:
   ~Traffic()
   {
     is_running_ = false;
+
     m_thread.join();
     shm_segment_->destroy<shm_map_Type>("JustineMap");
 
@@ -259,7 +270,7 @@ public:
   {
     for(auto cop_car:m_cop_cars)
     {
-      double lon {0.0}, lat1 {0.0};
+      double lon1 {0.0}, lat1 {0.0};
       toGPS(cop_car->from(), cop_car->to() , cop_car->get_step(), &lon1, &lat1);
 
       double lon2 {0.0}, lat2 {0.0};

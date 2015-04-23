@@ -31,6 +31,288 @@
 
 #include <traffic.hpp>
 
+void justine::robocar::Traffic::OpenLogStream(void)
+{
+  boost::posix_time::ptime now =
+    boost::posix_time::second_clock::universal_time();
+
+  logfile_name_   = boost::posix_time::to_simple_string(now);
+  logfile_stream_ = new std::fstream(logfile_name_.c_str() , std::ios_base::out);
+}
+
+void justine::robocar::Traffic::CloseLogStream(void)
+{
+  for(auto c:m_cop_cars)
+    *logfile_stream_  << *c << std::endl;
+
+  logfile_stream_->close();
+
+  boost::filesystem::rename(
+    boost::filesystem::path(logfile_name_),
+    boost::filesystem::path(get_title(logfile_name_)));
+}
+
+void justine::robocar::Traffic::InitializeRoutineCars(void)
+{
+  #ifdef DEBUG
+  std::cout << "Initializing routine cars ... " << std::endl;
+  #endif
+
+  if (traffic_type_ != TrafficType::NORMAL)
+  {
+    for (shm_map_Type::iterator iter=shm_map_->begin();
+         iter!=shm_map_->end();
+         ++iter)
+    {
+      for (auto noderef : iter->second.m_alist)
+      {
+        AntCar::alist[iter->first].push_back(1);
+        AntCar::alist_evaporate[iter->first].push_back(1);
+      }
+    }
+  }
+
+  for (int i {0}; i < num_cars_; ++i)
+  {
+    if (traffic_type_ == TrafficType::NORMAL)
+    {
+      std::shared_ptr<Car> car(new Car {*this});
+
+      car->init();
+      cars.push_back(car);
+    }
+    else
+    {
+      std::shared_ptr<AntCar> car(new AntCar {*this});
+
+      car->init();
+      cars.push_back(car);
+    }
+  }
+
+  #ifdef DEBUG
+  std::cout << "All routine cars initialized." <<"\n";
+  #endif
+}
+
+void justine::robocar::Traffic::SimulationLoop(void)
+{
+  std::unique_lock<std::mutex> lock(m_mutex);
+
+  m_cv.wait(lock);
+
+  #ifdef DEBUG
+  std::cout << "Traffic simulation started." << std::endl;
+  #endif
+
+  while(is_running_)
+  {
+    if (++running_time_elapsed_ > (running_time_allowed_ / delay_))
+    {
+      is_running_ = false;
+
+      break;
+    }
+    else
+    {
+      UpdateTraffic();
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(delay_));
+    }
+  }
+
+  std::cout << "The traffic simulation is over." << std::endl;
+
+  CloseLogStream();
+}
+
+std::string justine::robocar::Traffic::get_title(std::string name)
+{
+  std::map <std::string, int> res;
+  for(auto c:m_cop_cars)
+  {
+    res[c->get_name()] += c->get_num_captured_gangsters();
+  }
+
+  std::ostringstream ss;
+
+  for(auto r: res)
+    ss << r.first << " " << res[r.first] << " ";
+
+  ss << name << ".txt";
+
+  return ss.str();
+}
+
+osmium::unsigned_object_id_type justine::robocar::Traffic::node()
+{
+  shm_map_Type::iterator iter=shm_map_->begin();
+  std::advance(iter, std::rand() % shm_map_->size());
+
+  return iter->first;
+}
+
+void justine::robocar::Traffic::UpdateTraffic()
+{
+  CheckIfCaught();
+
+  StepCars();
+}
+
+void justine::robocar::Traffic::StepCars()
+{
+  std::lock_guard<std::mutex> lock(cars_mutex);
+
+  *logfile_stream_ << running_time_elapsed_
+                   << " "
+                   << running_time_minutes_
+                   << " "
+                   << cars.size() << std::endl;
+
+  for(auto car:cars)
+  {
+    car->step();
+
+    *logfile_stream_ << *car
+                     <<  " " << std::endl;
+  }
+}
+
+void justine::robocar::Traffic::CheckIfCaught(void)
+{
+  for(auto cop_car:m_cop_cars)
+  {
+    double lon1 {0.0}, lat1 {0.0};
+    toGPS(cop_car->from(), cop_car->to() , cop_car->get_step(), &lon1, &lat1);
+
+    double lon2 {0.0}, lat2 {0.0};
+    for(auto smart_car:m_smart_cars) //gangsters?
+    {
+      if(smart_car->get_type() == CarType::GANGSTER)
+      {
+        toGPS(smart_car->from(), smart_car->to() , smart_car->get_step(), &lon2, &lat2);
+        double d = Distance(lon1, lat1, lon2, lat2);
+
+        if(d < catch_distance_)
+        {
+          cop_car->captured_gangster();
+          smart_car->set_type(CarType::CAUGHT);
+        }
+      }
+    } // for - smart cars
+  } // for -cop cars
+}
+
+size_t justine::robocar::Traffic::nedges(osmium::unsigned_object_id_type from) const
+{
+  shm_map_Type::iterator iter=shm_map_->find(from);
+  return iter->second.m_alist.size();
+}
+
+osmium::unsigned_object_id_type justine::robocar::Traffic::alist(osmium::unsigned_object_id_type from, int to) const
+{
+  shm_map_Type::iterator iter=shm_map_->find(from);
+  return iter->second.m_alist[to];
+}
+
+int justine::robocar::Traffic::alist_inv(osmium::unsigned_object_id_type from, osmium::unsigned_object_id_type to) const
+{
+  shm_map_Type::iterator iter=shm_map_->find(from);
+
+  int ret = -1;
+
+  for(uint_vector::iterator noderefi = iter->second.m_alist.begin();
+        noderefi!=iter->second.m_alist.end();
+        ++noderefi)
+  {
+    if(to == *noderefi)
+    {
+      ret = std::distance(iter->second.m_alist.begin(), noderefi);
+      break;
+    }
+  }
+
+  return ret;
+}
+
+osmium::unsigned_object_id_type justine::robocar::Traffic::salist(osmium::unsigned_object_id_type from, int to) const
+{
+  shm_map_Type::iterator iter=shm_map_->find(from);
+  return iter->second.m_salist[to];
+}
+
+void justine::robocar::Traffic::set_salist(osmium::unsigned_object_id_type from, int to , osmium::unsigned_object_id_type value)
+{
+  shm_map_Type::iterator iter=shm_map_->find(from);
+  iter->second.m_salist[to] = value;
+}
+
+osmium::unsigned_object_id_type justine::robocar::Traffic::palist(osmium::unsigned_object_id_type from, int to) const
+{
+  shm_map_Type::iterator iter=shm_map_->find(from);
+  return iter->second.m_palist[to];
+}
+
+bool justine::robocar::Traffic::hasNode(osmium::unsigned_object_id_type node)
+{
+  shm_map_Type::iterator iter=shm_map_->find(node);
+  return !(iter == shm_map_->end());
+}
+
+std::ostream & justine::robocar::operator<<(std::ostream & os, Traffic & t)
+{
+  os << t.running_time_elapsed_ <<
+     " " <<
+     t.shm_map_->size()
+     << std::endl;
+
+  for(shm_map_Type::iterator iter=t.shm_map_->begin();
+        iter!=t.shm_map_->end(); ++iter)
+  {
+    os  << iter->first
+        << " "
+        << iter->second.lon
+        << " "
+        << iter->second.lat
+        << " "
+        << iter->second.m_alist.size()
+        << " ";
+
+    for(auto noderef : iter->second.m_alist)
+    {
+      os  << noderef
+          << " ";
+    }
+
+    for(auto noderef : iter->second.m_salist)
+    {
+      os  << noderef
+          << " ";
+    }
+
+    for(auto noderef : iter->second.m_palist)
+    {
+      os  << noderef
+          << " ";
+    }
+
+    os << std::endl;
+  }
+
+  return os;
+}
+
+justine::robocar::TrafficType
+justine::robocar::Traffic::get_type() const
+{
+  return traffic_type_;
+}
+
+int justine::robocar::Traffic::get_time() const
+{
+  return running_time_elapsed_;
+}
+
 int justine::robocar::Traffic::addCop(CarLexer& cl)
 {
   std::shared_ptr<CopCar> c;

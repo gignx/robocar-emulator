@@ -155,7 +155,7 @@ private:
 class SmartCar : public Car
 {
 public:
-  SmartCar ( Traffic & traffic, CarType type, bool guided );
+  SmartCar ( Traffic & traffic, CarType type, bool guided , int id);
 
   virtual void step();
   virtual void init();
@@ -182,9 +182,16 @@ public:
   virtual void nextGuidedEdge ( void );
   bool set_fromto ( unsigned int from, unsigned int to );
 
+  int get_id()
+  {
+    return this->id_;
+  }
+
 private:
   bool m_guided {false};
   bool m_routed {false};
+
+  int id_;
 
   std::vector<unsigned int> route;
 };
@@ -192,7 +199,7 @@ private:
 class CopCar : public SmartCar
 {
 public:
-  CopCar ( Traffic & traffic, bool guided, const char *name );
+  CopCar ( Traffic & traffic, bool guided, const char *name , int id);
 
   virtual void print ( std::ostream & os ) const
   {

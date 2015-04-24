@@ -107,6 +107,17 @@ class Loc {
 
 }
 
+class CopTeamData {
+  public int num_cars;
+  public int num_caught;
+  public java.awt.Color color;
+
+  public CopTeamData(int caught, java.awt.Color cl)  {
+      this.num_caught = caught;
+      this.color = cl;
+  }
+}
+
 public class CarWindow extends javax.swing.JFrame {
 
     org.jxmapviewer.viewer.WaypointPainter<org.jxmapviewer.viewer.Waypoint> waypointPainter
@@ -130,6 +141,8 @@ public class CarWindow extends javax.swing.JFrame {
 
     java.util.List<String> teams = new java.util.ArrayList<String>();
 
+    java.util.Map<String, CopTeamData> cop_teams = new java.util.HashMap<String, CopTeamData>();
+
     javax.swing.SwingWorker<Void, Traffic> worker = new javax.swing.SwingWorker<Void, Traffic>() {
 
         @Override
@@ -145,6 +158,8 @@ public class CarWindow extends javax.swing.JFrame {
                 java.io.InputStream is = trafficServer.getInputStream();
 
                 scan = new java.util.Scanner(is);
+
+                int team_counter = 0;
 
                 for (;;) {
                     java.util.Set<org.jxmapviewer.viewer.Waypoint> waypoints
@@ -163,7 +178,11 @@ public class CarWindow extends javax.swing.JFrame {
                     int num_captured_gangsters;
                     String name = "Cop";
 
-                    java.util.Map<String, Integer> cops = new java.util.HashMap<String, Integer>();
+                    //java.util.Map<String, Integer> cops = new java.util.HashMap<String, Integer>();
+
+                    for (CopTeamData value : cop_teams.values()) {
+                      value.num_caught = 0;
+                    }
 
                     for (int i = 0; i < size; ++i) {
 
@@ -177,10 +196,19 @@ public class CarWindow extends javax.swing.JFrame {
                             num_captured_gangsters = scan.nextInt();
                             name = scan.next();
 
-                            if (cops.containsKey(name)) {
-                                cops.put(name, cops.get(name) + num_captured_gangsters);
+                            if (cop_teams.containsKey(name)) {
+                                //cop_teams.put(name, cops.get(name) + num_captured_gangsters);
+                                if (num_captured_gangsters > 0)
+                                {
+                                  CopTeamData data = cop_teams.get(name);
+
+                                  data.num_caught += num_captured_gangsters;
+                                }
                             } else {
-                                cops.put(name, num_captured_gangsters);
+                                cop_teams.put(name, new CopTeamData(num_captured_gangsters,
+                                                                    available_colors[team_counter % available_colors.length]));
+
+                                team_counter++;
                             }
                         }
 
@@ -232,7 +260,7 @@ public class CarWindow extends javax.swing.JFrame {
                     sb.append(2 * time);
                     sb.append("|");
                     //sb.append(" Justine - Car Window (log player for Robocar City Emulator, Robocar World Championshin in Debrecen)");
-                    sb.append(java.util.Arrays.toString(cops.entrySet().toArray()));
+                    //sb.append(java.util.Arrays.toString(cops.entrySet().toArray()));
 
                     publish(new Traffic(waypoints, sb.toString()));
 
@@ -259,7 +287,6 @@ public class CarWindow extends javax.swing.JFrame {
 
             jXMapViewer.repaint();
             repaint();
-
         }
 
         @Override
@@ -419,6 +446,52 @@ public class CarWindow extends javax.swing.JFrame {
 
         jXMapViewer.setTileFactory(tileFactoryArray[0]);
 
+        org.jxmapviewer.painter.Painter<org.jxmapviewer.JXMapViewer> scoreboardPainter = new org.jxmapviewer.painter.Painter<org.jxmapviewer.JXMapViewer>() {
+          public void paint(java.awt.Graphics2D g2d, org.jxmapviewer.JXMapViewer map, int width, int height) {
+            g2d.setPaint(new java.awt.Color(0,0,0,150));
+
+            java.awt.FontMetrics font_metrics = g2d.getFontMetrics();
+
+            int max_name_width = 0;
+
+            for (String key : cop_teams.keySet()) {
+              if (max_name_width < font_metrics.stringWidth(key)) {
+                max_name_width = font_metrics.stringWidth(key);
+              }
+            }
+
+            int font_height = font_metrics.getHeight();
+
+            int scoreboard_height = (font_height + 10) * cop_teams.size() + 5;
+            int scoreboard_width =  max_name_width + font_height + font_metrics.charWidth('-') * 12 + 15;
+            g2d.fillRoundRect(10, 10, scoreboard_width, scoreboard_height, 10, 10);
+
+            g2d.setPaint(java.awt.Color.WHITE);
+
+            int draw_y = 15;
+
+            for (java.util.Map.Entry<String, CopTeamData> entry : cop_teams.entrySet()) {
+                String team_name = entry.getKey();
+                CopTeamData team_data = entry.getValue();
+
+                g2d.setPaint(team_data.color);
+
+                g2d.fillOval(15, draw_y, font_height, font_height);
+
+                g2d.setPaint(java.awt.Color.WHITE);
+
+                draw_y += font_height;
+
+                g2d.drawString(team_name + " - " + Integer.toString(team_data.num_caught),
+                               font_height + 5 + 15, draw_y);
+
+                draw_y += 10;
+            }
+
+            //g2d.drawString("Images provided by NASA", 50+10, 10+20);
+          }
+        };
+
         ClassLoader classLoader = this.getClass().getClassLoader();
 
         final java.awt.Image markerImg
@@ -438,19 +511,27 @@ public class CarWindow extends javax.swing.JFrame {
 
                         java.awt.geom.Point2D point = jXMapV.getTileFactory().geoToPixel(
                                 w.getPosition(), jXMapV.getZoom());
+                        java.awt.Rectangle sb = new java.awt.Rectangle(10, 10, 200, 200);
+
+                        g2d.setColor(java.awt.Color.WHITE);
+                        g2d.fill(sb);
+                        g2d.setColor(java.awt.Color.BLACK);
+                        g2d.draw(sb);
 
                         if (w instanceof WaypointPolice) {
                             g2d.drawImage(markerImgPolice, (int) point.getX() - markerImgPolice.getWidth(jXMapV),
                                     (int) point.getY() - markerImgPolice.getHeight(jXMapV), null);
 
                             java.awt.Color border_color =
-                              available_colors[teams.indexOf(((WaypointPolice) w).getName()) % available_colors.length];
+                              cop_teams.get(((WaypointPolice) w).getName()).color;
+                              //available_colors[teams.indexOf(((WaypointPolice) w).getName()) % available_colors.length];
 
                             g2d.setFont(new java.awt.Font("Serif", java.awt.Font.BOLD, 14));
                             java.awt.FontMetrics fm = g2d.getFontMetrics();
                             int nameWidth = fm.stringWidth(((WaypointPolice) w).getName());
                             g2d.setColor(java.awt.Color.GRAY);
                             java.awt.Rectangle rect = new java.awt.Rectangle((int) point.getX(), (int) point.getY(), nameWidth + 4, 20);
+
                             g2d.fill(rect);
                             g2d.setColor(border_color);
                             g2d.draw(rect);
@@ -470,7 +551,13 @@ public class CarWindow extends javax.swing.JFrame {
                     }
                 });
 
-        jXMapViewer.setOverlayPainter(waypointPainter);
+
+        org.jxmapviewer.painter.CompoundPainter<org.jxmapviewer.JXMapViewer> painters =
+          new org.jxmapviewer.painter.CompoundPainter<org.jxmapviewer.JXMapViewer>();
+
+        painters.setPainters(waypointPainter, scoreboardPainter);
+
+        jXMapViewer.setOverlayPainter(painters);
         jXMapViewer.setZoom(9);
         jXMapViewer.setAddressLocation(debrecen);
         jXMapViewer.setCenterPosition(debrecen);
@@ -518,7 +605,6 @@ public class CarWindow extends javax.swing.JFrame {
                 lon = scan.nextDouble();
 
                 lmap.put(ref, new Loc(lat, lon));
-
             }
 
         } catch (Exception e) {

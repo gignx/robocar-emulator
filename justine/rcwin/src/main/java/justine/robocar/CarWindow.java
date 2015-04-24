@@ -123,6 +123,13 @@ public class CarWindow extends javax.swing.JFrame {
     String hostname = "localhost";
     int port = 10007;
 
+    java.awt.Color[] available_colors = { java.awt.Color.BLUE, java.awt.Color.RED,
+                                          java.awt.Color.GREEN, java.awt.Color.YELLOW,
+                                          java.awt.Color.ORANGE, java.awt.Color.CYAN,
+                                          java.awt.Color.MAGENTA, java.awt.Color.PINK };
+
+    java.util.List<String> teams = new java.util.ArrayList<String>();
+
     javax.swing.SwingWorker<Void, Traffic> worker = new javax.swing.SwingWorker<Void, Traffic>() {
 
         @Override
@@ -192,6 +199,10 @@ public class CarWindow extends javax.swing.JFrame {
 
                         if (type == 1) {
                             waypoints.add(new WaypointPolice(lat, lon, name));
+
+                            if (!teams.contains(name)) {
+                              teams.add(name);
+                            }
                         } else if (type == 2) {
                             waypoints.add(new WaypointGangster(lat, lon));
                         } else if (type == 3) {
@@ -270,7 +281,7 @@ public class CarWindow extends javax.swing.JFrame {
                     int time = 0, size = 0, minutes = 0;
 
                     time = scan.nextInt();
-                    minutes = scan.nextInt();                    
+                    minutes = scan.nextInt();
                     size = scan.nextInt();
 
                     long ref_from = 0, ref_to = 0;
@@ -432,13 +443,16 @@ public class CarWindow extends javax.swing.JFrame {
                             g2d.drawImage(markerImgPolice, (int) point.getX() - markerImgPolice.getWidth(jXMapV),
                                     (int) point.getY() - markerImgPolice.getHeight(jXMapV), null);
 
+                            java.awt.Color border_color =
+                              available_colors[teams.indexOf(((WaypointPolice) w).getName()) % available_colors.length];
+
                             g2d.setFont(new java.awt.Font("Serif", java.awt.Font.BOLD, 14));
                             java.awt.FontMetrics fm = g2d.getFontMetrics();
                             int nameWidth = fm.stringWidth(((WaypointPolice) w).getName());
                             g2d.setColor(java.awt.Color.GRAY);
                             java.awt.Rectangle rect = new java.awt.Rectangle((int) point.getX(), (int) point.getY(), nameWidth + 4, 20);
                             g2d.fill(rect);
-                            g2d.setColor(java.awt.Color.CYAN);
+                            g2d.setColor(border_color);
                             g2d.draw(rect);
                             g2d.setColor(java.awt.Color.WHITE);
                             g2d.drawString(((WaypointPolice) w).getName(), (int) point.getX() + 2, (int) point.getY() + 20 - 5);
@@ -476,9 +490,9 @@ public class CarWindow extends javax.swing.JFrame {
 
         setTitle("Justine - Car Window (log player for Robocar City Emulator, Robocar World Championshin in Debrecen)");
         getContentPane().add(jXMapViewer);
-        
+
         java.awt.Dimension screenDim = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        
+
         setSize(screenDim.width/2, screenDim.height/2);
         setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
 
@@ -548,14 +562,14 @@ public class CarWindow extends javax.swing.JFrame {
                     new CarWindow(e.getValue().lat, e.getValue().lon, lmap, hostname, 10007).setVisible(true);
                 }
             });
-            
+
         } else if (args.length == 3) {
 
             readMap(lmap, args[0]);
 
             final String hostname = args[1];
             final int port = Integer.parseInt(args[2]);
-            
+
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
 
@@ -563,7 +577,7 @@ public class CarWindow extends javax.swing.JFrame {
 
                     new CarWindow(e.getValue().lat, e.getValue().lon, lmap, hostname, port).setVisible(true);
                 }
-            });            
+            });
 
         } else {
 

@@ -133,13 +133,15 @@ public class CarWindow extends javax.swing.JFrame {
 
     String hostname = "localhost";
     int port = 10007;
+    int num_gangsters = 0;
+    String longestTeamName = "";
+
+    StringBuilder scoreboardStringBuilder = new StringBuilder(100);
 
     java.awt.Color[] available_colors = { java.awt.Color.BLUE, java.awt.Color.RED,
                                           java.awt.Color.GREEN, java.awt.Color.YELLOW,
                                           java.awt.Color.ORANGE, java.awt.Color.CYAN,
                                           java.awt.Color.MAGENTA, java.awt.Color.PINK };
-
-    java.util.List<String> teams = new java.util.ArrayList<String>();
 
     java.util.Map<String, CopTeamData> cop_teams = new java.util.HashMap<String, CopTeamData>();
 
@@ -178,6 +180,8 @@ public class CarWindow extends javax.swing.JFrame {
                     int num_captured_gangsters;
                     String name = "Cop";
 
+                    num_gangsters = 0;
+
                     //java.util.Map<String, Integer> cops = new java.util.HashMap<String, Integer>();
 
                     for (CopTeamData value : cop_teams.values()) {
@@ -208,6 +212,9 @@ public class CarWindow extends javax.swing.JFrame {
                                 cop_teams.put(name, new CopTeamData(num_captured_gangsters,
                                                                     available_colors[team_counter % available_colors.length]));
 
+                                if (name.length() > longestTeamName.length())
+                                  longestTeamName = name;
+
                                 team_counter++;
                             }
                         }
@@ -227,12 +234,9 @@ public class CarWindow extends javax.swing.JFrame {
 
                         if (type == 1) {
                             waypoints.add(new WaypointPolice(lat, lon, name));
-
-                            if (!teams.contains(name)) {
-                              teams.add(name);
-                            }
                         } else if (type == 2) {
                             waypoints.add(new WaypointGangster(lat, lon));
+                            num_gangsters++;
                         } else if (type == 3) {
                             waypoints.add(new WaypointCaught(lat, lon));
                         } else {
@@ -260,7 +264,6 @@ public class CarWindow extends javax.swing.JFrame {
                     sb.append(2 * time);
                     sb.append("|");
                     //sb.append(" Justine - Car Window (log player for Robocar City Emulator, Robocar World Championshin in Debrecen)");
-                    //sb.append(java.util.Arrays.toString(cops.entrySet().toArray()));
 
                     publish(new Traffic(waypoints, sb.toString()));
 
@@ -294,7 +297,7 @@ public class CarWindow extends javax.swing.JFrame {
         }
     };
 
-    javax.swing.Action paintTimer = new javax.swing.AbstractAction() {
+    /*javax.swing.Action paintTimer = new javax.swing.AbstractAction() {
 
         public void actionPerformed(java.awt.event.ActionEvent event) {
 
@@ -410,7 +413,7 @@ public class CarWindow extends javax.swing.JFrame {
 
         }
 
-    };
+    };*/
 
     public CarWindow(double lat, double lon, java.util.Map<Long, Loc> lmap, String hostname, int port) {
 
@@ -448,47 +451,58 @@ public class CarWindow extends javax.swing.JFrame {
 
         org.jxmapviewer.painter.Painter<org.jxmapviewer.JXMapViewer> scoreboardPainter = new org.jxmapviewer.painter.Painter<org.jxmapviewer.JXMapViewer>() {
           public void paint(java.awt.Graphics2D g2d, org.jxmapviewer.JXMapViewer map, int width, int height) {
-            g2d.setPaint(new java.awt.Color(0,0,0,150));
+              int num_caught = 0;
 
-            java.awt.FontMetrics font_metrics = g2d.getFontMetrics();
+              g2d.setPaint(new java.awt.Color(0,0,0,150));
 
-            int max_name_width = 0;
+              java.awt.FontMetrics font_metrics = g2d.getFontMetrics();
 
-            for (String key : cop_teams.keySet()) {
-              if (max_name_width < font_metrics.stringWidth(key)) {
-                max_name_width = font_metrics.stringWidth(key);
+              int max_name_width = font_metrics.stringWidth(longestTeamName);
+
+              int font_height = font_metrics.getHeight();
+
+              int scoreboard_height = (font_height + 10) * (cop_teams.size() + 1) + 5;
+              int scoreboard_width =  max_name_width + font_height + font_metrics.charWidth('-') * 12 + 15;
+              g2d.fillRoundRect(10, 10, scoreboard_width, scoreboard_height, 10, 10);
+
+              int draw_y = 15;
+
+              for (java.util.Map.Entry<String, CopTeamData> entry : cop_teams.entrySet()) {
+                  String team_name = entry.getKey();
+                  CopTeamData team_data = entry.getValue();
+
+                  g2d.setPaint(team_data.color);
+
+                  g2d.fillOval(15, draw_y, font_height, font_height);
+
+                  g2d.setPaint(java.awt.Color.WHITE);
+
+                  draw_y += font_height;
+
+                  scoreboardStringBuilder.setLength(0);
+
+                  scoreboardStringBuilder.append(team_name);
+                  scoreboardStringBuilder.append(" - ");
+                  scoreboardStringBuilder.append(team_data.num_caught);
+
+                  g2d.drawString(scoreboardStringBuilder.toString(),
+                                 font_height + 5 + 15, draw_y);
+
+                  draw_y += 10;
+
+                  num_caught += team_data.num_caught;
               }
-            }
 
-            int font_height = font_metrics.getHeight();
+              scoreboardStringBuilder.setLength(0);
 
-            int scoreboard_height = (font_height + 10) * cop_teams.size() + 5;
-            int scoreboard_width =  max_name_width + font_height + font_metrics.charWidth('-') * 12 + 15;
-            g2d.fillRoundRect(10, 10, scoreboard_width, scoreboard_height, 10, 10);
+              scoreboardStringBuilder.append("Gangsters: ");
+              scoreboardStringBuilder.append(num_caught);
+              scoreboardStringBuilder.append("/");
+              scoreboardStringBuilder.append(num_gangsters);
 
-            g2d.setPaint(java.awt.Color.WHITE);
-
-            int draw_y = 15;
-
-            for (java.util.Map.Entry<String, CopTeamData> entry : cop_teams.entrySet()) {
-                String team_name = entry.getKey();
-                CopTeamData team_data = entry.getValue();
-
-                g2d.setPaint(team_data.color);
-
-                g2d.fillOval(15, draw_y, font_height, font_height);
-
-                g2d.setPaint(java.awt.Color.WHITE);
-
-                draw_y += font_height;
-
-                g2d.drawString(team_name + " - " + Integer.toString(team_data.num_caught),
-                               font_height + 5 + 15, draw_y);
-
-                draw_y += 10;
-            }
-
-            //g2d.drawString("Images provided by NASA", 50+10, 10+20);
+              draw_y += font_height;
+              g2d.drawString(scoreboardStringBuilder.toString(),
+                             15, draw_y);
           }
         };
 

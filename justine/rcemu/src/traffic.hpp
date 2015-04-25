@@ -76,12 +76,14 @@ class Traffic
 public:
   Traffic(int num_cars,
           const char *shm_segment_name,
+          int port,
           double catch_distance = 15.5,
           TrafficType traffic_type = TrafficType::NORMAL,
           int delay = 200,
           int minutes = 10,
           bool verbose_mode = false):
             num_cars_(num_cars),
+            port_(port),
             catch_distance_(catch_distance),
             traffic_type_(traffic_type),
             delay_(delay),
@@ -104,7 +106,7 @@ public:
     // infinite mode
     if (running_time_minutes_ == -1)
     {
-      running_time_allowed_ = std::numeric_limits<int>::max();
+      running_time_allowed_ = (std::numeric_limits<int>::max() / 60 / 1000) - 1;
     }
     else
     {
@@ -164,9 +166,14 @@ public:
 
   bool hasNode(osmium::unsigned_object_id_type node);
 
-  void start_server(boost::asio::io_service& io_service, unsigned short port);
+  void StartServer(void);
 
-  void cmd_session(boost::asio::ip::tcp::socket sock);
+  void CommandListener(boost::asio::ip::tcp::socket sock);
+
+  int addSmartCar(
+        justine::robocar::CarType type,
+        bool is_guided,
+        char *team_name);
 
   osmium::unsigned_object_id_type naive_node_for_nearest_gangster(
       osmium::unsigned_object_id_type from,
@@ -205,6 +212,7 @@ private:
   int running_time_elapsed_;
   int running_time_minutes_;
   int running_time_allowed_;
+  int port_;
 
   bool verbose_mode_;
 
@@ -220,13 +228,13 @@ private:
 
   std::mutex cars_mutex;
 
+  boost::asio::io_service io_service_;
+
   TrafficType traffic_type_ {TrafficType::NORMAL};
 
   std::string   logfile_name_;
   std::fstream *logfile_stream_;
 
-  int addCop(CarLexer& cl);
-  int addGangster(CarLexer& cl);
   friend std::ostream & operator<<(std::ostream & os, Traffic &);
 };
 

@@ -134,6 +134,7 @@ int main(int argc, char* argv[])
 
   justine::robocar::Traffic traffic {num_cars,
                                      shm.c_str(),
+                                     std::atoi(port.c_str()),
                                      catchdist,
                                      type,
                                      delay,
@@ -142,9 +143,7 @@ int main(int argc, char* argv[])
 
   try
   {
-    boost::asio::io_service io_service;
-
-    traffic.start_server(io_service, std::atoi(port.c_str()));
+    traffic.StartServer();
   }
   catch(std::exception& e)
   {

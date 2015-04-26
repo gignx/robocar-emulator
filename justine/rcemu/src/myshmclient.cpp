@@ -164,7 +164,6 @@ public:
   SharedData ( const void_allocator &void_alloc )
   :  m_alist ( void_alloc ), m_salist ( void_alloc ), m_palist ( void_alloc )
   {}
-
 };
 
 using map_pair_Type =
@@ -341,7 +340,7 @@ void justine::sampleclient::MyShmClient::AcquireCarDataFromServer(
   char buffer[kMaxBufferLen];
 
   size_t msg_length = std::sprintf(buffer, "<car ");
-  msg_length += std::sprintf(buffer + msg_length, "%d>", id);
+  msg_length += std::sprintf(buffer + msg_length, "%d %d>", auth_code_, id);
 
   socket.send(boost::asio::buffer(buffer, msg_length));
 
@@ -372,7 +371,7 @@ justine::sampleclient::MyShmClient::AcquireGangstersFromServer(
   char buffer[kMaxBufferLen];
 
   size_t msg_length = std::sprintf(buffer, "<gangsters ");
-  msg_length += std::sprintf(buffer + msg_length, "%d>", id);
+  msg_length += std::sprintf(buffer + msg_length, "%d>", auth_code_);
 
   socket.send(boost::asio::buffer(buffer,msg_length));
 
@@ -423,8 +422,8 @@ justine::sampleclient::MyShmClient::InitializeCops(
 
   char buffer[kMaxBufferLen];
 
-  size_t msg_length = std::sprintf(buffer, "<init guided %s %d c>",
-                                   m_team_name_.c_str(), num_cops_);
+  size_t msg_length = std::sprintf(buffer, "<init guided %d %d c>",
+                                   auth_code_, num_cops_);
 
   socket.send(boost::asio::buffer(buffer, msg_length));
 
@@ -490,7 +489,7 @@ void justine::sampleclient::MyShmClient::SendRouteToServer(
   char buffer[kMaxBufferLen];
 
   size_t msg_length = std::sprintf(buffer,
-                                   "<route %zu %d", path.size(), id);
+                                   "<route %zu %d %d", path.size(), auth_code_, id);
 
   for(auto ui: path)
   {
@@ -515,6 +514,35 @@ void justine::sampleclient::MyShmClient::SendRouteToServer(
   LogMessage("ROUTE", buffer);
 }
 
+void justine::sampleclient::MyShmClient::Authenticate(boost::asio::ip::tcp::socket &socket)
+{
+  boost::system::error_code error_code;
+
+  char buffer[kMaxBufferLen];
+
+  size_t msg_length = std::sprintf(buffer, "<auth %s c>",
+                                   m_team_name_.c_str());
+
+  socket.send(boost::asio::buffer(buffer, msg_length));
+
+  msg_length = socket.read_some(boost::asio::buffer(buffer), error_code);
+
+  if(error_code == boost::asio::error::eof)
+  {
+      // TODO
+  }
+  else if(error_code)
+  {
+      throw boost::system::system_error(error_code);
+  }
+
+  std::sscanf(buffer, "<OK %d>", &auth_code_);
+
+  LogMessage("AUTH", buffer);
+
+  if (auth_code_ != 0)
+    this->is_authenticated_ = true;
+}
 
 void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
 {
@@ -526,6 +554,13 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
 
   boost::asio::ip::tcp::socket socket(io_service);
   boost::asio::connect(socket, iterator);
+
+  Authenticate(socket);
+
+  if (!is_authenticated_)
+    return;
+  else
+    LogMessage("NOTE:\n\tAuthenticated successfully");
 
   int cops_initialized = InitializeCops(socket);
 

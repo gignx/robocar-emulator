@@ -39,6 +39,7 @@
 #include <limits>
 %}
 
+AUTH  "<auth"
 INIT	"<init"
 INITG	"<init guided"
 WS	[ \t]*
@@ -51,75 +52,77 @@ POS	"<pos"
 GANGSTERS	"<gangsters"
 STAT	"<stat"
 DISP	"<disp>"
-%% 
+%%
 {DISP}					{
-					  m_cmd = 0;
+						command_id_ = 0;
+}
+{AUTH}{WS}{WORD} {
+						std::sscanf(yytext, "<auth %s", team_name_);
+						command_id_ = 1;
+}
+{POS}{WS}{INT}{WS}{INT}{WS}{INT}{WS}{INT}	{
+					  std::sscanf(yytext, "<pos %d %d %u %u", &auth_code_, &car_id_, &from_, &to_);
+						command_id_ = 6;
 					}
-{POS}{WS}{INT}{WS}{INT}{WS}{INT}	{
-					  std::sscanf(yytext, "<pos %d %u %u", &m_id, &from, &to);
-					  m_cmd = 10001;
-					}
-{CAR}{WS}{INT}				{
-					  std::sscanf(yytext, "<car %d", &m_id);
-					  m_cmd = 1001;
+{CAR}{WS}{INT}{WS}{INT}	{
+					  std::sscanf(yytext, "<car %d %d", &auth_code_, &car_id_);
+						command_id_ = 3;
 					}
 {STAT}{WS}{INT}				{
-					  std::sscanf(yytext, "<stat %d", &m_id);
-					  m_cmd = 1003;
+					  std::sscanf(yytext, "<stat %d", &auth_code_);
+						command_id_ = 7;
 					}
 {GANGSTERS}{WS}{INT}			{
-					  std::sscanf(yytext, "<gangsters %d", &m_id);
-					  m_cmd = 1002;
+					  std::sscanf(yytext, "<gangsters %d", &auth_code_);
+						command_id_ = 4;
 					}
 {ROUTE}{WS}{INT}{WS}{INT}({WS}{INT})*	{
 				  int size{0};
 				  int ss{0};
-				  int sn{0};				  
-				  
-				  std::sscanf(yytext, "<route %d %d%n", &size, &m_id, &sn);
+				  int sn{0};
+
+				  std::sscanf(yytext, "<route %d %d %d%n", &size, &auth_code_, &car_id_, &sn);
 				  ss += sn;
-				  for(int i{0}; i<size; ++i)
+				  for (int i {0}; i < size; ++i)
 				  {
 				    unsigned int u{0u};
 				    std::sscanf(yytext+ss, "%u%n", &u, &sn);
-				    route.push_back(u);
-				    ss += sn; 				    
+				    route_.push_back(u);
+				    ss += sn;
 				  }
-				  m_cmd = 101;
+					command_id_ = 5;
 				}
-{INIT}{WS}{WORD}{WS}("c"|"g")	{
-				  std::sscanf(yytext, "<init %s %c>", name, &role);
-				  num = 1;
-				  m_cmd = 0;
+{INIT}{WS}{INT}{WS}("c"|"g")	{
+				  std::sscanf(yytext, "<init %d %c>", &auth_code_, &car_role_);
+				  num_ = 1;
+					command_id_ = 2;
 				}
-{INIT}{WS}{WORD}{WS}{INT}{WS}("c"|"g")	{
-				  std::sscanf(yytext, "<init %s %d %c>", name, &num, &role);
-				  if(num >200)
+{INIT}{WS}{INT}{WS}{INT}{WS}("c"|"g")	{
+				  std::sscanf(yytext, "<init %d %d %c>", &auth_code_, &num_, &car_role_);
+				  if (num_ > 200)
 				  {
-				    m_errnumber = 1;
-				    num = 200;
+				    errnumber_ = 1;
+				    num_ = 200;
 				  }
-				  m_cmd = 1;
-				}				
-{INITG}{WS}{WORD}{WS}("c"|"g")	{
-				  std::sscanf(yytext, "<init guided %s %c>", name, &role);
-				  num = 1;
-				  m_guided = true;
-				  m_cmd = 3;
+					command_id_ = 2;
 				}
-{INITG}{WS}{WORD}{WS}{INT}{WS}("c"|"g")	{				  
-				  std::sscanf(yytext, "<init guided %s %d %c>", name, &num, &role);
-				  if(num >200)
+{INITG}{WS}{INT}{WS}("c"|"g")	{
+				  std::sscanf(yytext, "<init guided %d %c>", &auth_code_, &car_role_);
+				  num_ = 1;
+				  is_guided_ = true;
+					command_id_ = 2;
+				}
+{INITG}{WS}{INT}{WS}{INT}{WS}("c"|"g")	{
+				  std::sscanf(yytext, "<init guided %d %d %c>", &auth_code_, &num_, &car_role_);
+				  if (num_ > 200)
 				  {
-				    m_errnumber = 1;
-				    num = 200;
+				    errnumber_ = 1;
+				    num_ = 200;
 				  }
-				  m_guided = true;
-				  m_cmd = 2;
-				}								
+				  is_guided_ = true;
+					command_id_ = 2;
+				}
 .				{;}
 %%
 
-int yyFlexLexer::yylex(){return -1;}            
-
-
+int yyFlexLexer::yylex(){return -1;}

@@ -66,6 +66,18 @@ namespace robocar
 
 constexpr int kMaxBufferLen = 524288;
 
+enum ClientCommand
+{
+  DISP = 0,
+  AUTH = 1,
+  INIT = 2,
+  CAR = 3,
+  GANGSTERS = 4,
+  ROUTE = 5,
+  POS = 6,
+  STAT = 7
+};
+
 enum class TrafficType: unsigned int
 {
   NORMAL = 0, ANT, ANT_RND, ANT_RERND, ANT_MRERND
@@ -177,13 +189,19 @@ public:
 
   int CarCmdHandler(CarLexer &car_lexer, char *buffer);
 
-  int GangsterCmdHandler(CarLexer &car_lexer, char *buffer);
+  int GangstersCmdHandler(CarLexer &car_lexer, char *buffer);
 
   int StatCmdHandler(CarLexer &car_lexer, char *buffer);
 
   int PosCmdHandler(CarLexer &car_lexer, char *buffer);
 
-  void CommandListener(boost::asio::ip::tcp::socket sock);
+  int AuthCmdHandler(CarLexer &car_lexer, char *buffer);
+
+  void DispCmdHandler(boost::asio::ip::tcp::socket &socket);
+
+  inline bool IsAuthenticated(CarLexer &car_lexer);
+
+  void CommandListener(boost::asio::ip::tcp::socket socket);
 
   int addSmartCar(
         justine::robocar::CarType type,
@@ -241,7 +259,7 @@ private:
   std::vector<std::shared_ptr<CopCar>> m_cop_cars;
 
   std::map<int, std::shared_ptr<SmartCar>> m_smart_cars_map;
-  std::map<int, std::string> authenticated_teams_;
+  std::map<int, char*> authenticated_teams_;
 
   std::mutex cars_mutex;
 

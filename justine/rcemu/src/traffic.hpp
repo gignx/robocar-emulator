@@ -168,6 +168,9 @@ public:
 
   void StartServer(void);
 
+  int InitCmdHandler(CarLexer &car_lexer, char *buffer);
+  int RouteCmdHandler(CarLexer &car_lexer, char *buffer);
+
   void CommandListener(boost::asio::ip::tcp::socket sock);
 
   int addSmartCar(

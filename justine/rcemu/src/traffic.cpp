@@ -128,16 +128,16 @@ void justine::robocar::Traffic::SimulationLoop(void)
 
 std::string justine::robocar::Traffic::get_title(std::string name)
 {
-  std::map <std::string, int> res;
+  std::map <std::string, int> gangsters_per_team;
   for(auto c:m_cop_cars)
   {
-    res[c->get_name()] += c->get_num_captured_gangsters();
+    gangsters_per_team[c->get_team_name()] += c->get_num_gangsters_caught();
   }
 
   std::ostringstream ss;
 
-  for(auto r: res)
-    ss << r.first << " " << res[r.first] << " ";
+  for(auto pair : gangsters_per_team)
+    ss << pair.first << " " << pair.second << " ";
 
   ss << name << ".txt";
 
@@ -195,7 +195,7 @@ void justine::robocar::Traffic::CheckIfCaught(void)
 
         if(d < catch_distance_)
         {
-          cop_car->captured_gangster();
+          cop_car->GangsterCaught();
           smart_car->set_type(CarType::CAUGHT);
         }
       }
@@ -353,6 +353,68 @@ int justine::robocar::Traffic::addSmartCar(
   return id;
 }
 
+// returns the msg length
+int justine::robocar::Traffic::InitCmdHandler(CarLexer &car_lexer, char *buffer)
+{
+  int msg_length = 0;
+
+  int num_cars_to_initialize = car_lexer.get_num();
+
+  int car_id;
+
+  std::lock_guard<std::mutex> lock(cars_mutex);
+
+  for(int i = 0; i < num_cars_to_initialize; ++i)
+  {
+    if (car_lexer.get_role() == 'c')
+    {
+      car_id = addSmartCar(CarType::POLICE, car_lexer.get_guided(), car_lexer.get_name());
+    }
+    else
+    {
+      car_id = addSmartCar(CarType::GANGSTER, car_lexer.get_guided(), nullptr);
+    }
+
+    if(!car_lexer.get_errnumber())
+    {
+      msg_length += std::sprintf(buffer + msg_length,
+                                 "<OK %d %d/%d %c>",
+                                 car_id,
+                                 num_cars_to_initialize,
+                                 i + 1,
+                                 car_lexer.get_role());
+    }
+    else
+    {
+      msg_length += std::sprintf(buffer + msg_length,
+                                 "<WARN %d %d/%d %c>",
+                                 car_id,
+                                 num_cars_to_initialize,
+                                 i + 1,
+                                 car_lexer.get_role());
+    }
+  }
+
+  return msg_length;
+}
+
+int justine::robocar::Traffic::RouteCmdHandler(CarLexer &car_lexer, char *buffer)
+{
+  int car_id = car_lexer.get_id();
+
+  auto iterator = m_smart_cars_map.find(car_lexer.get_id());
+
+  if (iterator == m_smart_cars_map.end())
+    return std::sprintf(buffer, "<ERR unknown car id>");
+
+  std::shared_ptr<SmartCar> car = iterator->second;
+
+  if(car->set_route(car_lexer.get_route()))
+      return std::sprintf(buffer, "<OK %d>", car_lexer.get_id());
+  else
+      return std::sprintf(buffer, "<ERR bad routing vector>");
+}
+
 void justine::robocar::Traffic::CommandListener(boost::asio::ip::tcp::socket client_socket)
 {
   const int network_buffer_size = 524288;
@@ -387,7 +449,7 @@ void justine::robocar::Traffic::CommandListener(boost::asio::ip::tcp::socket cli
       int num = car_lexer.get_num();
       int id {0};
 
-      if(car_lexer.get_cmd() == 0)
+      if(car_lexer.get_cmd() == 0) // DISP handler
       {
         for(;;)
         {
@@ -422,47 +484,19 @@ void justine::robocar::Traffic::CommandListener(boost::asio::ip::tcp::socket cli
 
           boost::asio::write(client_socket, boost::asio::buffer(buffer, length));
 
-          std::this_thread::sleep_for(std::chrono::milliseconds(200));
+          std::this_thread::sleep_for(std::chrono::milliseconds(delay_));
         }
 
       }
-      else if(car_lexer.get_cmd() <100)
+      else if(car_lexer.get_cmd() < 100) // INIT Handler
       {
-        std::lock_guard<std::mutex> lock(cars_mutex);
-
-        for(int i {0}; i<car_lexer.get_num(); ++i)
-        {
-          if(car_lexer.get_role() =='c')
-            id = addSmartCar(CarType::POLICE, car_lexer.get_guided(), car_lexer.get_name());
-          else
-            id = addSmartCar(CarType::GANGSTER, car_lexer.get_guided(), nullptr);
-
-          if(!resp_code)
-            length += std::sprintf(buffer+length,
-                                     "<OK %d %d/%d %c>", id, num,
-                                     i+1, car_lexer.get_role());
-          else
-            length += std::sprintf(buffer+length,
-                                     "<WARN %d %d/%d %c>", id, num,
-                                     i+1, car_lexer.get_role());
-        }
+        length = InitCmdHandler(car_lexer, buffer);
       } // cmd 100
-      else if(car_lexer.get_cmd() == 101)
+      else if(car_lexer.get_cmd() == 101) // ROUTE handler
       {
-        if(m_smart_cars_map.find(car_lexer.get_id()) != m_smart_cars_map.end())
-        {
-          std::shared_ptr<SmartCar> c = m_smart_cars_map[car_lexer.get_id()];
-
-          if(c->set_route(car_lexer.get_route()))
-            length += std::sprintf(buffer+length, "<OK %d>", car_lexer.get_id());
-          else
-            length += std::sprintf(buffer+length, "<ERR bad routing vector>");
-        }
-        else
-            length += std::sprintf(buffer+length, "<ERR unknown car id>");
-
+        length = RouteCmdHandler(car_lexer, buffer);
       }
-      else if(car_lexer.get_cmd() == 1001)
+      else if(car_lexer.get_cmd() == 1001) // CAR handler
       {
         if(m_smart_cars_map.find(car_lexer.get_id()) != m_smart_cars_map.end())
         {
@@ -475,7 +509,7 @@ void justine::robocar::Traffic::CommandListener(boost::asio::ip::tcp::socket cli
         else
           length += std::sprintf(buffer+length, "<ERR unknown car id>");
       }
-      else if(car_lexer.get_cmd() == 1002)
+      else if(car_lexer.get_cmd() == 1002) // GANGSTERS handler
       {
         std::lock_guard<std::mutex> lock(cars_mutex);
 
@@ -511,7 +545,7 @@ void justine::robocar::Traffic::CommandListener(boost::asio::ip::tcp::socket cli
           length += std::sprintf(buffer+length,
                                   "<ERR unknown car id>");
       }
-      else if(car_lexer.get_cmd() == 1003)
+      else if(car_lexer.get_cmd() == 1003) // STAT handler
       {
         std::lock_guard<std::mutex> lock(cars_mutex);
 
@@ -524,7 +558,7 @@ void justine::robocar::Traffic::CommandListener(boost::asio::ip::tcp::socket cli
             length += std::sprintf(buffer+length,
                                      "<OK %d %lu %lu %lu %d>", car_lexer.get_id(), c->from(),
                                      c->to_node(), c->get_step(),
-                                     c->get_num_captured_gangsters());
+                                     c->get_num_gangsters_caught());
 
             if(length > network_buffer_size - 512)
             {
@@ -546,7 +580,7 @@ void justine::robocar::Traffic::CommandListener(boost::asio::ip::tcp::socket cli
                                    "<ERR unknown car id>");
 
       }
-      else if(car_lexer.get_cmd() == 10001)
+      else if(car_lexer.get_cmd() == 10001) // POS handler
       {
         if(m_smart_cars_map.find(car_lexer.get_id()) != m_smart_cars_map.end())
         {
@@ -567,7 +601,6 @@ void justine::robocar::Traffic::CommandListener(boost::asio::ip::tcp::socket cli
                                  "<ERR unknown proto command>");
 
       boost::asio::write(client_socket, boost::asio::buffer(buffer, length));
-
     }
   }
   catch(std::exception& e)

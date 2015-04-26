@@ -64,6 +64,8 @@ namespace justine
 namespace robocar
 {
 
+constexpr int kMaxBufferLen = 524288;
+
 enum class TrafficType: unsigned int
 {
   NORMAL = 0, ANT, ANT_RND, ANT_RERND, ANT_MRERND
@@ -83,6 +85,7 @@ public:
           int minutes = 10,
           bool verbose_mode = false):
             num_cars_(num_cars),
+            num_gangsters_(0),
             port_(port),
             catch_distance_(catch_distance),
             traffic_type_(traffic_type),
@@ -169,7 +172,16 @@ public:
   void StartServer(void);
 
   int InitCmdHandler(CarLexer &car_lexer, char *buffer);
+
   int RouteCmdHandler(CarLexer &car_lexer, char *buffer);
+
+  int CarCmdHandler(CarLexer &car_lexer, char *buffer);
+
+  int GangsterCmdHandler(CarLexer &car_lexer, char *buffer);
+
+  int StatCmdHandler(CarLexer &car_lexer, char *buffer);
+
+  int PosCmdHandler(CarLexer &car_lexer, char *buffer);
 
   void CommandListener(boost::asio::ip::tcp::socket sock);
 
@@ -212,6 +224,7 @@ protected:
 
 private:
   int num_cars_;
+  int num_gangsters_;
   int running_time_elapsed_;
   int running_time_minutes_;
   int running_time_allowed_;
@@ -228,6 +241,7 @@ private:
   std::vector<std::shared_ptr<CopCar>> m_cop_cars;
 
   std::map<int, std::shared_ptr<SmartCar>> m_smart_cars_map;
+  std::map<int, std::string> authenticated_teams_;
 
   std::mutex cars_mutex;
 

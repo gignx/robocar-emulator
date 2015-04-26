@@ -106,6 +106,13 @@ public class CarWindow extends javax.swing.JFrame {
     java.util.Random rnd = new java.util.Random();
     java.util.Scanner scan = null;
 
+    java.awt.Color[] available_colors = { java.awt.Color.BLUE, java.awt.Color.RED,
+                                          java.awt.Color.GREEN, java.awt.Color.YELLOW,
+                                          java.awt.Color.ORANGE, java.awt.Color.CYAN,
+                                          java.awt.Color.MAGENTA, java.awt.Color.PINK };
+
+    java.util.List<String> teams = new java.util.ArrayList<String>();
+
     javax.swing.Action paintTimer = new javax.swing.AbstractAction() {
 
         public void actionPerformed(java.awt.event.ActionEvent event) {
@@ -166,6 +173,10 @@ public class CarWindow extends javax.swing.JFrame {
 
                         if (type == 1) {
                             waypoints.add(new WaypointPolice(lat, lon, name));
+
+                            if (!teams.contains(name)) {
+                              teams.add(name);
+                            }
                         } else if (type == 2) {
                             waypoints.add(new WaypointGangster(lat, lon));
                         } else if (type == 3) {
@@ -304,13 +315,16 @@ public class CarWindow extends javax.swing.JFrame {
                             g2d.drawImage(markerImgPolice, (int) point.getX() - markerImgPolice.getWidth(jXMapV),
                                     (int) point.getY() - markerImgPolice.getHeight(jXMapV), null);
 
+                            java.awt.Color border_color =
+                              available_colors[teams.indexOf(((WaypointPolice) w).getName()) % available_colors.length];
+
                             g2d.setFont(new java.awt.Font("Serif", java.awt.Font.BOLD, 14));
                             java.awt.FontMetrics fm = g2d.getFontMetrics();
                             int nameWidth = fm.stringWidth(((WaypointPolice) w).getName());
                             g2d.setColor(java.awt.Color.GRAY);
                             java.awt.Rectangle rect = new java.awt.Rectangle((int) point.getX(), (int) point.getY(), nameWidth + 4, 20);
                             g2d.fill(rect);
-                            g2d.setColor(java.awt.Color.CYAN);
+                            g2d.setColor(border_color);
                             g2d.draw(rect);
                             g2d.setColor(java.awt.Color.WHITE);
                             g2d.drawString(((WaypointPolice) w).getName(), (int) point.getX() + 2, (int) point.getY() + 20 - 5);

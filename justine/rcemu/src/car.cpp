@@ -53,15 +53,17 @@ justine::robocar::AntCar::AntCar (
 justine::robocar::SmartCar::SmartCar (
   justine::robocar::Traffic & traffic,
   justine::robocar::CarType type,
-  bool guided ) : justine::robocar::Car ( traffic, type ), m_guided ( guided )
+  bool guided,
+  int id ) : justine::robocar::Car ( traffic, type ), m_guided ( guided ), id_(id)
 {
 
 }
 
 justine::robocar::CopCar::CopCar (
   justine::robocar::Traffic & traffic,
-  bool guided, const char *name ) :
-    justine::robocar::SmartCar ( traffic, CarType::POLICE, guided ), m_name ( name )
+  bool guided, const char *name, int id) :
+    justine::robocar::SmartCar(traffic, CarType::POLICE, guided, id), team_name_(name),
+    num_gangsters_caught_(0)
 {
 
 }

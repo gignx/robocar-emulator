@@ -10,12 +10,12 @@
  *
  * @section LICENSE
  *
- * Copyright (C) 2014 Norbert Bátfai, batfai.norbert@inf.unideb.hu
+ * Copyright(C) 2014 Norbert Bátfai, batfai.norbert@inf.unideb.hu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ *(at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -42,6 +42,7 @@
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/containers/string.hpp>
 
+#include <carlexer.hpp>
 #include <smartcity.hpp>
 #include <car.hpp>
 
@@ -51,17 +52,7 @@
 #include <boost/asio.hpp>
 
 #include <limits>
-
-/*
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/log/expressions.hpp>
-#include <boost/log/utility/setup/file.hpp>
-*/
-
 #include <memory>
-
-#include <carlexer.hpp>
 
 #include <fstream>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -73,81 +64,60 @@ namespace justine
 namespace robocar
 {
 
-
 enum class TrafficType: unsigned int
 {
-  NORMAL=0, ANT, ANT_RND, ANT_RERND, ANT_MRERND
+  NORMAL = 0, ANT, ANT_RND, ANT_RERND, ANT_MRERND
 };
 
 class Traffic
 {
+  // I find the following initialization and so on very disgusting
+  // Usage of a configuration file should be considered
 public:
-  Traffic ( int size, const char * shm_segment,
-            double catchdist, TrafficType type = TrafficType::NORMAL,
-            int minutes = 10 ):
-              m_size ( size ), m_catchdist ( catchdist ),
-              m_type ( type ), m_minutes ( minutes )
+  Traffic(int num_cars,
+          const char *shm_segment_name,
+          int port,
+          double catch_distance = 15.5,
+          TrafficType traffic_type = TrafficType::NORMAL,
+          int delay = 200,
+          int minutes = 10,
+          bool verbose_mode = false):
+            num_cars_(num_cars),
+            port_(port),
+            catch_distance_(catch_distance),
+            traffic_type_(traffic_type),
+            delay_(delay),
+            running_time_minutes_(minutes),
+            verbose_mode_(verbose_mode)
   {
     #ifdef DEBUG
     std::cout << "Attaching shared memory segment called "
-              << shm_segment
+              << shm_segment_name
               << "... " << std::endl;
     #endif
 
-    segment = new boost::interprocess::managed_shared_memory (
+    shm_segment_ = new boost::interprocess::managed_shared_memory(
       boost::interprocess::open_only,
-      shm_segment );
+      shm_segment_name);
 
-    shm_map =
-      segment->find<shm_map_Type> ( "JustineMap" ).first;
+    shm_map_ =
+      shm_segment_->find<shm_map_Type>("JustineMap").first;
 
-    #ifdef DEBUG
-    std::cout << "Initializing routine cars ... " << std::endl;
-    #endif
-
-    if ( type != TrafficType::NORMAL )
+    // infinite mode
+    if (running_time_minutes_ == -1)
     {
-      for ( shm_map_Type::iterator iter=shm_map->begin();
-            iter!=shm_map->end(); ++iter )
-      {
-        for ( auto noderef : iter->second.m_alist )
-        {
-          AntCar::alist[iter->first].push_back ( 1 );
-          AntCar::alist_evaporate[iter->first].push_back ( 1 );
-        }
-      }
+      running_time_allowed_ = (std::numeric_limits<int>::max() / 60 / 1000) - 1;
+    }
+    else
+    {
+      running_time_allowed_ = running_time_minutes_ * 60 * 1000;
     }
 
-    for ( int i {0}; i < m_size; ++i )
-    {
-        //std::unique_ptr<Car> car(std::make_unique<Car>(*this)); //14, 4.9
-        //std::unique_ptr<Car> car(new Car {*this});
+    InitializeRoutineCars();
 
-      if ( type == TrafficType::NORMAL )
-      {
-        std::shared_ptr<Car> car ( new Car {*this} );
+    OpenLogStream();
 
-        car->init();
-        cars.push_back ( car );
-      }
-      else
-      {
-        std::shared_ptr<AntCar> car ( new AntCar {*this} );
-
-        car->init();
-        cars.push_back ( car );
-
-      }
-    }
-
-    #ifdef DEBUG
-    std::cout << "All routine cars initialized." <<"\n";
-    #endif
-
-    boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
-
-    logfile = boost::posix_time::to_simple_string ( now );
-    logFile = new std::fstream ( logfile.c_str() , std::ios_base::out );
+    is_running_ = true;
 
     m_cv.notify_one();
 
@@ -156,287 +126,102 @@ public:
 
   ~Traffic()
   {
-    m_run = false;
+    is_running_ = false;
+
     m_thread.join();
-    segment->destroy<shm_map_Type> ( "JustineMap" );
+    shm_segment_->destroy<shm_map_Type>("JustineMap");
 
-    delete segment;
+    delete shm_segment_;
   }
 
-  void processes ( )
-  {
-    std::unique_lock<std::mutex> lk ( m_mutex );
-    m_cv.wait ( lk );
+  void OpenLogStream(void);
 
-    #ifdef DEBUG
-    std::cout << "Traffic simul started." << std::endl;
-    #endif
+  void CloseLogStream(void);
 
+  void InitializeRoutineCars(void);
 
-    for ( ; m_run; )
-    {
-      if ( ++m_time > ( m_minutes*60*1000 ) /m_delay )
-      {
-        m_run = false;
-        break;
-      }
-      else
-      {
-        traffic_run();
-        std::this_thread::sleep_for ( std::chrono::milliseconds ( m_delay ) );
-      }
-    }
+  void SimulationLoop(void);
 
-    std::cout << "The traffic simulation is over." << std::endl;
+  std::string get_title(std::string name);
 
-    for ( auto c:m_cop_cars )
-      *logFile  << *c << std::endl;
+  virtual osmium::unsigned_object_id_type node();
 
-    logFile->close ();
+  virtual void UpdateTraffic();
 
-    boost::filesystem::rename (
-      boost::filesystem::path ( logfile ),
-      boost::filesystem::path ( get_title ( logfile ) )
-      );
-  }
+  void StepCars();
 
-  std::string get_title ( std::string name )
-  {
-    std::map <std::string, int> res;
-    for ( auto c:m_cop_cars )
-    {
-      res[c->get_name()] += c->get_num_captured_gangsters();
-    }
+  inline void CheckIfCaught(void);
 
-    std::ostringstream ss;
+  size_t nedges(osmium::unsigned_object_id_type from) const;
 
-    for ( auto r: res )
-      ss << r.first << " " << res[r.first] << " ";
+  osmium::unsigned_object_id_type alist(osmium::unsigned_object_id_type from, int to) const;
 
-    ss << name << ".txt";
+  int alist_inv(osmium::unsigned_object_id_type from, osmium::unsigned_object_id_type to) const;
 
-    return ss.str();
-  }
+  osmium::unsigned_object_id_type salist(osmium::unsigned_object_id_type from, int to) const;
 
-  osmium::unsigned_object_id_type virtual node()
-  {
-    shm_map_Type::iterator iter=shm_map->begin();
-    std::advance ( iter, std::rand() % shm_map->size() );
+  void set_salist(osmium::unsigned_object_id_type from, int to , osmium::unsigned_object_id_type value);
 
-    return iter->first;
-  }
+  osmium::unsigned_object_id_type palist(osmium::unsigned_object_id_type from, int to) const;
 
-  virtual void traffic_run()
-  {
+  bool hasNode(osmium::unsigned_object_id_type node);
 
-    // activities that may occur in the traffic flow
+  void StartServer(void);
 
-    // std::cout << *this;
+  int InitCmdHandler(CarLexer &car_lexer, char *buffer);
+  int RouteCmdHandler(CarLexer &car_lexer, char *buffer);
 
-    pursuit();
+  void CommandListener(boost::asio::ip::tcp::socket sock);
 
-    steps();
-  }
+  int addSmartCar(
+        justine::robocar::CarType type,
+        bool is_guided,
+        char *team_name);
 
-  void steps()
-  {
-    std::lock_guard<std::mutex> lock ( cars_mutex );
-
-    *logFile <<
-             m_time <<
-             " "    <<
-             m_minutes <<
-             " "    <<
-             cars.size() << std::endl;
-
-    for ( auto car:cars )
-    {
-      car->step();
-
-      *logFile << *car
-               <<  " " << std::endl;
-    }
-  }
-
-  inline void pursuit ( void )
-  {
-    for ( auto car1:m_cop_cars )
-    {
-      double lon1 {0.0}, lat1 {0.0};
-      toGPS ( car1->from(), car1->to() , car1->get_step(), &lon1, &lat1 );
-
-      double lon2 {0.0}, lat2 {0.0};
-      for ( auto car:m_smart_cars )
-      {
-        if ( car->get_type() == CarType::GANGSTER )
-        {
-          toGPS ( car->from(), car->to() , car->get_step(), &lon2, &lat2 );
-          double d = dst ( lon1, lat1, lon2, lat2 );
-
-          if ( d < m_catchdist )
-          {
-            car1->captured_gangster();
-            car->set_type ( CarType::CAUGHT );
-          }
-        }
-      } // for - smart cars
-    } // for -cop cars
-  }
-
-  size_t nedges ( osmium::unsigned_object_id_type from ) const
-  {
-    shm_map_Type::iterator iter=shm_map->find ( from );
-    return iter->second.m_alist.size();
-  }
-
-  osmium::unsigned_object_id_type alist ( osmium::unsigned_object_id_type from, int to ) const
-  {
-    shm_map_Type::iterator iter=shm_map->find ( from );
-    return iter->second.m_alist[to];
-  }
-
-  int alist_inv ( osmium::unsigned_object_id_type from, osmium::unsigned_object_id_type to ) const
-  {
-    shm_map_Type::iterator iter=shm_map->find ( from );
-
-    int ret = -1;
-
-    for ( uint_vector::iterator noderefi = iter->second.m_alist.begin();
-          noderefi!=iter->second.m_alist.end();
-          ++noderefi )
-    {
-      if ( to == *noderefi )
-      {
-        ret = std::distance ( iter->second.m_alist.begin(), noderefi );
-        break;
-      }
-    }
-
-    return ret;
-  }
-
-  osmium::unsigned_object_id_type salist ( osmium::unsigned_object_id_type from, int to ) const
-  {
-    shm_map_Type::iterator iter=shm_map->find ( from );
-    return iter->second.m_salist[to];
-  }
-
-  void set_salist ( osmium::unsigned_object_id_type from, int to , osmium::unsigned_object_id_type value )
-  {
-    shm_map_Type::iterator iter=shm_map->find ( from );
-    iter->second.m_salist[to] = value;
-  }
-
-  osmium::unsigned_object_id_type palist ( osmium::unsigned_object_id_type from, int to ) const
-  {
-    shm_map_Type::iterator iter=shm_map->find ( from );
-    return iter->second.m_palist[to];
-  }
-
-  bool hasNode ( osmium::unsigned_object_id_type node )
-  {
-    shm_map_Type::iterator iter=shm_map->find ( node );
-    return ! ( iter == shm_map->end() );
-  }
-
-  void start_server ( boost::asio::io_service& io_service, unsigned short port );
-
-  void cmd_session ( boost::asio::ip::tcp::socket sock );
-
-  friend std::ostream & operator<< ( std::ostream & os, Traffic & t )
-  {
-
-    os << t.m_time <<
-       " " <<
-       t.shm_map->size()
-       << std::endl;
-
-    for ( shm_map_Type::iterator iter=t.shm_map->begin();
-          iter!=t.shm_map->end(); ++iter )
-    {
-      os  << iter->first
-          << " "
-          << iter->second.lon
-          << " "
-          << iter->second.lat
-          << " "
-          << iter->second.m_alist.size()
-          << " ";
-
-      for ( auto noderef : iter->second.m_alist )
-      {
-        os  << noderef
-            << " ";
-      }
-
-      for ( auto noderef : iter->second.m_salist )
-      {
-        os  << noderef
-            << " ";
-      }
-
-      for ( auto noderef : iter->second.m_palist )
-      {
-        os  << noderef
-            << " ";
-      }
-
-      os << std::endl;
-    }
-
-    return os;
-  }
-
-  osmium::unsigned_object_id_type naive_node_for_nearest_gangster (
+  osmium::unsigned_object_id_type naive_node_for_nearest_gangster(
       osmium::unsigned_object_id_type from,
       osmium::unsigned_object_id_type to,
-      osmium::unsigned_object_id_type step );
+      osmium::unsigned_object_id_type step);
 
-  double dst ( osmium::unsigned_object_id_type n1,
-               osmium::unsigned_object_id_type n2 ) const;
+  double Distance(osmium::unsigned_object_id_type n1,
+               osmium::unsigned_object_id_type n2) const;
 
-  double dst ( double lon1, double lat1, double lon2, double lat2 ) const;
+  double Distance(double lon1, double lat1, double lon2, double lat2) const;
 
 
-  void toGPS ( osmium::unsigned_object_id_type from,
+  void toGPS(osmium::unsigned_object_id_type from,
                osmium::unsigned_object_id_type to,
                osmium::unsigned_object_id_type step,
-               double *lo, double *la ) const;
+               double *lo, double *la) const;
 
-  osmium::unsigned_object_id_type naive_nearest_gangster (
+  osmium::unsigned_object_id_type naive_nearest_gangster(
       osmium::unsigned_object_id_type from,
       osmium::unsigned_object_id_type to,
-      osmium::unsigned_object_id_type step );
+      osmium::unsigned_object_id_type step);
 
-  TrafficType get_type() const
-  {
-    return m_type;
-  }
+  TrafficType get_type() const;
 
-  int get_time() const
-  {
-    return m_time;
-  }
-
+  int get_time() const;
 protected:
-  boost::interprocess::managed_shared_memory *segment;
-  boost::interprocess::offset_ptr<shm_map_Type> shm_map;
+  boost::interprocess::managed_shared_memory *shm_segment_;
+  boost::interprocess::offset_ptr<shm_map_Type> shm_map_;
 
-  int m_delay {200};
-  bool m_run {true};
-  double m_catchdist {15.5};
+  int delay_;
+  bool is_running_;
+  double catch_distance_;
 
 private:
-  int addCop ( CarLexer& cl );
-  int addGangster ( CarLexer& cl );
+  int num_cars_;
+  int running_time_elapsed_;
+  int running_time_minutes_;
+  int running_time_allowed_;
+  int port_;
 
-  int m_size {10000};
-  int m_time {0};
-  int m_minutes {10};
+  bool verbose_mode_;
 
   std::mutex m_mutex;
   std::condition_variable m_cv;
-  std::thread m_thread {&Traffic::processes, this};
+  std::thread m_thread { &Traffic::SimulationLoop, this };
 
   std::vector<std::shared_ptr<Car>> cars;
   std::vector<std::shared_ptr<SmartCar>> m_smart_cars;
@@ -446,10 +231,14 @@ private:
 
   std::mutex cars_mutex;
 
-  TrafficType m_type {TrafficType::NORMAL};
+  boost::asio::io_service io_service_;
 
-  std::fstream* logFile;
-  std::string logfile;
+  TrafficType traffic_type_ {TrafficType::NORMAL};
+
+  std::string   logfile_name_;
+  std::fstream *logfile_stream_;
+
+  friend std::ostream & operator<<(std::ostream & os, Traffic &);
 };
 
 }

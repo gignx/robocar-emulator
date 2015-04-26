@@ -199,9 +199,9 @@ private:
 class CopCar : public SmartCar
 {
 public:
-  CopCar ( Traffic & traffic, bool guided, const char *name , int id);
+  CopCar (Traffic & traffic, bool guided, const char *name , int id);
 
-  virtual void print ( std::ostream & os ) const
+  virtual void print (std::ostream & os) const
   {
     os << m_from
        << " "
@@ -211,30 +211,31 @@ public:
        << " "
        << get_step()
        << " "
-       << static_cast<unsigned int> ( get_type() )
+       << static_cast<unsigned int> (get_type())
        << " "
-       << get_num_captured_gangsters()
+       << num_gangsters_caught_
        << " "
-       << m_name;
+       << team_name_;
   }
 
-  std::string get_name() const
+  std::string get_team_name() const
   {
-    return m_name;
+    return team_name_;
   }
 
-  int get_num_captured_gangsters() const
+  int get_num_gangsters_caught() const
   {
-    return m_num_captured_gangsters;
+    return num_gangsters_caught_;
   }
 
-  void captured_gangster ( void )
+  int GangsterCaught(void)
   {
-    ++m_num_captured_gangsters;
+    return ++num_gangsters_caught_;
   }
 protected:
-  int m_num_captured_gangsters {0};
-  std::string m_name;
+  int num_gangsters_caught_;
+
+  std::string team_name_;
 };
 
 }

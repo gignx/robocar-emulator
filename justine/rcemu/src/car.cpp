@@ -61,8 +61,9 @@ justine::robocar::SmartCar::SmartCar (
 
 justine::robocar::CopCar::CopCar (
   justine::robocar::Traffic & traffic,
-  bool guided, const char *name, int id ) :
-    justine::robocar::SmartCar ( traffic, CarType::POLICE, guided, id ), m_name ( name )
+  bool guided, const char *name, int id) :
+    justine::robocar::SmartCar(traffic, CarType::POLICE, guided, id), team_name_(name),
+    num_gangsters_caught_(0)
 {
 
 }

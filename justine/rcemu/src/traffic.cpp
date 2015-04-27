@@ -596,6 +596,24 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
   }
 }
 
+
+// Written together with Krisztián Szendrődi
+int justine::robocar::Traffic::StopCmdHandler(CarLexer &car_lexer, char *buffer)
+{
+  int car_id = car_lexer.get_car_id();
+
+  auto iterator = m_smart_cars_map.find(car_id);
+
+  if (iterator == m_smart_cars_map.end())
+    return std::sprintf(buffer, "<ERR unknown car id>");
+
+  std::vector<unsigned int> route_to_self { iterator->second->to_node(), iterator->second->to_node() };
+
+  iterator->second->set_route(route_to_self);
+
+  return std::sprintf(buffer, "<OK %d %d>", car_id, iterator->second->to_node());
+}
+
 inline bool justine::robocar::Traffic::IsAuthenticated(CarLexer &car_lexer)
 {
   int auth_code = car_lexer.get_auth_code();
@@ -679,6 +697,9 @@ void justine::robocar::Traffic::CommandListener(boost::asio::ip::tcp::socket cli
                 break;
             case ClientCommand::STAT:
                 msg_length = StatCmdHandler(car_lexer, buffer);
+                break;
+            case ClientCommand::STOP:
+                msg_length = StopCmdHandler(car_lexer, buffer);
                 break;
             default:
                 msg_length = std::sprintf(buffer, "<ERR unknown command>");

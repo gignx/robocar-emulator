@@ -42,6 +42,7 @@
 AUTH  "<auth"
 INIT	"<init"
 INITG	"<init guided"
+STOP "<stop"
 WS	[ \t]*
 WORD	[^-:\n \t()]{2,}
 INT	[0123456789]+
@@ -92,6 +93,10 @@ DISP	"<disp>"
 				  }
 					command_id_ = 5;
 				}
+{STOP}{WS}{INT}{WS}{INT} {
+					std::sscanf(yytext, "<stop %d %d>", &auth_code_, &car_id_);
+					command_id_ = 8;
+}
 {INIT}{WS}{INT}{WS}("c"|"g")	{
 				  std::sscanf(yytext, "<init %d %c>", &auth_code_, &car_role_);
 				  num_ = 1;

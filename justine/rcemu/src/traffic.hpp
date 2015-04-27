@@ -75,7 +75,8 @@ enum ClientCommand
   GANGSTERS = 4,
   ROUTE = 5,
   POS = 6,
-  STAT = 7
+  STAT = 7,
+  STOP = 8
 };
 
 enum class TrafficType: unsigned int
@@ -196,6 +197,8 @@ public:
   int PosCmdHandler(CarLexer &car_lexer, char *buffer);
 
   int AuthCmdHandler(CarLexer &car_lexer, char *buffer);
+
+  int StopCmdHandler(CarLexer &car_lexer, char *buffer);
 
   void DispCmdHandler(boost::asio::ip::tcp::socket &socket);
 

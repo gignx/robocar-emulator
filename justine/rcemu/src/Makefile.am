@@ -49,10 +49,10 @@ sampleshmclient_CXXFLAGS = $(CXXFLAGS)
 sampleshmclient_LDFLAGS = $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_THREAD_LDFLAGS) $(BOOST_ASIO_LDFLAGS) $(SHM_OPEN_LIBS) $(BOOST_LOG_LDFLAGS) $(LIBS) $(BOOST_SYSTEM_LDFLAGS)
 sampleshmclient_LIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_THREAD_LIBS) $(BOOST_ASIO_LIBS) $(SHM_OPEN_LIBS) $(LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_LOG_LIBS)
 sampleshmclient_LDADD = $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_THREAD_LDFLAGS) $(BOOST_ASIO_LDFLAGS) $(SHM_OPEN_LIBS) $(LIBS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_LOG_LDFLAGS)
-sampleshmclient_SOURCES = smartcity.hpp car.hpp shmclient.hpp shmclient.cpp shmclient-main.cpp
+sampleshmclient_SOURCES = smartcity.hpp car.hpp shmclient.hpp shmclient.cpp shmclient-main.cpp  graph.hpp graph.cpp server.hpp server.cpp
 
 samplemyshmclient_CXXFLAGS = $(CXXFLAGS)
 samplemyshmclient_LDFLAGS = $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_THREAD_LDFLAGS) $(BOOST_ASIO_LDFLAGS) $(SHM_OPEN_LIBS) $(BOOST_LOG_LDFLAGS) $(LIBS) $(BOOST_SYSTEM_LDFLAGS)
 samplemyshmclient_LIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_THREAD_LIBS) $(BOOST_ASIO_LIBS) $(SHM_OPEN_LIBS) $(LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_LOG_LIBS)
 samplemyshmclient_LDADD = $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_THREAD_LDFLAGS) $(BOOST_ASIO_LDFLAGS) $(SHM_OPEN_LIBS) $(LIBS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_LOG_LDFLAGS)
-samplemyshmclient_SOURCES = smartcity.hpp car.hpp shmclient.hpp myshmclient.hpp myshmclient.cpp myshmclient-main.cpp
+samplemyshmclient_SOURCES = smartcity.hpp car.hpp shmclient.hpp myshmclient.hpp myshmclient.cpp myshmclient-main.cpp  graph.hpp graph.cpp server.hpp server.cpp

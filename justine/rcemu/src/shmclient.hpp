@@ -42,22 +42,20 @@ namespace sampleclient
  class ShmClient
  {
  public:
-   justine::Server* server;
-   justine::Graph* graph;
+   Server* server;
+   Graph* graph;
 
    ShmClient ( const char * shm_segment, const char* port)
    {
-     server = new justine::Server (port);
-     graph = new justine::Graph (shm_segment);
-
-  }
+     server = new Server (port);
+     graph = new Graph (shm_segment);
+   }
 
    ~ShmClient()
    {
     delete server;
     delete graph;
    }
-
 
    osmium::unsigned_object_id_type virtual get_random_node ( void )
    {

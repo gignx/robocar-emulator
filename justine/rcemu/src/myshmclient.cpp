@@ -30,11 +30,11 @@
  */
 
 #include <myshmclient.hpp>
+#include <algorithm>
 
 void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
 {
-
-  std::vector<Cop> cops = server->spawnCops("yolo", 10);
+  std::vector<Cop> cops = server->spawnCops(m_team_name_, 10);
 
   std::vector<Gangster> gangsters;
 
@@ -44,10 +44,14 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
 
     for(Cop cop:cops)
     {
-
       cop = server->getCopData(cop);
 
       gangsters = server->getGangsters();
+
+      std::sort(gangsters.begin(), gangsters.end(),
+        [this, cop] (Gangster x, Gangster y) {
+          return dst(cop.to, x.to) < dst(cop.to, y.to);
+        });
 
       if(gangsters.size() > 0)
       {
@@ -59,7 +63,6 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
           server->sendRoute(cop, path);
         }
       }
-
     }
   }
 }

@@ -6,10 +6,6 @@
 #include <boost/graph/properties.hpp>
 #include <boost/property_map/property_map.hpp>
 
-<<<<<<< HEAD
-using ID = osmium::unsigned_object_id_type;
-using NodeRefGraph = boost::adjacency_list<boost::listS, boost::vecS, boost::directedS,boost::property<boost::vertex_name_t, ID>,boost::property<boost::edge_weight_t, int>>;
-=======
 namespace justine
 {
 namespace sampleclient
@@ -17,31 +13,17 @@ namespace sampleclient
 
 using GraphNodeID = osmium::unsigned_object_id_type;
 using NodeRefGraph = boost::adjacency_list<boost::listS, boost::vecS, boost::directedS,boost::property<boost::vertex_name_t, GraphNodeID>,boost::property<boost::edge_weight_t, int>>;
->>>>>>> af9ca647fdf12fb4c3bd2133e129c6019ed15573
 using NRGVertex = boost::graph_traits<NodeRefGraph>::vertex_descriptor;
 using NRGVertexIter = boost::graph_traits<NodeRefGraph>::vertex_iterator;
 using NRGEdge = boost::graph_traits<NodeRefGraph>::edge_descriptor;
 using NRGEdgeIter = boost::graph_traits<NodeRefGraph>::edge_iterator;
-using NRGAdjacentVertexIter = boost::graph_traits<NodeRefGraph>::adjacency_iterator;
 using VertexNameMap = boost::property_map<NodeRefGraph, boost::vertex_name_t>::type;
 using VertexIndexMap = boost::property_map<NodeRefGraph, boost::vertex_index_t>::type;
 using PredecessorMap = boost::iterator_property_map <NRGVertex*, VertexIndexMap, NRGVertex, NRGVertex&>;
 using DistanceMap = boost::iterator_property_map <int*, VertexIndexMap, int, int&>;
 using EdgeWeightMap = boost::property_map<NodeRefGraph, boost::edge_weight_t>::type;
 
-<<<<<<< HEAD
-
-namespace justine{
-
-
-
-class Graph{
-
-
-
-=======
 class Graph {
->>>>>>> af9ca647fdf12fb4c3bd2133e129c6019ed15573
 public:
 	Graph(const char* shm_segment)
 	{
@@ -59,11 +41,7 @@ public:
 
 	GraphNodeID palist(GraphNodeID from, int to ) const;
 	void BuildGraph(void);
-<<<<<<< HEAD
-	
-=======
 	std::vector<GraphNodeID> DetermineDijkstraPath(GraphNodeID from, GraphNodeID to);
->>>>>>> af9ca647fdf12fb4c3bd2133e129c6019ed15573
 
 	NodeRefGraph* nrg;
 	boost::interprocess::offset_ptr<justine::robocar::shm_map_Type> shm_map;

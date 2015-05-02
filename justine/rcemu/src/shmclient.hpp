@@ -29,9 +29,11 @@
  *
  */
 #include <server.hpp>
-#include <extendedgraph.hpp>
+#include <graph.hpp>
+
 #include <smartcity.hpp>
 #include <car.hpp>
+
 namespace justine
 {
 namespace sampleclient
@@ -40,23 +42,6 @@ namespace sampleclient
  class ShmClient
  {
  public:
-<<<<<<< HEAD
-   justine::Server* server;
-   justine::ExtendedGraph* graph;
-
-   ShmClient ( const char * shm_segment, const char* port)
-   {
-     server = new justine::Server (port);
-     graph = new justine::ExtendedGraph (shm_segment);
-
-#ifdef DEBUG
-     using NRGVertexIter = boost::graph_traits<NodeRefGraph>::vertex_iterator;
-     NRGVertexIter i, end;
-     std::tie(i,end) = graph->getVertices();
-     for(;i!=end;++i) std::cout << *i << std::endl;
-#endif
-  }
-=======
    Server* server;
    Graph* graph;
 
@@ -65,7 +50,6 @@ namespace sampleclient
      server = new Server (port);
      graph = new Graph (shm_segment);
    }
->>>>>>> af9ca647fdf12fb4c3bd2133e129c6019ed15573
 
    ~ShmClient()
    {
@@ -73,11 +57,6 @@ namespace sampleclient
     delete graph;
    }
 
-<<<<<<< HEAD
-   
-
-=======
->>>>>>> af9ca647fdf12fb4c3bd2133e129c6019ed15573
    osmium::unsigned_object_id_type virtual get_random_node ( void )
    {
      justine::robocar::shm_map_Type::iterator iter=graph->shm_map->begin();
@@ -145,7 +124,13 @@ namespace sampleclient
 
    double dst ( osmium::unsigned_object_id_type n1, osmium::unsigned_object_id_type n2 ) const
    {
-    return 0;
+     justine::robocar::shm_map_Type::iterator iter1=graph->shm_map->find ( n1 );
+     justine::robocar::shm_map_Type::iterator iter2=graph->shm_map->find ( n2 );
+
+     osmium::geom::Coordinates c1 {iter1->second.lon/10000000.0, iter1->second.lat/10000000.0};
+     osmium::geom::Coordinates c2 {iter2->second.lon/10000000.0, iter2->second.lat/10000000.0};
+
+     return osmium::geom::haversine::distance ( c1, c2 );
    }
 
    double dst ( double lon1, double lat1, double lon2, double lat2 ) const

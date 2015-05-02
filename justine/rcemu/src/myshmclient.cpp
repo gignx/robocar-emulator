@@ -30,15 +30,21 @@
  */
 
 #include <myshmclient.hpp>
+#include <algorithm>
 
   using Gangster = justine::Server::Gangster;
   using Cop = justine::Server::Cop;
 
 void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
 {
+<<<<<<< HEAD
   //int id = server->authenticate(m_team_name_);
   //log("auth");
   std::vector<Cop> cops = server->spawnCops(m_team_name_, 10);
+=======
+  std::vector<Cop> cops = server->spawnCops(m_team_name_, 10);
+
+>>>>>>> af9ca647fdf12fb4c3bd2133e129c6019ed15573
   std::vector<Gangster> gangsters;
 
   for(;;)
@@ -47,13 +53,23 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
 
     for(Cop cop:cops)
     {
-
       cop = server->getCopData(cop);
       gangsters = server->getGangsters();
+<<<<<<< HEAD
       if(gangsters.size()>0){
         std::sort ( gangsters.begin(), gangsters.end(),
          [this, cop] ( Gangster x, Gangster y )
           {return graph->getDistance ( cop.to, x.to ) < graph->getDistance ( cop.to, y.to );} );
+=======
+
+      std::sort(gangsters.begin(), gangsters.end(),
+        [this, cop] (Gangster x, Gangster y) {
+          return dst(cop.to, x.to) < dst(cop.to, y.to);
+        });
+
+      if(gangsters.size() > 0)
+      {
+>>>>>>> af9ca647fdf12fb4c3bd2133e129c6019ed15573
         std::vector<osmium::unsigned_object_id_type> path =
           graph->DetermineDijkstraPath(cop.to, gangsters[0].to);
         if(path.size() > 1)
@@ -61,7 +77,6 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
           server->sendRoute(cop, path);
         }
       }
-
     }
   }
 }

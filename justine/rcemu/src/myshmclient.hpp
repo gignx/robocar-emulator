@@ -38,7 +38,6 @@ namespace justine
 namespace sampleclient
 {
 
-
 class MyShmClient : public ShmClient
 {
 public:
@@ -84,8 +83,13 @@ public:
 
 
 private:
+<<<<<<< HEAD
 
 
+=======
+  using Gangster = Server::Gangster;
+  using Cop = Server::Cop;
+>>>>>>> af9ca647fdf12fb4c3bd2133e129c6019ed15573
 
   int num_cops_;
   bool verbose_mode_;

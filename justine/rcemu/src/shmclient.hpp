@@ -40,6 +40,7 @@ namespace sampleclient
  class ShmClient
  {
  public:
+<<<<<<< HEAD
    justine::Server* server;
    justine::ExtendedGraph* graph;
 
@@ -55,6 +56,16 @@ namespace sampleclient
      for(;i!=end;++i) std::cout << *i << std::endl;
 #endif
   }
+=======
+   Server* server;
+   Graph* graph;
+
+   ShmClient ( const char * shm_segment, const char* port)
+   {
+     server = new Server (port);
+     graph = new Graph (shm_segment);
+   }
+>>>>>>> af9ca647fdf12fb4c3bd2133e129c6019ed15573
 
    ~ShmClient()
    {
@@ -62,8 +73,11 @@ namespace sampleclient
     delete graph;
    }
 
+<<<<<<< HEAD
    
 
+=======
+>>>>>>> af9ca647fdf12fb4c3bd2133e129c6019ed15573
    osmium::unsigned_object_id_type virtual get_random_node ( void )
    {
      justine::robocar::shm_map_Type::iterator iter=graph->shm_map->begin();

@@ -36,28 +36,3 @@ void justine::Graph::BuildGraph(void)
 	    }
   	}
 }
-
-
-std::vector<ID> justine::Graph::DetermineDijkstraPath(ID from, ID to)
-{
-  	std::vector<NRGVertex> parents(boost::num_vertices(*nrg));
-  	std::vector<int> distances(boost::num_vertices(*nrg));
-  	VertexIndexMap vertexIndexMap = boost::get(boost::vertex_index, *nrg);
-  	PredecessorMap predecessorMap(&parents[0], vertexIndexMap);
-  	DistanceMap distanceMap(&distances[0], vertexIndexMap);
-  	boost::dijkstra_shortest_paths(*nrg, nr2v[from], boost::distance_map(distanceMap).predecessor_map(predecessorMap));
-  	VertexNameMap vertexNameMap = boost::get(boost::vertex_name, *nrg);
- 	std::vector<ID> path;
-  	NRGVertex tov = nr2v[to];
-  	NRGVertex fromv = predecessorMap[tov];
-  	while(fromv != tov)
-  	{
-    	NRGEdge edge = boost::edge(fromv, tov, *nrg).first;
-    	path.push_back(vertexNameMap[boost::target(edge, *nrg)]);
-    	tov = fromv;
-    	fromv = predecessorMap[tov];
-  	}
-  	path.push_back(from);
-  	std::reverse(path.begin(), path.end());
-  	return path;
-}

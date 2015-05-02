@@ -85,8 +85,7 @@ public:
 
 private:
 
-  using Gangster = justine::Server::Gangster;
-  using Cop = justine::Server::Cop;
+
 
   int num_cops_;
   bool verbose_mode_;

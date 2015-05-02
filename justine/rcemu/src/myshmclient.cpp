@@ -34,8 +34,9 @@
 
 void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
 {
+  //int id = server->authenticate(m_team_name_);
+  //log("auth");
   std::vector<Cop> cops = server->spawnCops(m_team_name_, 10);
-
   std::vector<Gangster> gangsters;
 
   for(;;)
@@ -44,25 +45,21 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
 
     for(Cop cop:cops)
     {
+
       cop = server->getCopData(cop);
-
       gangsters = server->getGangsters();
-
-      std::sort(gangsters.begin(), gangsters.end(),
-        [this, cop] (Gangster x, Gangster y) {
-          return dst(cop.to, x.to) < dst(cop.to, y.to);
-        });
-
-      if(gangsters.size() > 0)
-      {
+      if(gangsters.size()>0){
+        std::sort ( gangsters.begin(), gangsters.end(),
+         [this, cop] ( Gangster x, Gangster y )
+          {return graph->getDistance ( cop.to, x.to ) < graph->getDistance ( cop.to, y.to );} );
         std::vector<osmium::unsigned_object_id_type> path =
           graph->DetermineDijkstraPath(cop.to, gangsters[0].to);
-
         if(path.size() > 1)
         {
           server->sendRoute(cop, path);
         }
       }
+
     }
   }
 }

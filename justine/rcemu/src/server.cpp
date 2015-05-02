@@ -1,150 +1,149 @@
 #include <server.hpp>
 
-using Gangster 	= justine::sampleclient::Server::Gangster;
-using Cop 			= justine::sampleclient::Server::Cop;
+	int justine::sampleclient::Server::auth_code = -1;
+    
+	using Gangster = justine::sampleclient::Server::Gangster;
+	using Cop = justine::sampleclient::Server::Cop;
 
-std::vector<Gangster> justine::sampleclient::Server::getGangsters()
-{
-	std::vector<Gangster> gangsters;
-
-	if (hack_id == 0 || !isConnected()) return gangsters;
-
-	boost::system::error_code error_code;
-
-	char buffer[MAX_BUFFER_SIZE];
-	size_t msg_length = std::sprintf(buffer, "<gangsters ");
-
-	msg_length += std::sprintf(buffer + msg_length, "%d>", hack_id);
-
-	socket->send(boost::asio::buffer(buffer,msg_length));
-
-	msg_length = socket->read_some(boost::asio::buffer(buffer), error_code);
-
-	int gangster_car_id {0};
-  int bytes_read      {0};
-	int seek_pointer    {0};
-
-	unsigned from_node, to_node, step;
-
-	while(std::sscanf(buffer+seek_pointer, "<OK %d %u %u %u>%n",
-	                  &gangster_car_id, &from_node, &to_node, &step, &bytes_read) == 4)
+	void justine::sampleclient::Server::stopCop(int id, int auth)
 	{
-	  seek_pointer += bytes_read;
-	  gangsters.emplace_back(Gangster {gangster_car_id, from_node, to_node, step});
+		boost::system::error_code error_code;
+		char buffer[MAX_BUFFER_SIZE];
+		size_t msg_length = std::sprintf(buffer, "<stop %d %d>", auth, id);
+		socket->send(boost::asio::buffer (buffer, msg_length));
+		msg_length = socket->read_some(boost::asio::buffer(buffer), error_code);
 	}
 
-	return gangsters;
-}
-
-Cop justine::sampleclient::Server::getCopData(int id)
-{
-	Cop r {0,0,0,0};
-
-	if (!isConnected()) {
-		return r;
-	}
-
-	boost::system::error_code error_code;
-
-	char buffer[MAX_BUFFER_SIZE];
-	size_t msg_length = std::sprintf(buffer, "<car ");
-
-	msg_length += std::sprintf(buffer + msg_length, "%d>", id);
-
-	socket->send(boost::asio::buffer(buffer, msg_length));
-
-	msg_length = socket->read_some(boost::asio::buffer(buffer), error_code);
-
-	r.id = id;
-
-	std::sscanf(buffer, "<OK %*d %u %u %u", &r.from, &r.to, &r.step);
-
-	return r;
-}
-
-std::vector<Cop> justine::sampleclient::Server::spawnCops(std::string teamname, int num_cops)
-{
-	std::vector<Cop> cops;
-
-	if (!isConnected()) {
-		return cops;
-	}
-
-	boost::system::error_code error_code;
-
-	char buffer[MAX_BUFFER_SIZE];
-	size_t msg_length = std::sprintf(buffer, "<init guided %s %d c>",teamname.c_str(), num_cops);
-
-	socket->send(boost::asio::buffer(buffer, msg_length));
-
-	msg_length = socket->read_some(boost::asio::buffer(buffer), error_code);
-
-	int cop_car_id   {0};
-	int bytes_read   {0};
-	int seek_pointer {0};
-
-	std::vector<int> cop_ids;
-
-	while(std::sscanf(buffer+seek_pointer, "<OK %d %*d/%*d %*c>%n", &cop_car_id, &bytes_read) == 1)
+	void justine::sampleclient::Server::stopCop(Cop c, int auth)
 	{
-  	seek_pointer += bytes_read;
-  	cop_ids.push_back(cop_car_id);
-  	hack_id = cop_car_id;
+		justine::sampleclient::Server::stopCop(c.id, auth);
 	}
 
-	for (int c:cop_ids) {
-		cops.emplace_back(getCopData(c));
+	int justine::sampleclient::Server::authenticate(std::string team_name)
+	{
+		if(!isConnected()) return auth_code;
+		auth_code = -2;
+		boost::system::error_code error_code;
+		char buffer[MAX_BUFFER_SIZE];
+		size_t msg_length = std::sprintf(buffer, "<auth %s", team_name.c_str());
+		socket->send(boost::asio::buffer (buffer, msg_length));
+		msg_length = socket->read_some(boost::asio::buffer(buffer), error_code);
+		std::sscanf(buffer, "<OK %d>", &auth_code);
+		return auth_code;
 	}
 
- 	return cops;
-}
+	std::vector<Gangster> justine::sampleclient::Server::getGangsters(int auth)
+	{
+		std::vector<Gangster> gangsters;
+		if(auth==-1) {std::cout << "Error: authenticate required for this command. (GANGSTERS)" << std::endl; return gangsters;}
+		if(!isConnected()) return gangsters;
 
-void justine::sampleclient::Server::sendRoute(int id, std::vector<osmium::unsigned_object_id_type> & path)
-{
-	if (!isConnected()) {
-		return;
+		boost::system::error_code error_code;
+		char buffer[MAX_BUFFER_SIZE];
+		size_t msg_length = std::sprintf(buffer, "<gangsters %d>", auth);
+		socket->send(boost::asio::buffer(buffer,msg_length));
+		msg_length = socket->read_some(boost::asio::buffer(buffer), error_code);
+
+  		int gangster_car_id {0};
+	  	int bytes_read      {0};
+		int seek_pointer    {0};
+
+		unsigned from_node, to_node, step;
+
+		while(std::sscanf(buffer+seek_pointer, "<OK %d %lu %lu %lu>%n",
+		                  &gangster_car_id, &from_node, &to_node, &step, &bytes_read) == 4)
+		{
+		  seek_pointer += bytes_read;
+		  gangsters.emplace_back(Gangster {gangster_car_id, from_node, to_node, step});
+		}
+	    return gangsters;
 	}
 
-	boost::system::error_code error_code;
-
-	char buffer[MAX_BUFFER_SIZE];
-	size_t msg_length = std::sprintf(buffer, "<route %zu %d", path.size(), id);
-
-	for (auto ui: path) {
-		msg_length += std::sprintf(buffer + msg_length, " %lu", ui);
+	Cop justine::sampleclient::Server::getCopData(int id, int auth)
+	{
+		Cop r {0,0,0,0};
+		if(auth==-1) {std::cout << "Error: authenticate required for this command. (CAR)" << std::endl; return r;}
+		if(!isConnected()) return r;
+		boost::system::error_code error_code;
+ 		char buffer[MAX_BUFFER_SIZE];
+ 		size_t msg_length = std::sprintf(buffer, "<car %d %d>", auth, id);
+  		socket->send(boost::asio::buffer(buffer, msg_length));
+  		msg_length = socket->read_some(boost::asio::buffer(buffer), error_code);
+  		int cop_id;
+  		long unsigned int f,t,s;
+  		std::sscanf(buffer, "<OK %d %lu %lu %lu>", &cop_id, &f, &t, &s);
+		return Cop{cop_id, f,t,s};
 	}
 
-	msg_length += std::sprintf(buffer + msg_length, ">");
+	std::vector<Cop> justine::sampleclient::Server::spawnCops(std::string team_name, int num_cops, int auth)
+	{
+		std::vector<Cop> cops;
+		if(!isConnected()) return cops;
+		// Automatic auth at spawn, this way in the client we dont need to worry about auth
+		if(auth == -1){justine::sampleclient::Server::authenticate(team_name); return justine::sampleclient::Server::spawnCops(team_name, num_cops);}
+		if(auth == -2) {std::cout << "Error: team name already taken!"; return cops;}
 
-	socket->send(boost::asio::buffer(buffer, msg_length));
+        boost::system::error_code error_code;
+  		char buffer[MAX_BUFFER_SIZE];
+  		size_t msg_length = std::sprintf(buffer, "<init guided %d %d c>", auth, num_cops);
+  		socket->send(boost::asio::buffer(buffer, msg_length));
+  		msg_length = socket->read_some(boost::asio::buffer(buffer), error_code);
 
-	msg_length = socket->read_some(boost::asio::buffer(buffer), error_code);
-}
+  		int cop_car_id   {0};
+  		int bytes_read   {0};
+  		int seek_pointer {0};
 
-void justine::sampleclient::Server::sendRoute(Cop c, std::vector<osmium::unsigned_object_id_type> & path)
-{
-	justine::sampleclient::Server::sendRoute(c.id, path);
-}
+  		std::vector<int> cop_ids;
+
+  		while(std::sscanf(buffer+seek_pointer, "<OK %d %*d/%*d %*c>%n", &cop_car_id, &bytes_read) == 1)
+  		{
+    		seek_pointer += bytes_read;
+    		cop_ids.emplace_back(cop_car_id);
+  		}
+  		
+  		for(int c:cop_ids) cops.emplace_back(getCopData(c, auth));
+   		return cops;
+	}
+
+	void justine::sampleclient::Server::sendRoute(int id, std::vector<osmium::unsigned_object_id_type> & path, int auth)
+	{
+		if(!isConnected()) return;
+		if(auth==-1){std::cout << "Error: authenticate required for this command. (ROUTE)" << std::endl; return;}
+		boost::system::error_code error_code;
+  		char buffer[MAX_BUFFER_SIZE];
+  		size_t msg_length = std::sprintf(buffer, "<route %d %d %d", path.size(), auth, id);
+
+  		for(auto ui: path){msg_length += std::sprintf(buffer + msg_length, " %u", ui);}
+		msg_length += std::sprintf(buffer + msg_length, ">");
 
 
-Cop justine::sampleclient::Server::getCopData(Cop c)
-{
-	return justine::sampleclient::Server::getCopData(c.id);
-}
+
+  		socket->send(boost::asio::buffer(buffer, msg_length));
+
+  		msg_length = socket->read_some(boost::asio::buffer(buffer), error_code);
+	}
+
+	void justine::sampleclient::Server::sendRoute(Cop c, std::vector<osmium::unsigned_object_id_type> & path, int auth)
+	{
+		justine::sampleclient::Server::sendRoute(c.id, path, auth);
+	}
 
 
-Gangster justine::sampleclient::Server::getGangster(int id)
-{
-	std::vector<Gangster> gangsters = justine::sampleclient::Server::getGangsters();
-
-	return *std::find_if(gangsters.begin(), gangsters.end(),
-		[id] (Gangster g) {
-			return g.id == id;
-		});
-}
+	Cop justine::sampleclient::Server::getCopData(Cop c, int auth)
+	{
+		return justine::sampleclient::Server::getCopData(c.id, auth);
+	}
 
 
-Gangster justine::sampleclient::Server::getGangster(Gangster g)
-{
-	return justine::sampleclient::Server::getGangster(g.id);
-}
+	Gangster justine::sampleclient::Server::getGangster(int id,int auth)
+	{
+		std::vector<Gangster> gangsters = justine::sampleclient::Server::getGangsters(auth);
+		return *std::find_if(gangsters.begin(), gangsters.end(), [id] (Gangster g) {return g.id==id;});
+	}
+
+
+	Gangster justine::sampleclient::Server::getGangster(Gangster g, int auth)
+	{
+		return justine::sampleclient::Server::getGangster(g.id, auth);
+	}
+

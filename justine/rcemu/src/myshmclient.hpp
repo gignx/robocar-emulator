@@ -77,7 +77,7 @@ namespace sampleclient
 {
 
 // 512 KiB, should be enough for all messages received and sent
-const int kMaxBufferLen = 524288;
+constexpr int kMaxBufferLen = 524288;
 
 using NodeRefGraph    =
         boost::adjacency_list<boost::listS, boost::vecS, boost::directedS,
@@ -140,7 +140,9 @@ public:
     const char *port      = "10007",
     int num_cops          = 10,
     bool verbose_mode     = false):
-      ShmClient(shm_segment), num_cops_(num_cops), verbose_mode_(verbose_mode),
+      ShmClient(shm_segment), num_cops_(num_cops),
+      auth_code_(0), is_authenticated_(false),
+      verbose_mode_(verbose_mode),
       port_(port), m_team_name_(team_name)
   {
     BuildGraph();
@@ -233,6 +235,8 @@ private:
   using Cop = int;
 
   int num_cops_;
+  int auth_code_;
+  bool is_authenticated_;
   bool verbose_mode_;
   const char *port_;
 
@@ -284,7 +288,9 @@ private:
 
   std::vector<Gangster> AcquireGangstersFromServer(
     boost::asio::ip::tcp::socket & socket,
-    int id, osmium::unsigned_object_id_type cop);  
+    int id, osmium::unsigned_object_id_type cop);
+
+  void Authenticate(boost::asio::ip::tcp::socket &socket);
 
   void SendRouteToServer(
     boost::asio::ip::tcp::socket & socket, int id,

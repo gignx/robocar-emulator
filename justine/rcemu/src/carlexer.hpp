@@ -53,69 +53,73 @@ public:
 
   virtual int yylex ();
 
-  friend std::ostream & operator<< ( std::ostream & os, CarLexer & cl )
+  friend std::ostream & operator<< (std::ostream & os, CarLexer & cl)
   {
-    os << cl.name
+    os << cl.team_name_
        << " "
-       << cl.role
+       << cl.car_role_
        << std::endl;
 
     return os;
   }
 
-  char* get_name()
+  char* get_team_name()
   {
-    return name;
+    return team_name_;
   }
-  char get_role() const
+  char get_car_role() const
   {
-    return role;
+    return car_role_;
   }
   int get_num() const
   {
-    return num;
+    return num_;
   }
   int get_errnumber() const
   {
-    return m_errnumber;
+    return errnumber_;
   }
-  bool get_guided() const
+  bool get_is_guided() const
   {
-    return m_guided;
+    return is_guided_;
   }
-  int get_cmd() const
+  int get_command_id() const
   {
-    return m_cmd;
+    return command_id_;
   }
-  int get_id() const
+  int get_auth_code() const
   {
-    return m_id;
+    return auth_code_;
+  }
+  int get_car_id() const
+  {
+    return car_id_;
   }
   std::vector<unsigned int> & get_route ( void )
   {
-    return route;
+    return route_;
   }
   unsigned int get_from() const
   {
-    return from;
+    return from_;
   }
   unsigned int get_to() const
   {
-    return to;
+    return to_;
   }
 
 private:
-  int m_cmd {0};
-  char name[128];
-  int num {0};
-  char role;
-  int m_errnumber {0};
-  bool m_guided {false};
-  std::vector<unsigned int> route;
-  int m_id {0};
-  unsigned int from {0u};
-  unsigned int to {0u};
-
+  int command_id_ {0};
+  char team_name_[128];
+  int num_ {0};
+  char car_role_;
+  int errnumber_ {0};
+  bool is_guided_ {false};
+  std::vector<unsigned int> route_;
+  int car_id_ {0};
+  int auth_code_ {0};
+  unsigned int from_ {0u};
+  unsigned int to_ {0u};
 };
 
 }

@@ -32,28 +32,31 @@
 #include <myshmclient.hpp>
 #include <algorithm>
 
+ 
+
 void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
 {
-  //int id = server->authenticate(m_team_name_);
-  //log("auth");
-  std::vector<Cop> cops = server->spawnCops(m_team_name_, 10);
+  std::vector<Cop> cops = server->spawnCops(m_team_name_, num_cops_);
   std::vector<Gangster> gangsters;
 
   for(;;)
   {
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
-
-    for(Cop cop:cops)
+    gangsters = server->getGangsters();
+    for(auto cop:cops)
     {
-
       cop = server->getCopData(cop);
-      gangsters = server->getGangsters();
+      
+
       if(gangsters.size()>0){
-        std::sort ( gangsters.begin(), gangsters.end(),
-         [this, cop] ( Gangster x, Gangster y )
-          {return graph->getDistance ( cop.to, x.to ) < graph->getDistance ( cop.to, y.to );} );
-        std::vector<osmium::unsigned_object_id_type> path =
-          graph->DetermineDijkstraPath(cop.to, gangsters[0].to);
+        sortByDistance(gangsters, cop);
+
+        NRGVertex v = getAdjacentCrossroad(gangsters[0].to, true);
+        NRGVertex v2 = getAdjacentCrossroad(gangsters[0].to, false);
+
+        if(graph->getDistance(gangsters[0].from, graph->getVertexNameMap()[v2]) > graph->getDistance(gangsters[0].to, graph->getVertexNameMap()[v2])) v=v2;
+
+        Path path = graph->DetermineDijkstraPath(cop.to, graph->getVertexNameMap()[v]);
         if(path.size() > 1)
         {
           server->sendRoute(cop, path);

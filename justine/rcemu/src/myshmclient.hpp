@@ -37,7 +37,7 @@ namespace justine
 {
 namespace sampleclient
 {
-
+using Path = std::vector<osmium::unsigned_object_id_type>;
 
 class MyShmClient : public ShmClient
 {

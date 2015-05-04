@@ -31,3 +31,54 @@
 
 #include <shmclient.hpp>
 //#include <trafficlexer.hpp>
+
+ using GraphNodeID = osmium::unsigned_object_id_type;
+ using NRGVertex = justine::sampleclient::ExtendedGraph::NRGVertex;    	
+ using NRGAdjacentVertexIter = justine::sampleclient::ExtendedGraph::NRGAdjacentVertexIter;
+ using NRGVertex = justine::sampleclient::ExtendedGraph::NRGVertex;
+
+     void justine::sampleclient::ShmClient::sortByDistance(std::vector<Gangster> &gangsters, Cop c)
+    {
+      sortByDistance(gangsters, c.to);
+    }
+
+    void justine::sampleclient::ShmClient::sortByDistance(std::vector<Gangster> &gangsters, GraphNodeID t){
+        std::sort ( gangsters.begin(), gangsters.end(), 
+                  [this, t] ( Gangster x, Gangster y )
+                  {return graph->getDistance( t, x.to ) < graph->getDistance ( t, y.to );} 
+        );
+    }
+
+    NRGVertex justine::sampleclient::ShmClient::getAdjacentCrossroad(GraphNodeID g, bool direction){
+    	int db;
+    	NRGVertex before, v;
+    	std::vector<NRGVertex> circle;
+    	v = before = graph->findObject(g);
+    	std::pair<NRGAdjacentVertexIter, NRGAdjacentVertexIter> adjacent;
+    	db = 0;
+    	adjacent = graph->getAdjacentVertices(v);
+
+    	for(;adjacent.first!=adjacent.second;++adjacent.first) {db++;if(db>2){ return v;}}
+    		if(db == 2) {
+    			NRGAdjacentVertexIter it = adjacent.first;
+    			if(direction) before = *(it);
+    			else before = *(++it);
+    		}
+
+    		do{
+    			adjacent = graph->getAdjacentVertices(v);
+    			db = 0;
+    			for(NRGAdjacentVertexIter item = adjacent.first;item!=adjacent.second;++item) {db++;}
+    				if(db==1){before = v; v=*(adjacent.first);}
+    			if(db==2){
+    				if(*(adjacent.first) == before){before = v;++adjacent.first; v = *adjacent.first; }
+    				else{before = v; v = *adjacent.first;}
+    			}
+    			if(v==before){return v;}
+
+    			//checking for possible circles in the graph (aka infinite loops)
+    			for(auto it = circle.begin();it!=circle.end();it++) if(v==*it) {return v;}
+    				circle.push_back(v);
+    		}while(db<3);
+    		return v;  
+    	}

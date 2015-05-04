@@ -25,9 +25,11 @@
 		auth_code = -2;
 		boost::system::error_code error_code;
 		char buffer[MAX_BUFFER_SIZE];
-		size_t msg_length = std::sprintf(buffer, "<auth %s", team_name.c_str());
+		size_t msg_length = std::sprintf(buffer, "<auth %s c>", team_name.c_str());
+		std::cout << "Sending: " << buffer;
 		socket->send(boost::asio::buffer (buffer, msg_length));
 		msg_length = socket->read_some(boost::asio::buffer(buffer), error_code);
+		std::cout <<" Answer: "<< buffer << std::endl;
 		std::sscanf(buffer, "<OK %d>", &auth_code);
 		return auth_code;
 	}
@@ -48,10 +50,9 @@
 	  	int bytes_read      {0};
 		int seek_pointer    {0};
 
-		unsigned from_node, to_node, step;
+		unsigned int from_node, to_node, step;
 
-		while(std::sscanf(buffer+seek_pointer, "<OK %d %lu %lu %lu>%n",
-		                  &gangster_car_id, &from_node, &to_node, &step, &bytes_read) == 4)
+		while(std::sscanf(buffer+seek_pointer, "<OK %d %u %u %u>%n", &gangster_car_id, &from_node, &to_node, &step, &bytes_read) == 4)
 		{
 		  seek_pointer += bytes_read;
 		  gangsters.emplace_back(Gangster {gangster_car_id, from_node, to_node, step});
@@ -70,8 +71,8 @@
   		socket->send(boost::asio::buffer(buffer, msg_length));
   		msg_length = socket->read_some(boost::asio::buffer(buffer), error_code);
   		int cop_id;
-  		long unsigned int f,t,s;
-  		std::sscanf(buffer, "<OK %d %lu %lu %lu>", &cop_id, &f, &t, &s);
+  		unsigned int f,t,s;
+  		std::sscanf(buffer, "<OK %d %u %u %u>", &cop_id, &f, &t, &s);
 		return Cop{cop_id, f,t,s};
 	}
 
@@ -111,9 +112,9 @@
 		if(auth==-1){std::cout << "Error: authenticate required for this command. (ROUTE)" << std::endl; return;}
 		boost::system::error_code error_code;
   		char buffer[MAX_BUFFER_SIZE];
-  		size_t msg_length = std::sprintf(buffer, "<route %d %d %d", path.size(), auth, id);
+  		size_t msg_length = std::sprintf(buffer, "<route %lu %d %d", path.size(), auth, id);
 
-  		for(auto ui: path){msg_length += std::sprintf(buffer + msg_length, " %u", ui);}
+  		for(auto ui: path){msg_length += std::sprintf(buffer + msg_length, " %lu", ui);}
 		msg_length += std::sprintf(buffer + msg_length, ">");
 
 
@@ -138,7 +139,7 @@
 	Gangster justine::sampleclient::Server::getGangster(int id,int auth)
 	{
 		std::vector<Gangster> gangsters = justine::sampleclient::Server::getGangsters(auth);
-		return *std::find_if(gangsters.begin(), gangsters.end(), [id] (Gangster g) {return g.id==id;});
+		return *std::find_if(gangsters.begin(), gangsters.end(), [id] (Gangster g) { return g.id==id;});
 	}
 
 

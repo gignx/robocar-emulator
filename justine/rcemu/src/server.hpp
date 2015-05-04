@@ -32,6 +32,7 @@ public:
   		boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve ( query );
   		boost::asio::socket_base::keep_alive option(true);
   		boost::asio::connect ( *socket, iterator );
+  		std::cout << "Connected!" << std::endl;
 	}
 
 	~Server(){

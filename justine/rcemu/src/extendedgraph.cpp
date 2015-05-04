@@ -1,7 +1,7 @@
 #include <extendedgraph.hpp>
 
-using ID = osmium::unsigned_object_id_type;
-using NodeRefGraph = boost::adjacency_list<boost::listS, boost::vecS, boost::directedS,boost::property<boost::vertex_name_t, ID>,boost::property<boost::edge_weight_t, int>>;
+using GraphNodeID = osmium::unsigned_object_id_type;
+using NodeRefGraph = boost::adjacency_list<boost::listS, boost::vecS, boost::directedS,boost::property<boost::vertex_name_t, GraphNodeID>,boost::property<boost::edge_weight_t, int>>;
 using NRGVertex = boost::graph_traits<NodeRefGraph>::vertex_descriptor;
 using NRGVertexIter = boost::graph_traits<NodeRefGraph>::vertex_iterator;
 using NRGEdge = boost::graph_traits<NodeRefGraph>::edge_descriptor;
@@ -39,7 +39,7 @@ using EdgeWeightMap = boost::property_map<NodeRefGraph, boost::edge_weight_t>::t
 		return boost::get(boost::vertex_name, *nrg);
 	}
 
-	NRGVertex justine::sampleclient::ExtendedGraph::findObject(ID id)
+	NRGVertex justine::sampleclient::ExtendedGraph::findObject(GraphNodeID id)
 	{
 		return nr2v[id];
 	}
@@ -49,7 +49,7 @@ using EdgeWeightMap = boost::property_map<NodeRefGraph, boost::edge_weight_t>::t
 		return boost::adjacent_vertices(v, *nrg);
 	}
 
-	double justine::sampleclient::ExtendedGraph::getDistance(ID n1, ID n2)
+	double justine::sampleclient::ExtendedGraph::getDistance(GraphNodeID n1, GraphNodeID n2)
 	{
 		justine::robocar::shm_map_Type::iterator iter1=shm_map->find ( n1 );
 	    justine::robocar::shm_map_Type::iterator iter2=shm_map->find ( n2 );
@@ -66,7 +66,7 @@ using EdgeWeightMap = boost::property_map<NodeRefGraph, boost::edge_weight_t>::t
 	    return osmium::geom::haversine::distance ( c1, c2 );
 	}
 
-	double justine::sampleclient::ExtendedGraph::pathLength(std::vector<ID> path, int accuracy)
+	double justine::sampleclient::ExtendedGraph::pathLength(std::vector<GraphNodeID> path, int accuracy)
 	{
 		double distance = 0;
 		if(path.size()<2) return distance;
@@ -79,7 +79,7 @@ using EdgeWeightMap = boost::property_map<NodeRefGraph, boost::edge_weight_t>::t
 		return distance;
 	}
 
-	std::vector<ID> justine::sampleclient::ExtendedGraph::DetermineDijkstraPath(ID from, ID to)
+	std::vector<GraphNodeID> justine::sampleclient::ExtendedGraph::DetermineDijkstraPath(GraphNodeID from, GraphNodeID to)
 	{
 	
     std::vector<NRGVertex> parents ( boost::num_vertices ( *nrg ) );
@@ -119,11 +119,11 @@ using EdgeWeightMap = boost::property_map<NodeRefGraph, boost::edge_weight_t>::t
     return path;
 	}
 
-	std::vector<ID> operator+ (std::vector<ID> lhs, std::vector<ID> rhs)
+	std::vector<GraphNodeID> operator+ (std::vector<GraphNodeID> lhs, std::vector<GraphNodeID> rhs)
 	{
-		std::vector<ID> v;
-		for (std::vector<ID>::iterator i = lhs.begin();i!=lhs.end();++i) { v.push_back(*i); }
+		std::vector<GraphNodeID> v;
+		for (std::vector<GraphNodeID>::iterator i = lhs.begin();i!=lhs.end();++i) { v.push_back(*i); }
 		v.pop_back();
-		for (std::vector<ID>::iterator i = rhs.begin();i!=rhs.end();++i) { v.push_back(*i); }
+		for (std::vector<GraphNodeID>::iterator i = rhs.begin();i!=rhs.end();++i) { v.push_back(*i); }
 		return v;
 	}

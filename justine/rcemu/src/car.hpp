@@ -187,11 +187,12 @@ public:
     return this->id_;
   }
 
+protected:
+  int id_;
+
 private:
   bool m_guided {false};
   bool m_routed {false};
-
-  int id_;
 
   std::vector<unsigned int> route;
 };
@@ -215,7 +216,9 @@ public:
        << " "
        << num_gangsters_caught_
        << " "
-       << team_name_;
+       << team_name_
+       << " "
+       << id_;
   }
 
   std::string get_team_name() const

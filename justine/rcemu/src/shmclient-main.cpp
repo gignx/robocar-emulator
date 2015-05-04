@@ -89,15 +89,16 @@ int main ( int argc, char* argv[] )
                << "This is free software: you are free to change and redistribute it." << std::endl
                << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
 
-     justine::sampleclient::ShmClient shmClient {shm.c_str() };
-
+     justine::sampleclient::ShmClient shmClient {shm.c_str(), port.c_str()};
      try
      {
-       boost::asio::io_service io_service;
-       shmClient.start ( io_service, port.c_str() );
+       
      }
      catch ( std::exception& e )
      {
        std::cerr << "Exception: " << e.what() << "\n";
      }
+
+     
+
 }

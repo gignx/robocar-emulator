@@ -9,7 +9,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -24,20 +23,14 @@ import org.jxmapviewer.viewer.WaypointPainter;
 public class CarPainter extends WaypointPainter<Waypoint> {
 
     private BufferedImage buffer;
-    private boolean first = true;
     private Graphics2D g;
-    private LinkedList<WaypointPolice> copList = new LinkedList<WaypointPolice>();
-    private LinkedList<WaypointGangster> gangsterList = new LinkedList<WaypointGangster>();
-    private LinkedList<WaypointCaught> caughtList = new LinkedList<WaypointCaught>();
-    private LinkedList<DefaultWaypoint> defaultList = new LinkedList<DefaultWaypoint>();
+
+    public Traffic traffic = new Traffic();
+
     private Image markerImg;
     private Image markerImgPolice;
     private Image markerImgGangster;
     private Image markerImgCaught;
-    private String longestTeamName = "";
-    private int num_gangsters = 0;
-    private Map<Integer, Boolean> clicked_map = new HashMap<Integer, Boolean>();
-    private Map<String, CopTeamData> cop_teams = new HashMap<String, CopTeamData>();
     private StringBuilder scoreboardStringBuilder = new StringBuilder(100);
 
     public CarPainter() {
@@ -49,49 +42,64 @@ public class CarPainter extends WaypointPainter<Waypoint> {
 	markerImgCaught = new ImageIcon(classLoader.getResource("logo4.png")).getImage();
     }
 
+    public void update(Traffic traffic) {
+	if (this.traffic.longestTeamName != traffic.longestTeamName)
+	    sbu = true;
+	this.traffic = traffic;
+    }
+
+    Point2D a = new Point(0, 0);
+
     @Override
     protected void doPaint(Graphics2D gr, JXMapViewer map, int w, int h) {
-	if (first) {
-	    buffer = new BufferedImage((int) map.getViewportBounds().getWidth(), (int) map.getViewportBounds().getHeight(), BufferedImage.TYPE_INT_ARGB);
-	    g = buffer.createGraphics();
+	if (traffic != null) {
+	    synchronized (traffic) {
+		buffer = new BufferedImage((int) map.getViewportBounds().getWidth(), (int) map.getViewportBounds().getHeight(), BufferedImage.TYPE_INT_ARGB);
+		g = buffer.createGraphics();
+
+		a.setLocation(map.getViewportBounds().x, map.getViewportBounds().y);
+		GeoPosition pos = map.getTileFactory().pixelToGeo(a, map.getZoom());
+		Point2D point = map.getTileFactory().geoToPixel(pos, map.getZoom());
+		g.translate(-(int) point.getX(), -(int) point.getY());
+
+		paintDefaults(g, map, traffic.defaultList);
+		paintCaughts(g, map, traffic.caughtList);
+		paintGangsters(g, map, traffic.gangsterList);
+		paintCops(g, map, traffic.copList);
+
+		g.translate((int) point.getX(), (int) point.getY());
+		paintScoreBoard(g);
+
+		gr.drawImage(buffer, 0, 0, null);
+	    }
 	}
-	Point2D a = new Point(map.getViewportBounds().x, map.getViewportBounds().y);
-	GeoPosition pos = map.getTileFactory().pixelToGeo(a, map.getZoom());
-	Point2D point = map.getTileFactory().geoToPixel(pos, map.getZoom());
-	g.translate(-(int) point.getX(), -(int) point.getY());
-
-	paintCar(g, map, defaultList);
-	paintCar(g, map, caughtList);
-	paintCar(g, map, gangsterList);
-	paintCar(g, map, copList);
-
-	g.translate((int) point.getX(), (int) point.getY());
-	paintScoreBoard(g);
-
-	gr.drawImage(buffer, 0, 0, null);
+	//map.repaint();
     }
 
-    private void paintCar(Graphics2D g, JXMapViewer map, LinkedList<? extends Waypoint> points) {
-	if (points == null)
-	    return;
-	for (Waypoint w : points) {
-	    paintWaypoint(g, map, w);
-	}
-    }
+    Color scorebg = new Color(0, 0, 0, 150);
+    Font arial = new Font("Arial", Font.PLAIN, 14);
+    FontMetrics font_metrics;
+    private int max_name_width;
+    private int font_height;
+    private int scoreboard_height;
+    private int scoreboard_width;
+    private boolean sbu = true;
 
     private void paintScoreBoard(Graphics2D g) {
-	int num_caught = 0;
-	g.setPaint(new Color(0, 0, 0, 150));
-	g.setFont(new Font("Arial", Font.PLAIN, 14));
-	FontMetrics font_metrics = g.getFontMetrics();
-	int max_name_width = font_metrics.stringWidth(getLongestTeamName());
-	int font_height = font_metrics.getHeight();
-	int scoreboard_height = (font_height + 10) * (cop_teams.size() + 1) + 5;
-	int scoreboard_width = max_name_width + font_height + font_metrics.charWidth('-') * 12 + 15;
+	g.setPaint(scorebg);
+	g.setFont(arial);
+	if (sbu) {
+	    font_metrics = g.getFontMetrics();
+	    max_name_width = font_metrics.stringWidth(traffic.longestTeamName);
+	    font_height = font_metrics.getHeight();
+	    scoreboard_height = (font_height + 10) * (Traffic.cop_teams.size() + 1) + 5;
+	    scoreboard_width = max_name_width + font_height + font_metrics.charWidth('-') * 12 + 15;
+	    sbu = false;
+	}
 	g.fillRoundRect(10, 10, scoreboard_width, scoreboard_height, 10, 10);
 	int draw_y = 15;
 
-	for (Map.Entry<String, CopTeamData> entry : cop_teams.entrySet()) {
+	for (Map.Entry<String, CopTeamData> entry : Traffic.cop_teams.entrySet()) {
 	    String team_name = entry.getKey();
 	    CopTeamData team_data = entry.getValue();
 	    g.setPaint(team_data.color);
@@ -104,153 +112,110 @@ public class CarPainter extends WaypointPainter<Waypoint> {
 	    scoreboardStringBuilder.append(team_data.num_caught);
 	    g.drawString(scoreboardStringBuilder.toString(), font_height + 5 + 15, draw_y);
 	    draw_y += 10;
-	    num_caught += team_data.num_caught;
 	}
 
 	scoreboardStringBuilder.setLength(0);
 	scoreboardStringBuilder.append("Gangsters: ");
-	scoreboardStringBuilder.append(num_caught);
+	scoreboardStringBuilder.append(traffic.caughtList.size());
 	scoreboardStringBuilder.append("/");
-	scoreboardStringBuilder.append(getNumGangsters());
+	scoreboardStringBuilder.append(traffic.gangsterList.size());
 
 	draw_y += font_height;
 	g.drawString(scoreboardStringBuilder.toString(), 15, draw_y);
     }
 
-    private void paintWaypoint(Graphics2D g, JXMapViewer jXMapV, Waypoint w) {
+    private void paintGangsters(Graphics2D g, JXMapViewer map, LinkedList<WaypointGangster> points) {
+	for (WaypointGangster w : points) {
+	    paintGangster(g, map, w);
+	}
+    }
+
+    private void paintGangster(Graphics2D g, JXMapViewer jXMapV, WaypointGangster w) {
+	Point2D point = jXMapV.getTileFactory().geoToPixel(w.getPosition(), jXMapV.getZoom());
+	if (!jXMapV.getViewportBounds().contains(point))
+	    return;
+	g.drawImage(markerImgGangster, (int) point.getX() - markerImgGangster.getWidth(jXMapV), (int) point.getY() - markerImgGangster.getHeight(jXMapV), null);
+    }
+
+    private void paintCaughts(Graphics2D g, JXMapViewer map, LinkedList<WaypointCaught> points) {
+	for (WaypointCaught w : points) {
+	    paintCaught(g, map, w);
+	}
+    }
+
+    private void paintCaught(Graphics2D g, JXMapViewer jXMapV, WaypointCaught w) {
+	Point2D point = jXMapV.getTileFactory().geoToPixel(w.getPosition(), jXMapV.getZoom());
+	if (!jXMapV.getViewportBounds().contains(point))
+	    return;
+	g.drawImage(markerImgCaught, (int) point.getX() - markerImgCaught.getWidth(jXMapV), (int) point.getY() - markerImgCaught.getHeight(jXMapV), null);
+    }
+
+    private void paintDefaults(Graphics2D g, JXMapViewer map, LinkedList<DefaultWaypoint> points) {
+	for (DefaultWaypoint w : points) {
+	    paintDefault(g, map, w);
+	}
+    }
+
+    private void paintDefault(Graphics2D g, JXMapViewer jXMapV, DefaultWaypoint w) {
+	Point2D point = jXMapV.getTileFactory().geoToPixel(w.getPosition(), jXMapV.getZoom());
+	if (!jXMapV.getViewportBounds().contains(point))
+	    return;
+	g.drawImage(markerImg, (int) point.getX() - markerImg.getWidth(jXMapV), (int) point.getY() - markerImg.getHeight(jXMapV), null);
+    }
+
+    private void paintCops(Graphics2D g, JXMapViewer map, LinkedList<WaypointPolice> points) {
+	for (WaypointPolice w : points) {
+	    paintCop(g, map, w);
+	}
+    }
+
+    Font serif = new Font("Serif", Font.BOLD, 14);
+
+    private void paintCop(Graphics2D g, JXMapViewer jXMapV, WaypointPolice w) {
 
 	Point2D point = jXMapV.getTileFactory().geoToPixel(w.getPosition(), jXMapV.getZoom());
+	if (!jXMapV.getViewportBounds().contains(point))
+	    return;
 
-	if (w instanceof WaypointGangster) {
-	    g.drawImage(markerImgGangster, (int) point.getX() - markerImgGangster.getWidth(jXMapV), (int) point.getY() - markerImgGangster.getHeight(jXMapV), null);
-	} else if (w instanceof WaypointCaught) {
-	    g.drawImage(markerImgCaught, (int) point.getX() - markerImgCaught.getWidth(jXMapV), (int) point.getY() - markerImgCaught.getHeight(jXMapV), null);
-	} else if (!(w instanceof WaypointPolice)) {
-	    g.drawImage(markerImg, (int) point.getX() - markerImg.getWidth(jXMapV), (int) point.getY() - markerImg.getHeight(jXMapV), null);
-	}
+	g.drawImage(markerImgPolice, (int) point.getX() - markerImgPolice.getWidth(jXMapV), (int) point.getY() - markerImgPolice.getHeight(jXMapV), null);
 
-	else if (w instanceof WaypointPolice) {
-	    g.drawImage(markerImgPolice, (int) point.getX() - markerImgPolice.getWidth(jXMapV), (int) point.getY() - markerImgPolice.getHeight(jXMapV), null);
+	Color border_color = Traffic.cop_teams.get(w.getName()).color;
+	g.setFont(serif);
+	font_metrics = g.getFontMetrics();
+	int nameWidth = font_metrics.stringWidth(w.getName());
+	int fontHeight = font_metrics.getHeight();
 
-	    WaypointPolice police = (WaypointPolice) w;
+	g.setColor(scorebg);
+	if (Traffic.clicked_map.get(w.getID()) == null || Traffic.clicked_map.get(w.getID()) == false) {
+	    Rectangle rect = new Rectangle((int) point.getX(), (int) point.getY(), nameWidth + 4, 20);
 
-	    Color border_color = getCopTeams().get(police.getName()).color;
+	    g.fill(rect);
+	    g.setColor(border_color);
+	    g.draw(rect);
+	    g.setColor(Color.WHITE);
 
-	    g.setFont(new Font("Serif", Font.BOLD, 14));
-	    FontMetrics fm = g.getFontMetrics();
+	    g.drawString(w.getName(), (int) point.getX() + 2, (int) point.getY() + 20 - 5);
+	} else {
+	    int boxWidth = Math.max(162, nameWidth);
+	    Rectangle rect = new Rectangle((int) point.getX(), (int) point.getY(), boxWidth + 4, fontHeight * 4 + 10);
+	    double center_pos = (boxWidth - nameWidth) / 2.0;
 
-	    int nameWidth = fm.stringWidth(police.getName());
+	    g.fill(rect);
+	    g.setColor(border_color);
+	    g.draw(rect);
+	    g.setColor(Color.WHITE);
 
-	    int fontHeight = fm.getHeight();
+	    String data[] = { w.getName(), "Caught: " + Integer.toString(w.getCaught()), "From: " + Long.toString(w.getNodeFrom()), "To: " + Long.toString(w.getNodeTo()) };
 
-	    g.setColor(new Color(0, 0, 0, 150));
-	    if (clicked_map.get(police.getID()) == null) {
-		Rectangle rect = new Rectangle((int) point.getX(), (int) point.getY(), nameWidth + 4, 20);
-
-		g.fill(rect);
-		g.setColor(border_color);
-		g.draw(rect);
-		g.setColor(Color.WHITE);
-
-		g.drawString(police.getName(), (int) point.getX() + 2, (int) point.getY() + 20 - 5);
-	    } else if (!clicked_map.get(police.getID())) {
-		Rectangle rect = new Rectangle((int) point.getX(), (int) point.getY(), nameWidth + 4, 20);
-
-		g.fill(rect);
-		g.setColor(border_color);
-		g.draw(rect);
-		g.setColor(Color.WHITE);
-
-		g.drawString(police.getName(), (int) point.getX() + 2, (int) point.getY() + 20 - 5);
-	    } else {
-		int boxWidth = Math.max(162, nameWidth);
-
-		Rectangle rect = new Rectangle((int) point.getX(), (int) point.getY(), boxWidth + 4, fontHeight * 4 + 10);
-
-		double center_pos = (boxWidth - nameWidth) / 2.0;
-
-		g.fill(rect);
-		g.setColor(border_color);
-		g.draw(rect);
-		g.setColor(Color.WHITE);
-
-		String data[] = { police.getName(), "Caught: " + Integer.toString(police.getCaught()), "From: " + Long.toString(police.getNodeFrom()), "To: " + Long.toString(police.getNodeTo()) };
-
-		for (int i = 0; i < 4; i++) {
-		    if (i == 0) // team name
-		    {
-			g.drawString(data[i], (int) point.getX() + 2 + (int) center_pos, (int) point.getY() + 15);
-		    } else {
-			g.drawString(data[i], (int) point.getX() + 2, (int) point.getY() + 15 + i * (fontHeight + 2));
-		    }
+	    for (int i = 0; i < 4; i++) {
+		if (i == 0) {
+		    g.drawString(data[i], (int) point.getX() + 2 + (int) center_pos, (int) point.getY() + 15);
+		} else {
+		    g.drawString(data[i], (int) point.getX() + 2, (int) point.getY() + 15 + i * (fontHeight + 2));
 		}
-		jXMapV.setCenterPosition(police.getPosition());
 	    }
+	    jXMapV.setCenterPosition(w.getPosition());
 	}
-    }
 
-    public Map<String, CopTeamData> getCopTeams() {
-	return cop_teams;
     }
-
-    public void setCopTeams(Map<String, CopTeamData> cop_teams) {
-	this.cop_teams = cop_teams;
-    }
-
-    public int getNumGangsters() {
-	return num_gangsters;
-    }
-
-    public void setNumGangsters(int num_gangsters) {
-	this.num_gangsters = num_gangsters;
-    }
-
-    public String getLongestTeamName() {
-	return longestTeamName;
-    }
-
-    public void setLongestTeamName(String longestTeamName) {
-	this.longestTeamName = longestTeamName;
-    }
-
-    public Map<Integer, Boolean> getClickedMap() {
-	return clicked_map;
-    }
-
-    public void setClickedMap(Map<Integer, Boolean> clicked_map) {
-	this.clicked_map = clicked_map;
-    }
-
-    public LinkedList<WaypointPolice> getCopList() {
-	return copList;
-    }
-
-    public void setCopList(LinkedList<WaypointPolice> copList) {
-	this.copList = copList;
-    }
-
-    public LinkedList<WaypointGangster> getGangsterList() {
-	return gangsterList;
-    }
-
-    public void setGangsterList(LinkedList<WaypointGangster> gangsterList) {
-	this.gangsterList = gangsterList;
-    }
-
-    public LinkedList<WaypointCaught> getCaughtList() {
-	return caughtList;
-    }
-
-    public void setCaughtList(LinkedList<WaypointCaught> caughtList) {
-	this.caughtList = caughtList;
-    }
-
-    public LinkedList<DefaultWaypoint> getDefaultList() {
-	return defaultList;
-    }
-
-    public void setDefaultList(LinkedList<DefaultWaypoint> defaultList) {
-	this.defaultList = defaultList;
-    }
-
 }

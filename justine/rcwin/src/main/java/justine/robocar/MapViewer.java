@@ -49,8 +49,8 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 	    public void mouseClicked(MouseEvent me) {
 		Point2D gp_pt = null;
 
-		LinkedList<WaypointPolice> waypoints_ = carPainter.getCopList();
-		Map<Integer, Boolean> clicked_map = carPainter.getClickedMap();
+		LinkedList<WaypointPolice> waypoints_ = carPainter.traffic.copList;
+		Map<Integer, Boolean> clicked_map = Traffic.clicked_map;
 		for (WaypointPolice waypoint : waypoints_) {
 		    gp_pt = getTileFactory().geoToPixel(waypoint.getPosition(), getZoom());
 
@@ -62,7 +62,7 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 		    } else {
 			clicked_map.put(waypoint.getID(), false);
 		    }
-		    carPainter.setClickedMap(clicked_map);
+		    Traffic.clicked_map = clicked_map;
 
 		}
 

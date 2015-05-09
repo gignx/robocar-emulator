@@ -8,23 +8,19 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import javax.swing.SwingWorker;
+import javax.swing.SwingUtilities;
 
 import org.jxmapviewer.viewer.DefaultWaypoint;
 
-public class NetworkThread extends SwingWorker<Void, Traffic> {
+public class BackgroundThread implements Runnable {
 
     private Map<Long, Loc> lmap;
     private String hostname;
     private int port;
-    private int team_counter = 0;
     private Map<String, CopTeamData> cop_teams = new HashMap<String, CopTeamData>();
-    private int num_gangsters;
-    private Map<Integer, Boolean> clicked_map = new HashMap<Integer, Boolean>();
     private Color[] available_colors = { Color.BLUE, Color.RED, Color.GREEN, Color.YELLOW, Color.ORANGE, Color.CYAN, Color.MAGENTA, Color.PINK };
     private String longestTeamName = "";
     private NotifyListener notifyListener = null;
@@ -35,15 +31,15 @@ public class NetworkThread extends SwingWorker<Void, Traffic> {
 	public void onException(Exception e);
     }
 
-    public NetworkThread(Map<Long, Loc> lmap, String hostname, int port) {
+    public BackgroundThread(Map<Long, Loc> lmap, String hostname, int port, NotifyListener l) {
 	super();
 	this.lmap = lmap;
 	this.hostname = hostname;
 	this.port = port;
+	notifyListener = l;
     }
 
-    @Override
-    protected Void doInBackground() throws IOException {
+    public void run() {
 	Socket trafficServer = null;
 	Scanner scanner = null;
 	try {
@@ -61,12 +57,15 @@ public class NetworkThread extends SwingWorker<Void, Traffic> {
 	    LinkedList<WaypointCaught> caught_list = new LinkedList<WaypointCaught>();
 	    LinkedList<DefaultWaypoint> default_list = new LinkedList<DefaultWaypoint>();
 
-	    for (;;) {
+	    final Traffic traffic = new Traffic();
+
+	    while(!Thread.interrupted()) {
 		cop_list.clear();
 		gangster_list.clear();
 		caught_list.clear();
 		default_list.clear();
-
+		
+		int team_counter = 0;
 		int time = 0, size = 0, minutes = 0;
 
 		time = scanner.nextInt();
@@ -74,7 +73,7 @@ public class NetworkThread extends SwingWorker<Void, Traffic> {
 		size = scanner.nextInt();
 
 		long ref_from = 0, ref_to = 0;
-		int step = 0, maxstep = 1, type = 0;
+		int step = 0, maxstep = 100, type = 0;
 		int id = 0;
 		double lat, lon;
 		double lat2, lon2;
@@ -95,13 +94,8 @@ public class NetworkThread extends SwingWorker<Void, Traffic> {
 			num_captured_gangsters = scanner.nextInt();
 			name = scanner.next();
 			id = scanner.nextInt();
-			// if(!clicked_map.containsKey(id)){
-			// clicked_map.put(id, false);
-			// }
 
 			if (cop_teams.containsKey(name)) {
-			    // cop_teams.put(name, cops.get(name) +
-			    // num_captured_gangsters);
 			    if (num_captured_gangsters > 0) {
 				CopTeamData data = cop_teams.get(name);
 				data.num_caught += num_captured_gangsters;
@@ -144,7 +138,6 @@ public class NetworkThread extends SwingWorker<Void, Traffic> {
 		    }
 
 		}
-		num_gangsters = gangster_list.size();
 		if (time >= minutes * 60 * 1000 / 200) {
 		    // scanner = null;
 		}
@@ -163,9 +156,22 @@ public class NetworkThread extends SwingWorker<Void, Traffic> {
 		sb.append(":");
 		sb.append(2 * time);
 		sb.append("|");
+		traffic.copList = cop_list;
+		traffic.gangsterList = gangster_list;
+		traffic.caughtList = caught_list;
+		traffic.defaultList = default_list;
+		traffic.title = sb.toString();
+		Traffic.cop_teams = cop_teams;
+		traffic.longestTeamName = longestTeamName;
 
-		publish(new Traffic(cop_list, gangster_list, caught_list, default_list, sb.toString(), num_gangsters, cop_teams, longestTeamName, clicked_map));
+		SwingUtilities.invokeAndWait(new Runnable() {
 
+		    public void run() {
+			if (notifyListener != null) {
+			    notifyListener.onDataChanged(Traffic.create(traffic));
+			}
+		    }
+		});
 	    }
 
 	} catch (Exception e) {
@@ -173,29 +179,15 @@ public class NetworkThread extends SwingWorker<Void, Traffic> {
 		notifyListener.onException(e);
 	} finally {
 	    if (trafficServer != null)
-		trafficServer.close();
+		try {
+		    trafficServer.close();
+		} catch (IOException e) {
+		    if (notifyListener != null)
+			notifyListener.onException(e);
+		}
 	    if (scanner != null)
 		scanner.close();
 	}
 
-	return null;
-    }
-
-    @Override
-    protected void process(List<Traffic> traffics) {
-	if (notifyListener != null)
-	    notifyListener.onDataChanged(traffics.get(traffics.size() - 1));
-    }
-
-    @Override
-    protected void done() {
-    }
-
-    public NotifyListener getNotifyListener() {
-	return notifyListener;
-    }
-
-    public void setNotifyListener(NotifyListener notifyListener) {
-	this.notifyListener = notifyListener;
     }
 }

@@ -32,6 +32,8 @@ package justine.robocar;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -40,7 +42,8 @@ import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 
-import justine.robocar.NetworkThread.NotifyListener;
+import justine.robocar.BackgroundThread.NotifyListener;
+
 
 @SuppressWarnings("serial")
 public class CarWindow extends JFrame implements NotifyListener {
@@ -50,6 +53,7 @@ public class CarWindow extends JFrame implements NotifyListener {
     Map<Long, Loc> lmap = null;
     String hostname = "localhost";
     int port = 10007;
+    private Thread worker;
 
     public CarWindow(double lat, double lon, Map<Long, Loc> lmap, String hostname, int port) {
 	this.lmap = lmap;
@@ -63,23 +67,23 @@ public class CarWindow extends JFrame implements NotifyListener {
 	Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
 	setSize(screenDim.width / 2, screenDim.height / 2);
 
-	NetworkThread worker = new NetworkThread(lmap, hostname, port);
-	worker.setNotifyListener(this);
-	worker.execute();
+	worker = new Thread(new BackgroundThread(lmap, hostname, port, this));
+	worker.start();
+
+	addWindowListener(new WindowAdapter() {
+
+	    public void windowClosed(WindowEvent e) {
+		worker.stop();
+		e.getWindow().dispose();
+	    }
+
+	});
     }
 
     public void onDataChanged(Traffic traffic) {
-	setTitle(traffic.getTitle());
-	carPainter.setDefaultList(traffic.getDefaultList());
-	carPainter.setCaughtList(traffic.getCaughtList());
-	carPainter.setGangsterList(traffic.getGangsterList());
-	carPainter.setCopList(traffic.getCopList());
-	carPainter.getCopTeams().clear();
-	carPainter.getCopTeams().putAll(traffic.getCopTeams());
-	carPainter.setLongestTeamName(traffic.getLongestTeamName());
-	carPainter.setNumGangsters(traffic.getNumGangsters());
+	setTitle(traffic.title);
+	carPainter.update(traffic);
 	jXMapViewer.repaint();
-	repaint();
     }
 
     public void onException(Exception e) {

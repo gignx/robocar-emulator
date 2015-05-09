@@ -1,5 +1,6 @@
 package justine.robocar;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -49,18 +50,50 @@ public class CarPainter extends WaypointPainter<Waypoint> {
     }
 
     Point2D a = new Point(0, 0);
+    int zoom = 17;
+    boolean asd = true;
+    boolean masik = true;
+    long timer = System.currentTimeMillis();
 
     @Override
     protected void doPaint(Graphics2D gr, JXMapViewer map, int w, int h) {
+	buffer = new BufferedImage((int) map.getViewportBounds().getWidth(), (int) map.getViewportBounds().getHeight(), BufferedImage.TYPE_INT_ARGB);
+	g = buffer.createGraphics();
+	a.setLocation(map.getViewportBounds().x, map.getViewportBounds().y);
+	GeoPosition pos = map.getTileFactory().pixelToGeo(a, map.getZoom());
+	Point2D point = map.getTileFactory().geoToPixel(pos, map.getZoom());
+	g.translate(-(int) point.getX(), -(int) point.getY());
+	if (map.getZoom() >= 9 && asd) {
+	    if (BackgroundThread.position != null) {
+		if (masik) {
+		    map.setCenterPosition(BackgroundThread.position);
+		    for (int i = 0; i < 17; i++)
+			map.setZoom(i);
+		    masik = false;
+		}
+		if (System.currentTimeMillis() - timer > 200) {
+		    Rectangle zoomrect = new Rectangle((int) (map.getViewportBounds().x + (map.getViewportBounds().getWidth() / 4.0)*(((System.currentTimeMillis() - timer)-200)/800.0)), (int) (map.getViewportBounds().y + (map.getViewportBounds().getHeight() / 4.0)*(((System.currentTimeMillis() - timer)-200)/800.0)), (int) ((map.getViewportBounds().getWidth())*(1-((System.currentTimeMillis() - timer)-200)/1600.0)), (int) ((map.getViewportBounds().getHeight())*(1-((System.currentTimeMillis() - timer)-200)/1600.0)));
+		    g.setColor(Color.GREEN);
+		    g.setStroke(new BasicStroke(5));
+		    // sin (x^(1/10)*300)+0.5
+		    if (Math.sin(Math.pow((double) ((System.currentTimeMillis() - timer - 200) / 1600.0), 1.0 / 10.0) * 300) -0.2 > 0 || System.currentTimeMillis() - timer > 900) {
+			
+			g.draw(zoomrect);
+
+		    }
+		    g.setStroke(new BasicStroke(1));
+		}
+		if (System.currentTimeMillis() - timer > 1000) {
+		    map.setZoom(zoom--);
+		    timer = System.currentTimeMillis();
+		}
+
+		if (map.getZoom() <= 9)
+		    asd = false;
+	    }
+	}
 	if (traffic != null) {
 	    synchronized (traffic) {
-		buffer = new BufferedImage((int) map.getViewportBounds().getWidth(), (int) map.getViewportBounds().getHeight(), BufferedImage.TYPE_INT_ARGB);
-		g = buffer.createGraphics();
-
-		a.setLocation(map.getViewportBounds().x, map.getViewportBounds().y);
-		GeoPosition pos = map.getTileFactory().pixelToGeo(a, map.getZoom());
-		Point2D point = map.getTileFactory().geoToPixel(pos, map.getZoom());
-		g.translate(-(int) point.getX(), -(int) point.getY());
 
 		paintDefaults(g, map, traffic.defaultList);
 		paintCaughts(g, map, traffic.caughtList);
@@ -73,7 +106,7 @@ public class CarPainter extends WaypointPainter<Waypoint> {
 		gr.drawImage(buffer, 0, 0, null);
 	    }
 	}
-	//map.repaint();
+	map.repaint();
     }
 
     Color scorebg = new Color(0, 0, 0, 150);

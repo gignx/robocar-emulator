@@ -10,20 +10,24 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.SwingUtilities;
 
 import org.jxmapviewer.viewer.DefaultWaypoint;
+import org.jxmapviewer.viewer.GeoPosition;
 
 public class BackgroundThread implements Runnable {
 
-    private Map<Long, Loc> lmap;
     private String hostname;
     private int port;
     private Map<String, CopTeamData> cop_teams = new HashMap<String, CopTeamData>();
     private Color[] available_colors = { Color.BLUE, Color.RED, Color.GREEN, Color.YELLOW, Color.ORANGE, Color.CYAN, Color.MAGENTA, Color.PINK };
     private String longestTeamName = "";
     private NotifyListener notifyListener = null;
+    final Map<Long, Loc> lmap = new HashMap<Long, Loc>();
+    public static GeoPosition position;
 
     public interface NotifyListener {
 	public void onDataChanged(Traffic current);
@@ -31,15 +35,15 @@ public class BackgroundThread implements Runnable {
 	public void onException(Exception e);
     }
 
-    public BackgroundThread(Map<Long, Loc> lmap, String hostname, int port, NotifyListener l) {
+    public BackgroundThread(String hostname, int port, NotifyListener l) {
 	super();
-	this.lmap = lmap;
 	this.hostname = hostname;
 	this.port = port;
 	notifyListener = l;
     }
 
     public void run() {
+	readMap(lmap, CarWindow.file);
 	Socket trafficServer = null;
 	Scanner scanner = null;
 	try {
@@ -59,12 +63,12 @@ public class BackgroundThread implements Runnable {
 
 	    final Traffic traffic = new Traffic();
 
-	    while(!Thread.interrupted()) {
+	    while (!Thread.interrupted()) {
 		cop_list.clear();
 		gangster_list.clear();
 		caught_list.clear();
 		default_list.clear();
-		
+
 		int team_counter = 0;
 		int time = 0, size = 0, minutes = 0;
 
@@ -190,4 +194,36 @@ public class BackgroundThread implements Runnable {
 	}
 
     }
+
+    public void readMap(Map<Long, Loc> lmap, String name) {
+
+	Scanner scan;
+	java.io.File file = new java.io.File(name);
+
+	long ref = 0;
+	double lat = 0.0, lon = 0.0;
+	try {
+
+	    scan = new Scanner(file);
+	    boolean first = true;
+	    while (scan.hasNext()) {
+
+		ref = scan.nextLong();
+		lat = scan.nextDouble();
+		lon = scan.nextDouble();
+		if(first){
+		    position = new GeoPosition(lat, lon);
+		    first = false;
+		}
+		lmap.put(ref, new Loc(lat, lon));
+	    }
+
+	} catch (Exception e) {
+
+	    Logger.getLogger(CarWindow.class.getName()).log(Level.SEVERE, "hibás noderef2GPS leképezés", e);
+
+	}
+
+    }
+
 }

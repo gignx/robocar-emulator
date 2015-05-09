@@ -20,7 +20,6 @@ import org.jxmapviewer.input.PanKeyListener;
 import org.jxmapviewer.input.PanMouseInputListener;
 import org.jxmapviewer.input.ZoomMouseWheelListenerCursor;
 import org.jxmapviewer.viewer.DefaultTileFactory;
-import org.jxmapviewer.viewer.GeoPosition;
 import org.jxmapviewer.viewer.TileFactory;
 
 @SuppressWarnings("serial")
@@ -28,10 +27,9 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 
     final TileFactory tileFactoryArray[] = { new DefaultTileFactory(new OSMTileFactoryInfo()), new DefaultTileFactory(new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.MAP)), new DefaultTileFactory(new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.SATELLITE)), new DefaultTileFactory(new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.HYBRID)) };
 
-    public MapViewer(double lat, double lon, final CarPainter carPainter) {
+    public MapViewer(final CarPainter carPainter) {
 	super();
 	setDoubleBuffered(false);
-	GeoPosition debrecen = new GeoPosition(lat, lon);
 	MouseInputListener mouseListener = new PanMouseInputListener(this);
 	this.addKeyListener(this);
 	this.addMouseListener(mouseListener);
@@ -41,9 +39,7 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 	this.addKeyListener(new PanKeyListener(this));
 	this.setTileFactory(tileFactoryArray[0]);
 	this.setOverlayPainter(carPainter);
-	this.setZoom(9);
-	this.setAddressLocation(debrecen);
-	this.setCenterPosition(debrecen);
+	this.setZoom(17);
 	this.addMouseListener(new MouseAdapter() {
 	    @Override
 	    public void mouseClicked(MouseEvent me) {

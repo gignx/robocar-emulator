@@ -34,11 +34,7 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 
@@ -55,25 +51,31 @@ public class CarWindow extends JFrame implements NotifyListener {
     int port = 10007;
     private Thread worker;
 
-    public CarWindow(double lat, double lon, Map<Long, Loc> lmap, String hostname, int port) {
-	this.lmap = lmap;
+    public CarWindow(String hostname, int port) {
 	this.hostname = hostname;
 	this.port = port;
 
 	carPainter = new CarPainter();
-	jXMapViewer = new MapViewer(lat, lon, carPainter);
+	jXMapViewer = new MapViewer(carPainter);
+	
+	
 	add(jXMapViewer);
 
 	Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
 	setSize(screenDim.width / 2, screenDim.height / 2);
 
-	worker = new Thread(new BackgroundThread(lmap, hostname, port, this));
+	worker = new Thread(new BackgroundThread(hostname, port, this));
 	worker.start();
 
 	addWindowListener(new WindowAdapter() {
 
 	    public void windowClosed(WindowEvent e) {
-		worker.stop();
+		worker.interrupt();
+		try {
+		    worker.join();
+		} catch (InterruptedException e1) {
+		    e1.printStackTrace();
+		}
 		e.getWindow().dispose();
 	    }
 
@@ -91,41 +93,15 @@ public class CarWindow extends JFrame implements NotifyListener {
 	System.exit(1);
     }
 
-    public static void readMap(Map<Long, Loc> lmap, String name) {
-
-	Scanner scan;
-	java.io.File file = new java.io.File(name);
-
-	long ref = 0;
-	double lat = 0.0, lon = 0.0;
-	try {
-
-	    scan = new Scanner(file);
-
-	    while (scan.hasNext()) {
-
-		ref = scan.nextLong();
-		lat = scan.nextDouble();
-		lon = scan.nextDouble();
-
-		lmap.put(ref, new Loc(lat, lon));
-	    }
-
-	} catch (Exception e) {
-
-	    Logger.getLogger(CarWindow.class.getName()).log(Level.SEVERE, "hibás noderef2GPS leképezés", e);
-
-	}
-
-    }
+    public static String file;
 
     public static void main(String[] args) {
 
-	final Map<Long, Loc> lmap = new HashMap<Long, Loc>();
-	readMap(lmap, args[0]);
+	
 	String hostname = "localhost";
 	int port = 10007;
-
+	file = args[0];
+	
 	switch (args.length) {
 	case 3:
 	    port = Integer.parseInt(args[2]);
@@ -137,8 +113,7 @@ public class CarWindow extends JFrame implements NotifyListener {
 	    System.out.println("java -jar target/site/justine-rcwin-0.0.16-jar-with-dependencies.jar ../../../lmap.txt localhost");
 	    return;
 	}
-	Map.Entry<Long, Loc> e = lmap.entrySet().iterator().next();
-	new CarWindow(e.getValue().lat, e.getValue().lon, lmap, hostname, port).setVisible(true);
+	new CarWindow(hostname, port).setVisible(true);
     }
 
 }

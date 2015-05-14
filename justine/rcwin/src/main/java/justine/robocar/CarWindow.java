@@ -32,88 +32,135 @@ package justine.robocar;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.Map;
 
 import javax.swing.JFrame;
 
-import justine.robocar.BackgroundThread.NotifyListener;
+import justine.robocar.NetworkThread.OnNewTrafficListener;
+import justine.robocar.UpdateThread.Drawer;
 
+import org.jxmapviewer.viewer.GeoPosition;
 
 @SuppressWarnings("serial")
-public class CarWindow extends JFrame implements NotifyListener {
+public class CarWindow extends JFrame implements OnNewTrafficListener, Drawer,
+		WindowListener {
 
-    CarPainter carPainter;
-    MapViewer jXMapViewer;
-    Map<Long, Loc> lmap = null;
-    String hostname = "localhost";
-    int port = 10007;
-    private Thread worker;
-
-    public CarWindow(String hostname, int port) {
-	this.hostname = hostname;
-	this.port = port;
-
-	carPainter = new CarPainter();
-	jXMapViewer = new MapViewer(carPainter);
-	
-	
-	add(jXMapViewer);
-
-	Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
-	setSize(screenDim.width / 2, screenDim.height / 2);
-
-	worker = new Thread(new BackgroundThread(hostname, port, this));
-	worker.start();
-
-	addWindowListener(new WindowAdapter() {
-
-	    public void windowClosed(WindowEvent e) {
-		worker.interrupt();
-		try {
-		    worker.join();
-		} catch (InterruptedException e1) {
-		    e1.printStackTrace();
-		}
-		e.getWindow().dispose();
-	    }
-
-	});
-    }
-
-    public void onDataChanged(Traffic traffic) {
-	setTitle(traffic.title);
-	carPainter.update(traffic);
-	jXMapViewer.repaint();
-    }
-
-    public void onException(Exception e) {
-	System.out.println(e.getMessage());
-	System.exit(1);
-    }
-
-    public static String file;
-
-    public static void main(String[] args) {
-
-	
+	CarPainter carPainter;
+	MapViewer jXMapViewer;
+	Map<Long, Loc> lmap = null;
 	String hostname = "localhost";
 	int port = 10007;
-	file = args[0];
-	
-	switch (args.length) {
-	case 3:
-	    port = Integer.parseInt(args[2]);
-	case 2:
-	    hostname = args[1];
-	case 1:
-	    break;
-	default:
-	    System.out.println("java -jar target/site/justine-rcwin-0.0.16-jar-with-dependencies.jar ../../../lmap.txt localhost");
-	    return;
+	private NetworkThread network;
+	Traffic currentTraffic = null;
+
+	public CarWindow(String hostname, int port) {
+		this.hostname = hostname;
+		this.port = port;
+		addWindowListener(this);
+
+		carPainter = new CarPainter();
+		jXMapViewer = new MapViewer(carPainter);
+
+		add(jXMapViewer);
+
+		Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
+		setSize(screenDim.width / 2, screenDim.height / 2);
+
+		network = new NetworkThread(hostname, port);
+		network.setOnNewTrafficListener(this);
+		network.start();
+
+		updater = new UpdateThread();
+		updater.drawer = this;
 	}
-	new CarWindow(hostname, port).setVisible(true);
-    }
+
+	public synchronized void onUpdated(Traffic traffic) {
+		if (traffic.timestamp != currentTraffic.timestamp) {
+			updater.setTraffic(Traffic.create(currentTraffic));
+		} else {
+			currentTraffic = Traffic.create(traffic);
+			carPainter.update(currentTraffic);
+			jXMapViewer.repaint();
+			UpdateableWaypoint.max = (int) (20 / (double) (jXMapViewer
+					.getZoom() + 1) + 5);
+
+			if (jXMapViewer.getZoom() > 8)
+				updater.need = false;
+			else
+				updater.need = true;
+		}
+	}
+
+	public synchronized void onNewTraffic(Traffic traffic) {
+		currentTraffic = Traffic.create(traffic);
+		if (!updater.isAlive()) {
+			jXMapViewer.setCenterPosition(new GeoPosition(NetworkThread.lmap
+					.values().iterator().next().lat, NetworkThread.lmap
+					.values().iterator().next().lon));
+			jXMapViewer.setZoom(8);
+			updater.setTraffic(currentTraffic);
+			updater.start();
+		}
+	}
+
+	public static String file;
+	private UpdateThread updater;
+
+	public static void main(String[] args) {
+
+		String hostname = "localhost";
+		int port = 10007;
+		file = args[0];
+
+		switch (args.length) {
+		case 3:
+			port = Integer.parseInt(args[2]);
+		case 2:
+			hostname = args[1];
+		case 1:
+			break;
+		default:
+			System.out
+					.println("java -jar target/site/justine-rcwin-0.0.16-jar-with-dependencies.jar ../../../lmap.txt localhost");
+			return;
+		}
+		new CarWindow(hostname, port).setVisible(true);
+	}
+
+	public void windowActivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void windowClosed(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void windowClosing(WindowEvent e) {
+		System.exit(0);
+	}
+
+	public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void windowDeiconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void windowIconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
 
 }

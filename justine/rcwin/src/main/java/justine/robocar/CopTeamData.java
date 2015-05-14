@@ -3,7 +3,6 @@ package justine.robocar;
 import java.awt.Color;
 
 class CopTeamData {
-    public int num_cars;
     public int num_caught;
     public Color color;
 

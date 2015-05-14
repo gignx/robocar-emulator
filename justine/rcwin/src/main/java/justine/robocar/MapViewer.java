@@ -44,22 +44,22 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 	    @Override
 	    public void mouseClicked(MouseEvent me) {
 		Point2D gp_pt = null;
+		if (carPainter.traffic != null) {
+		    LinkedList<WaypointPolice> waypoints_ = carPainter.traffic.copList;
+		    Map<Integer, Boolean> clicked_map = Traffic.clicked_map;
+		    for (WaypointPolice waypoint : waypoints_) {
+			gp_pt = getTileFactory().geoToPixel(waypoint.getPosition(), getZoom());
 
-		LinkedList<WaypointPolice> waypoints_ = carPainter.traffic.copList;
-		Map<Integer, Boolean> clicked_map = Traffic.clicked_map;
-		for (WaypointPolice waypoint : waypoints_) {
-		    gp_pt = getTileFactory().geoToPixel(waypoint.getPosition(), getZoom());
+			Rectangle rect = getViewportBounds();
+			Point converted_gp_pt = new Point((int) gp_pt.getX() - rect.x, (int) gp_pt.getY() - rect.y);
 
-		    Rectangle rect = getViewportBounds();
-		    Point converted_gp_pt = new Point((int) gp_pt.getX() - rect.x, (int) gp_pt.getY() - rect.y);
-
-		    if (converted_gp_pt.distance(me.getPoint()) < 22) {
-			clicked_map.put(waypoint.getID(), true);
-		    } else {
-			clicked_map.put(waypoint.getID(), false);
+			if (converted_gp_pt.distance(me.getPoint()) < 22) {
+			    clicked_map.put(waypoint.getID(), true);
+			} else {
+			    clicked_map.put(waypoint.getID(), false);
+			}
+			Traffic.clicked_map = clicked_map;
 		    }
-		    Traffic.clicked_map = clicked_map;
-
 		}
 
 	    }

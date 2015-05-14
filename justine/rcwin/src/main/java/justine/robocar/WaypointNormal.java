@@ -9,25 +9,24 @@ import javax.swing.ImageIcon;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.viewer.GeoPosition;
 
-class WaypointGangster extends UpdateableWaypoint {
+public class WaypointNormal extends UpdateableWaypoint {
 
     private static Image sprite;
 
-    public WaypointGangster(GeoPosition from, GeoPosition to) {
+    public WaypointNormal(GeoPosition from, GeoPosition to) {
 	super(from, to);
     }
 
     public Image getSprite() {
 	if (sprite == null) {
 	    ClassLoader classLoader = this.getClass().getClassLoader();
-	    sprite = new ImageIcon(classLoader.getResource("logo3.png")).getImage();
+	    sprite = new ImageIcon(classLoader.getResource("logo1.png")).getImage();
 	}
 	return sprite;
     }
 
     @Override
     public void draw(Graphics2D g, JXMapViewer map) {
-	super.draw(g, map);
 	Point2D point = map.getTileFactory().geoToPixel(getPosition(), map.getZoom());
 	if (!map.getViewportBounds().contains(point)) {
 	    onScreen = false;

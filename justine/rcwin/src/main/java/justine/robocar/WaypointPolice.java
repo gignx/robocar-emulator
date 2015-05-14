@@ -1,45 +1,180 @@
 package justine.robocar;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.geom.Point2D;
+import java.util.LinkedList;
+
+import javax.swing.ImageIcon;
+
+import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.viewer.GeoPosition;
-import org.jxmapviewer.viewer.Waypoint;
 
-class WaypointPolice implements Waypoint {
+class WaypointPolice extends UpdateableWaypoint {
 
-    GeoPosition geoPosition;
-    String name;
-    int num_caught_, id_;
-    long node_from_, node_to_;
+	private static Image sprite;
+	String name;
+	Color c;
+	int num_caught_, id_;
+	long node_from_, node_to_;
+	static Color borderbg = new Color(0, 0, 0, 150);
+	static Font serif = new Font("Serif", Font.BOLD, 14);
+	static FontMetrics font_metrics;
+	LinkedList<Loc> path;
+	Color pathcolor = new Color(0, 66, 255, 170);
 
-    public WaypointPolice(double lat, double lon, String name, int num_caught, long node_from, long node_to, int id) {
-	geoPosition = new GeoPosition(lat, lon);
-	this.name = name;
-	num_caught_ = num_caught;
-	node_from_ = node_from;
-	node_to_ = node_to;
-	id_ = id;
-    }
+	public WaypointPolice(GeoPosition from, GeoPosition to, String name,
+			int num_caught, long node_from, long node_to, int id, Color c,
+			LinkedList<Loc> path) {
+		super(from, to);
+		this.path = new LinkedList<Loc>();
+		this.path.addAll(path);
+		this.c = c;
+		this.name = name;
+		num_caught_ = num_caught;
+		node_from_ = node_from;
+		node_to_ = node_to;
+		id_ = id;
+	}
 
-    public GeoPosition getPosition() {
-	return geoPosition;
-    }
+	@Override
+	public void update() {
+		super.update();
+		path.set(0, new Loc(getPosition().getLatitude(), getPosition()
+				.getLongitude()));
+	}
 
-    String getName() {
-	return name;
-    }
+	public void drawPath(Graphics2D g, JXMapViewer map) {
+		if ((Traffic.clicked_map.get(getID()) != null)
+				&& Traffic.clicked_map.get(getID()) == true) {
+			g.setColor(pathcolor);
+			g.setStroke(new BasicStroke(5));
+			Point2D point = map.getTileFactory().geoToPixel(getPosition(),
+					map.getZoom());
+			for (Loc l : path) {
+				Point2D p = map.getTileFactory().geoToPixel(
+						new GeoPosition(l.lat, l.lon), map.getZoom());
 
-    int getCaught() {
-	return num_caught_;
-    }
+				g.drawLine((int) point.getX(), (int) point.getY(),
+						(int) p.getX(), (int) p.getY());
+				point = p;
+			}
+			g.setStroke(new BasicStroke(1));
+		}
+	}
 
-    long getNodeFrom() {
-	return node_from_;
-    }
+	public void drawWithInfo(Graphics2D g, JXMapViewer map) {
 
-    long getNodeTo() {
-	return node_to_;
-    }
+		Point2D point = map.getTileFactory().geoToPixel(getPosition(),
+				map.getZoom());
+		g.setFont(serif);
+		font_metrics = g.getFontMetrics();
+		int nameWidth = font_metrics.stringWidth(getName());
+		int fontHeight = font_metrics.getHeight();
+		int boxWidth = Math.max(162, nameWidth);
+		Rectangle rect = new Rectangle((int) point.getX(), (int) point.getY(),
+				boxWidth + 4, fontHeight * 4 + 10);
+		double center_pos = (boxWidth - nameWidth) / 2.0;
 
-    int getID() {
-	return id_;
-    }
+		g.setColor(borderbg);
+		g.fill(rect);
+		g.setColor(c);
+		g.draw(rect);
+		g.setColor(Color.WHITE);
+
+		String data[] = { getName(),
+				"Caught: " + Integer.toString(getCaught()),
+				"From: " + Long.toString(getNodeFrom()),
+				"To: " + Long.toString(getNodeTo()) };
+
+		for (int i = 0; i < 4; i++) {
+			if (i == 0) {
+				g.drawString(data[i],
+						(int) point.getX() + 2 + (int) center_pos,
+						(int) point.getY() + 15);
+			} else {
+				g.drawString(data[i], (int) point.getX() + 2,
+						(int) point.getY() + 15 + i * (fontHeight + 2));
+			}
+		}
+		point = map.getTileFactory().geoToPixel(getPosition(), map.getZoom());
+		g.drawImage(getSprite(),
+				(int) point.getX() - getSprite().getWidth(map),
+				(int) point.getY() - getSprite().getHeight(map), null);
+
+		// map.setCenterPosition(getPosition());
+	}
+
+	@Override
+	public void draw(Graphics2D g, JXMapViewer map) {
+
+		if ((Traffic.clicked_map.get(getID()) != null)
+				&& Traffic.clicked_map.get(getID()) == true) {
+			drawWithInfo(g, map);
+			return;
+		}
+
+		Point2D point = map.getTileFactory().geoToPixel(getPosition(),
+				map.getZoom());
+		if (!map.getViewportBounds().contains(point)) {
+			onScreen = false;
+			return;
+		}
+		onScreen = true;
+
+		g.setFont(serif);
+		font_metrics = g.getFontMetrics();
+		int nameWidth = font_metrics.stringWidth(getName());
+
+		g.setColor(borderbg);
+		g.drawImage(getSprite(),
+				(int) point.getX() - getSprite().getWidth(map),
+				(int) point.getY() - getSprite().getHeight(map), null);
+		Rectangle rect = new Rectangle((int) point.getX(), (int) point.getY(),
+				nameWidth + 4, 20);
+
+		g.fill(rect);
+		g.setColor(c);
+		g.draw(rect);
+		g.setColor(Color.WHITE);
+
+		g.drawString(getName(), (int) point.getX() + 2,
+				(int) point.getY() + 20 - 5);
+
+	}
+
+	public Image getSprite() {
+		if (sprite == null) {
+			ClassLoader classLoader = this.getClass().getClassLoader();
+			sprite = new ImageIcon(classLoader.getResource("logo2.png"))
+					.getImage();
+		}
+		return sprite;
+	}
+
+	String getName() {
+		return name;
+	}
+
+	int getCaught() {
+		return num_caught_;
+	}
+
+	long getNodeFrom() {
+		return node_from_;
+	}
+
+	long getNodeTo() {
+		return node_to_;
+	}
+
+	int getID() {
+		return id_;
+	}
+
 }

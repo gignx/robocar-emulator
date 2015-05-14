@@ -36,6 +36,8 @@
 #include <iostream>
 #include <vector>
 
+#include <robocar.pb.h>
+
 #include <osmreader.hpp>
 #include <algorithm>
 
@@ -101,6 +103,19 @@ public:
        << static_cast<unsigned int> ( get_type() );
   }
 
+  virtual void assign(CarData *car_data)
+  {
+    // meghívjuk a protobuf által generált setter függvényeket
+    // és belehelyezzük a CarData objektumba az autó adatait
+    car_data->set_node_from(m_from);
+    car_data->set_node_to(to_node());
+    car_data->set_max_step(get_max_steps());
+    car_data->set_step(get_step());
+    // a cast biztosan lehetséges, így a static_cast is megfelelő lesz
+    // (nincs runtime ellenőrzés benne)
+    car_data->set_type(static_cast<CarData::ProtoCarType>(get_type())); // safe
+  }
+
   friend std::ostream & operator<< ( std::ostream & os, Car & c )
   {
     c.print ( os );
@@ -139,6 +154,15 @@ public:
        << static_cast<unsigned int> ( get_type() );
   }
 
+  virtual void assign(CarData *car_data)
+  {
+    car_data->set_node_from(m_from);
+    car_data->set_node_to(to_node());
+    car_data->set_max_step(get_max_steps());
+    car_data->set_step(get_step());
+    car_data->set_type(static_cast<CarData::ProtoCarType>(get_type())); // safe
+  }
+
   osmium::unsigned_object_id_type ant ( void );
   osmium::unsigned_object_id_type ant_rnd ( void );
   osmium::unsigned_object_id_type ant_rernd ( void );
@@ -173,6 +197,15 @@ public:
        << static_cast<unsigned int> ( get_type() );
   }
 
+  virtual void assign(CarData *car_data)
+  {
+    car_data->set_node_from(m_from);
+    car_data->set_node_to(to_node());
+    car_data->set_max_step(get_max_steps());
+    car_data->set_step(get_step());
+    car_data->set_type(static_cast<CarData::ProtoCarType>(get_type())); // safe
+  }
+
   bool get_guided() const
   {
     return m_guided;
@@ -189,12 +222,13 @@ public:
 
 protected:
   int id_;
+  std::vector<unsigned int> route;
 
 private:
   bool m_guided {false};
   bool m_routed {false};
 
-  std::vector<unsigned int> route;
+  
 };
 
 class CopCar : public SmartCar
@@ -219,6 +253,24 @@ public:
        << team_name_
        << " "
        << id_;
+  }
+
+  virtual void assign(CarData *car_data)
+  {
+    // annyiban külonbozik a tobbi assign() függvénytől, hogy
+    // a rendőrautókra jellemző adatokat is átadjuk
+    // ezek a .proto fájlban "optional" értékek
+    car_data->set_node_from(m_from);
+    car_data->set_node_to(to_node());
+    car_data->set_max_step(get_max_steps());
+    car_data->set_step(get_step());
+    car_data->set_type(static_cast<CarData::ProtoCarType>(get_type())); // safe
+    car_data->set_caught(num_gangsters_caught_);
+    car_data->set_team(team_name_);
+    car_data->set_id(id_);
+    car_data->set_size(route.size());
+    for(auto it = route.begin();it!=route.end();it++)
+      car_data->add_path(*it);
   }
 
   std::string get_team_name() const

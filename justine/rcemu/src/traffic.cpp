@@ -30,6 +30,7 @@
  */
 
 #include <traffic.hpp>
+#include <robocar.pb.h>
 
 void justine::robocar::Traffic::OpenLogStream(void)
 {
@@ -554,44 +555,114 @@ int justine::robocar::Traffic::AuthCmdHandler(CarLexer &car_lexer, char *buffer)
   return std::sprintf(buffer, "<OK %d>", auth_code);
 }
 
+/*
+ *  Az rcwin egy <disp> üzenetet küld, mikor csatlakozik a szerverhez.
+ *  A DISP hatására indítunk egy végtelen ciklust, ami folyamatosan küldozgeti
+ *  az autók adatait az rcwinnek.
+ */
 void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &client_socket)
 {
   char buffer[justine::robocar::kMaxBufferLen];
 
-  int msg_length = 0;
-
+  // a küldésért felelő végtelen ciklus
   for(;;)
   {
+    int msg_length = 0;
+
     std::vector<std::shared_ptr<Car>> cars_copy;
-    {
-      std::lock_guard<std::mutex> lock(cars_mutex);
-      cars_copy = cars;
-    }
 
-    std::stringstream ss;
+    // lockoljuk a mutexet, hogy biztonságosan másolhassunk
+    cars_mutex.lock();
 
-    ss  <<
-        running_time_elapsed_ <<
-        " " <<
-        running_time_minutes_ <<
-        " " <<
-        cars_copy.size() << std::endl;
+    cars_copy = cars;
 
+
+
+    // A TrafficStateHeader küldjük el előszor, ez fogja tartalmazni, hogy hány
+    // darab autó adatát küldjük utána
+    // lsd.: robocar.proto
+    TrafficStateHeader traffic_state_header;
+
+    // a protobuf által generált setter függvények
+    traffic_state_header.set_time_minutes(running_time_minutes_);
+    traffic_state_header.set_time_elapsed(running_time_elapsed_);
+
+    traffic_state_header.set_num_cars(cars_copy.size());
+
+    // vegigmegyunk a masolaton es leptetjuk a kocsikat
     for(auto car:cars_copy)
     {
       car->step();
-
-      ss << *car
-         <<  " " << std::endl;
     }
 
-    boost::asio::write(client_socket, boost::asio::buffer(buffer, msg_length));
+    // ebbe fog belekerülni a szerializált adat
+    boost::asio::streambuf buf;
+    // wrapper a buffer koré, hogy átadhassuk a SerializeToOstream-nek
+    std::ostream os(&buf);
 
-    msg_length = std::sprintf(buffer,
-                              "%s", ss.str().c_str());
+    // a protobuf által biztosított függvény segítségével szerializáljuk
+    // a TrafficStateHeadert a streambe. Bináris adatot kapunk
+    traffic_state_header.SerializeToOstream(&os);
 
-    boost::asio::write(client_socket, boost::asio::buffer(buffer, msg_length));
+    // a szerializált bináris adat nagysága bájtokban
+    msg_length = buf.size();
 
+    #ifdef DEBUG
+    std::cout << msg_length << "\n";
+    #endif
+
+    // intet nem tudunk küldeni, char tombot viszont igen
+    // a reinterpret_cast segítségével az int bájtjaihoz úgy férhetünk
+    // hozzá, mint egy karaktertombhoz
+    char *char_len = reinterpret_cast<char*>(msg_length);
+
+    // elküldjük a "karaktertombot", 32 bit -> 4 bájt
+    // az rcwin pontosan 4 bájtot fog kiolvasni és ebből tudni fogja, hogy
+    // mekkora a protobuf-os szerializált üzenet mérete.
+    boost::asio::write(client_socket, boost::asio::buffer(&char_len, 4));
+
+    // miután elküldtük az üzenet méretét, elküldjük a tényleges üzenetet
+    // a write visszaadja, hogy mennyit küldott el, reméljük, ez egyezik
+    // a msg_length-el
+    size_t sent_bytes = boost::asio::write(client_socket, buf);
+
+    #ifdef DEBUG
+    std::cout << "Sent: " << sent_bytes << "/" << msg_length << std::endl;
+    #endif
+
+    // most pedig elküldjük az osszes autó adatait
+    for(auto car:cars_copy)
+    {
+      // protobuf-os objektum, egy autó adatai
+      // lsd.: robocar.proto
+      CarData car_data;
+
+      // kis módosítás a Car, SmartCar és CopCar osztályokban
+      // átadunk egy pointer-t egy CarData objektumra
+      // az oroklődésnek és a polimorfiuzmusnak koszonhetően
+      // a megfelelő adatok bele lesznek pakolva a CarData-ba
+      // lsd.: Car.cpp Lines: 106, 257
+      car->assign(&car_data);
+
+      // innentől kezdve ugyanazt csináljuk, mint a TrafficStateHeader
+      // esetén, csak a CarData objektummal
+      car_data.SerializeToOstream(&os);
+      msg_length = buf.size();
+
+      #ifdef DEBUG
+      std::cout << msg_length << "\n";
+      #endif
+
+      char_len = reinterpret_cast<char*>(msg_length);
+
+      boost::asio::write(client_socket, boost::asio::buffer(&char_len, 4));
+      sent_bytes = boost::asio::write(client_socket, buf);
+
+      #ifdef DEBUG
+      std::cout << "Sent: " << sent_bytes << "/" << msg_length << std::endl;
+      #endif
+    }
+    cars_mutex.unlock();
     std::this_thread::sleep_for(std::chrono::milliseconds(delay_));
   }
 }
@@ -715,6 +786,7 @@ void justine::robocar::Traffic::CommandListener(boost::asio::ip::tcp::socket cli
   catch(std::exception& e)
   {
     std::cerr << "Ooops: " << e.what() << std::endl;
+    cars_mutex.unlock();
   }
 }
 

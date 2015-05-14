@@ -49,6 +49,8 @@
 #include <cstdlib>
 #include <iterator>
 
+#include <robocar.pb.h>
+
 #include <boost/asio.hpp>
 
 #include <limits>
@@ -118,6 +120,8 @@ public:
 
     shm_map_ =
       shm_segment_->find<shm_map_Type>("JustineMap").first;
+
+    running_time_elapsed_ = 0;
 
     // infinite mode
     if (running_time_minutes_ == -1)

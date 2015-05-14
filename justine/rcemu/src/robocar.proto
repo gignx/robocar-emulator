@@ -1,0 +1,35 @@
+package justine.robocar;
+
+option java_package = "justine.robocar";
+option java_outer_classname = "TrafficStateProtos";
+
+message CarData {
+  enum ProtoCarType {
+    NORMAL    = 0;
+    POLICE    = 1;
+    GANGSTER  = 2;
+    CAUGHT    = 3;
+  }
+
+  required fixed64 node_from  = 1;
+  required fixed64 node_to    = 2;
+
+  required fixed64 max_step   = 3;
+  required fixed64 step       = 4;
+
+  required ProtoCarType type       = 5;
+
+  optional int32 caught       = 6;
+  optional string team        = 7;
+  optional int32 id           = 8;
+  optional int32 size =9;
+  repeated fixed64 path = 10;
+}
+
+
+message TrafficStateHeader {
+  required int32 time_minutes = 1;
+  required int32 time_elapsed = 2;
+
+  required int32 num_cars     = 3;
+}

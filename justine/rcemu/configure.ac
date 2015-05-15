@@ -100,6 +100,8 @@ AC_SUBST([FLEX])
 AC_SUBST([FLEXFLAGS])
 AC_SUBST([AM_FLEXFLAGS])
 
+AC_CHECK_PROG([protoc],[protoc],protoc, AC_MSG_ERROR([protobuf compiler "protoc" not found.]))
+
 AC_CHECK_PROG([FLEX],[flex],flex, AC_MSG_ERROR([please install the flex package]))
 AM_FLEXFLAGS="-olex.yy.c"
 

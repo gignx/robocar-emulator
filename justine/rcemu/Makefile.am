@@ -21,6 +21,10 @@ SUBDIRS = src
 ACLOCAL_AMFLAGS = -I m4
 DIST_SUBDIRS = src 
 
+PROTA := $(shell protoc ./src/robocar.proto --cpp_out=./src)
+PROTO := $(shell protoc ./src/robocar.proto --cpp_out=.)
+PROTJ := $(shell protoc ./src/robocar.proto --java_out=../rcwin/src/main/java)
+
 include aminclude.am
 
 EXTRA_DIST = $(DX_CONFIG) doc/html

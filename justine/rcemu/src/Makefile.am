@@ -17,6 +17,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+
 bin_PROGRAMS = smartcity traffic sampleshmclient samplemyshmclient
 
 smartcity_CXXFLAGS = $(CXXFLAGS) $(BOOST_CPPFLAGS)

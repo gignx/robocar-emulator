@@ -95,6 +95,7 @@ public class CarWindow extends JFrame implements OnNewTrafficListener, Drawer,
 
 	public synchronized void onNewTraffic(Traffic traffic) {
 		currentTraffic = Traffic.create(traffic);
+		setTitle(currentTraffic.title);
 		if (!updater.isAlive()) {
 			jXMapViewer.setCenterPosition(new GeoPosition(NetworkThread.lmap
 					.values().iterator().next().lat, NetworkThread.lmap

@@ -220,8 +220,9 @@ public class NetworkThread extends Thread {
 					}
 
 				}
+				
 				if (time >= minutes * 60 * 1000 / 200) {
-					// scanner = null;
+					throw new Exception();
 				}
 
 				StringBuilder sb = new StringBuilder();
@@ -232,12 +233,14 @@ public class NetworkThread extends Thread {
 				time = time - min * 60 * 5 - sec * 5;
 
 				sb.append("|");
+				if(min<10) sb.append("0");
 				sb.append(min);
 				sb.append(":");
+				if(sec<10) sb.append("0");
 				sb.append(sec);
-				sb.append(":");
-				sb.append(2 * time);
 				sb.append("|");
+				
+				
 				traffic = new Traffic();
 				traffic.copList = cop_list;
 				traffic.gangsterList = gangster_list;

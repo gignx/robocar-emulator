@@ -6,6 +6,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import java.util.Map;
@@ -47,6 +48,34 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 		this.setTileFactory(tileFactoryArray[0]);
 		this.setOverlayPainter(carPainter);
 		this.setZoom(17);
+		this.addMouseMotionListener(new MouseMotionListener() {
+
+			public void mouseMoved(MouseEvent e) {
+				if (carPainter.traffic != null) {
+					LinkedList<WaypointPolice> waypoints_ = carPainter.traffic.copList;
+
+					for (WaypointPolice waypoint : waypoints_) {
+						if (Traffic.clicked_map.get(waypoint.getID())) {
+							Point2D point = getTileFactory().geoToPixel(
+									waypoint.getPosition(), getZoom());
+							Rectangle rect = getViewportBounds();
+							Point con_p = new Point(
+									(int) point.getX() - rect.x, (int) point
+											.getY() - rect.y);
+							if (con_p.distance(e.getPoint()) < 22) {
+								WaypointPolice.on = true;
+							} else {
+								WaypointPolice.on = false;
+							}
+						}
+					}
+				}
+			}
+
+			public void mouseDragged(MouseEvent e) {
+
+			}
+		});
 		this.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent me) {

@@ -27,6 +27,7 @@ class WaypointPolice extends UpdateableWaypoint {
 	static FontMetrics font_metrics;
 	LinkedList<Loc> path;
 	Color pathcolor = new Color(0, 66, 255, 170);
+	protected static boolean on = false;
 
 	public WaypointPolice(GeoPosition from, GeoPosition to, String name,
 			int num_caught, long node_from, long node_to, int id, Color c,
@@ -81,9 +82,17 @@ class WaypointPolice extends UpdateableWaypoint {
 				boxWidth + 4, fontHeight * 4 + 10);
 		double center_pos = (boxWidth - nameWidth) / 2.0;
 
-		g.setColor(borderbg);
+		if (on)
+			g.setColor(borderbg);
+		else
+			g.setColor(new Color(borderbg.getRed(), borderbg.getGreen(),
+					borderbg.getBlue(), 20));
 		g.fill(rect);
-		g.setColor(c);
+		if (on)
+			g.setColor(c);
+		else {
+			g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 20));
+		}
 		g.draw(rect);
 		g.setColor(Color.WHITE);
 
@@ -91,6 +100,10 @@ class WaypointPolice extends UpdateableWaypoint {
 				"Caught: " + Integer.toString(getCaught()),
 				"From: " + Long.toString(getNodeFrom()),
 				"To: " + Long.toString(getNodeTo()) };
+
+		if (!on) {
+			g.setColor(new Color(255, 255, 255, 20));
+		}
 
 		for (int i = 0; i < 4; i++) {
 			if (i == 0) {

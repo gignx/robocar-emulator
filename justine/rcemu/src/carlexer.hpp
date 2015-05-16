@@ -95,7 +95,7 @@ public:
   {
     return car_id_;
   }
-  std::vector<unsigned int> & get_route ( void )
+  std::vector<long unsigned int> & get_route ( void )
   {
     return route_;
   }
@@ -115,7 +115,7 @@ private:
   char car_role_;
   int errnumber_ {0};
   bool is_guided_ {false};
-  std::vector<unsigned int> route_;
+  std::vector<long unsigned int> route_;
   int car_id_ {0};
   int auth_code_ {0};
   unsigned int from_ {0u};

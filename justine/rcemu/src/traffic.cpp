@@ -189,7 +189,7 @@ void justine::robocar::Traffic::StepCars()
     std::stringbuf buf;
     std::ostream os(&buf);
 
-    car->assign(&car_data);
+    car->assign(&car_data, full_logging);
     car_data.SerializeToOstream(&os);
     msg_length = buf.str().length();
     const char *char_len = reinterpret_cast<const char*>(&msg_length);
@@ -591,7 +591,6 @@ int justine::robocar::Traffic::AuthCmdHandler(CarLexer &car_lexer, char *buffer)
  */
 void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &client_socket)
 {
-  char buffer[justine::robocar::kMaxBufferLen];
 
   // a küldésért felelő végtelen ciklus
   for(;;)
@@ -670,7 +669,7 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
       // az oroklődésnek és a polimorfiuzmusnak koszonhetően
       // a megfelelő adatok bele lesznek pakolva a CarData-ba
       // lsd.: Car.cpp Lines: 106, 257
-      car->assign(&car_data);
+      car->assign(&car_data, true);
 
       // innentől kezdve ugyanazt csináljuk, mint a TrafficStateHeader
       // esetén, csak a CarData objektummal
@@ -709,11 +708,11 @@ int justine::robocar::Traffic::StopCmdHandler(CarLexer &car_lexer, char *buffer)
   if (iterator == m_smart_cars_map.end())
     return std::sprintf(buffer, "<ERR unknown car id>");
 
-  std::vector<unsigned int> route_to_self { iterator->second->to_node(), iterator->second->to_node() };
+  std::vector<long unsigned int> route_to_self { iterator->second->to_node(), iterator->second->to_node() };
 
   iterator->second->set_route(route_to_self);
 
-  return std::sprintf(buffer, "<OK %d %d>", car_id, iterator->second->to_node());
+  return std::sprintf(buffer, "<OK %d %lu>", car_id, iterator->second->to_node());
 }
 
 inline bool justine::robocar::Traffic::IsAuthenticated(CarLexer &car_lexer)

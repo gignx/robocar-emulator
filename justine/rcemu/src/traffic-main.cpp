@@ -46,6 +46,7 @@ int main(int argc, char* argv[])
   desc.add_options()
  ("version",      "produce version message")
  ("help,h",       "produce help message")
+ ("full_log,f",   boost::program_options::bool_switch(), "Enable logging of routes")
  ("verbose,v",    boost::program_options::bool_switch(), "verbose mode")
  ("shm,s",        boost::program_options::value<std::string>()->default_value("JustineSharedMemory"), "shared memory segment name")
  ("port,p",       boost::program_options::value<std::string>()->default_value("10007"), "the TCP port that the traffic server is listening on to allow agents to communicate with the traffic simulation, the default value is 10007")
@@ -109,6 +110,8 @@ int main(int argc, char* argv[])
 
   std::string port  = vm["port"].as<std::string>();
 
+  bool full  = vm["full_log"].as<bool>();
+
   int num_cars      = vm["cars"].as<int>();
 
   int delay         = vm["delay"].as<int>();
@@ -139,7 +142,8 @@ int main(int argc, char* argv[])
                                      type,
                                      delay,
                                      minutes,
-                                     verbose_mode};
+                                     verbose_mode,
+                                     full};
 
   try
   {

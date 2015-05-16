@@ -396,7 +396,7 @@ void justine::robocar::SmartCar::nextGuidedEdge ( void )
   {
     if ( m_step >= traffic.palist ( m_from, m_to ) )
     {
-      std::vector<unsigned int>::iterator i
+      std::vector<long unsigned int>::iterator i
           = std::find ( route.begin(), route.end(), to_node() );
 
       if ( i == route.end() )
@@ -405,7 +405,7 @@ void justine::robocar::SmartCar::nextGuidedEdge ( void )
       osmium::unsigned_object_id_type next_m_to;
       osmium::unsigned_object_id_type next_m_from;
 
-      if ( std::distance ( route.begin(), i ) == route.size() )
+      if ( static_cast<unsigned int>(std::distance ( route.begin(), i ) )== route.size() )
       {
         next_m_to = 0;
         next_m_from = to_node();
@@ -481,7 +481,7 @@ osmium::unsigned_object_id_type justine::robocar::Car::get_max_steps() const
   return traffic.palist ( m_from, m_to );
 }
 
-bool justine::robocar::SmartCar::set_route ( std::vector<unsigned int> & route )
+bool justine::robocar::SmartCar::set_route ( std::vector<long unsigned int> & route )
 {
   if ( route.size() < 2 )
     return false;

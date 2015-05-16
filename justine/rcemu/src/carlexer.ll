@@ -86,8 +86,8 @@ DISP	"<disp>"
 				  ss += sn;
 				  for (int i {0}; i < size; ++i)
 				  {
-				    unsigned int u{0u};
-				    std::sscanf(yytext+ss, "%u%n", &u, &sn);
+				    long unsigned int u{0u};
+				    std::sscanf(yytext+ss, "%lu%n", &u, &sn);
 				    route_.push_back(u);
 				    ss += sn;
 				  }

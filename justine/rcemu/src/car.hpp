@@ -103,7 +103,7 @@ public:
        << static_cast<unsigned int> ( get_type() );
   }
 
-  virtual void assign(CarData *car_data)
+  virtual void assign(CarData *car_data, bool full)
   {
     // meghívjuk a protobuf által generált setter függvényeket
     // és belehelyezzük a CarData objektumba az autó adatait
@@ -154,7 +154,7 @@ public:
        << static_cast<unsigned int> ( get_type() );
   }
 
-  virtual void assign(CarData *car_data)
+  virtual void assign(CarData *car_data, bool full)
   {
     car_data->set_node_from(m_from);
     car_data->set_node_to(to_node());
@@ -197,7 +197,7 @@ public:
        << static_cast<unsigned int> ( get_type() );
   }
 
-  virtual void assign(CarData *car_data)
+  virtual void assign(CarData *car_data, bool full)
   {
     car_data->set_node_from(m_from);
     car_data->set_node_to(to_node());
@@ -210,7 +210,7 @@ public:
   {
     return m_guided;
   }
-  bool set_route ( std::vector<unsigned int> & route );
+  bool set_route ( std::vector<long unsigned int> & route );
   virtual void nextEdge ( void );
   virtual void nextGuidedEdge ( void );
   bool set_fromto ( unsigned int from, unsigned int to );
@@ -219,16 +219,14 @@ public:
   {
     return this->id_;
   }
-
-protected:
-  int id_;
-  std::vector<unsigned int> route;
-
 private:
   bool m_guided {false};
   bool m_routed {false};
 
-  
+protected:
+  int id_;
+  std::vector<long unsigned int> route;
+ 
 };
 
 class CopCar : public SmartCar
@@ -255,7 +253,7 @@ public:
        << id_;
   }
 
-  virtual void assign(CarData *car_data)
+  virtual void assign(CarData *car_data, bool full)
   {
     // annyiban külonbozik a tobbi assign() függvénytől, hogy
     // a rendőrautókra jellemző adatokat is átadjuk
@@ -268,9 +266,13 @@ public:
     car_data->set_caught(num_gangsters_caught_);
     car_data->set_team(team_name_);
     car_data->set_id(id_);
-    car_data->set_size(route.size());
-    for(auto it = route.begin();it!=route.end();it++)
-      car_data->add_path(*it);
+    if(full){
+      car_data->set_size(route.size());
+      for(auto it = route.begin();it!=route.end();it++)
+        car_data->add_path(*it);
+    }else{
+      car_data->set_size(0);
+    }
   }
 
   std::string get_team_name() const
@@ -288,9 +290,9 @@ public:
     return ++num_gangsters_caught_;
   }
 protected:
-  int num_gangsters_caught_;
-
   std::string team_name_;
+
+  int num_gangsters_caught_;
 };
 
 }

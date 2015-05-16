@@ -98,7 +98,8 @@ public:
           TrafficType traffic_type = TrafficType::NORMAL,
           int delay = 200,
           int minutes = 10,
-          bool verbose_mode = false):
+          bool verbose_mode = false,
+          bool full = false):
             num_cars_(num_cars),
             num_gangsters_(0),
             port_(port),
@@ -106,7 +107,8 @@ public:
             traffic_type_(traffic_type),
             delay_(delay),
             running_time_minutes_(minutes),
-            verbose_mode_(verbose_mode)
+            verbose_mode_(verbose_mode),
+            full_logging(full)
   {
     #ifdef DEBUG
     std::cout << "Attaching shared memory segment called "
@@ -242,21 +244,28 @@ public:
 protected:
   boost::interprocess::managed_shared_memory *shm_segment_;
   boost::interprocess::offset_ptr<shm_map_Type> shm_map_;
-
-  int delay_;
   bool is_running_;
-  double catch_distance_;
+  
 
 private:
   int num_cars_;
   int num_gangsters_;
-  int running_time_elapsed_;
+  int port_;  
+
+
+protected:  
+  double catch_distance_;
+private:
+  TrafficType traffic_type_;
+protected:
+  int delay_;
+private:
   int running_time_minutes_;
-  int running_time_allowed_;
-  int port_;
+
 
   bool verbose_mode_;
-
+  bool full_logging;
+  int running_time_allowed_;  int running_time_elapsed_;
   std::mutex m_mutex;
   std::condition_variable m_cv;
   std::thread m_thread { &Traffic::SimulationLoop, this };
@@ -272,7 +281,7 @@ private:
 
   boost::asio::io_service io_service_;
 
-  TrafficType traffic_type_ {TrafficType::NORMAL};
+  
 
   std::string   logfile_name_;
   std::fstream *logfile_stream_;

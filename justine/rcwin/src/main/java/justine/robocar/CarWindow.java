@@ -107,27 +107,36 @@ public class CarWindow extends JFrame implements OnNewTrafficListener, Drawer,
 	}
 
 	public static String file;
+	public static String logfile;
 	private UpdateThread updater;
+	public static boolean log;
 
 	public static void main(String[] args) {
 
 		String hostname = "localhost";
 		int port = 10007;
 		file = args[0];
-
-		switch (args.length) {
-		case 3:
-			port = Integer.parseInt(args[2]);
-		case 2:
-			hostname = args[1];
-		case 1:
-			break;
-		default:
-			System.out
-					.println("java -jar target/site/justine-rcwin-0.0.16-jar-with-dependencies.jar ../../../lmap.txt localhost");
-			return;
+		
+		if (args.length == 3 && args[1].equals("--playlog")) {
+			log = true;
+			logfile = args[2];
+			new CarWindow(hostname, port).setVisible(true);
+		} else {
+			log = false;
+			switch (args.length) {
+			case 3:
+				port = Integer.parseInt(args[2]);
+			case 2:
+				hostname = args[1];
+			case 1:
+				break;
+			default:
+				System.out
+						.println("java -jar target/site/justine-rcwin-0.0.16-jar-with-dependencies.jar ../../../lmap.txt localhost");
+				return;
+			}
+			new CarWindow(hostname, port).setVisible(true);
 		}
-		new CarWindow(hostname, port).setVisible(true);
 	}
 
 	public void windowActivated(WindowEvent e) {

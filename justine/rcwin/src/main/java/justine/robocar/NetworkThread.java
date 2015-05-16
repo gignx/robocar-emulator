@@ -1,7 +1,10 @@
 package justine.robocar;
 
 import java.awt.Color;
+import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,6 +32,7 @@ public class NetworkThread extends Thread {
 	final static Map<Long, Loc> lmap = new HashMap<Long, Loc>();
 	public static GeoPosition position;
 	private OnNewTrafficListener onNewTrafficListener = null;
+	public static int speed = 200;
 
 	public interface OnNewTrafficListener {
 		public void onNewTraffic(Traffic traffic);
@@ -45,16 +49,21 @@ public class NetworkThread extends Thread {
 		readMap(lmap, CarWindow.file);
 		Socket trafficServer = null;
 		try {
-			trafficServer = new Socket(hostname, port);
-			OutputStream os = trafficServer.getOutputStream();
-			DataOutputStream dos = new DataOutputStream(os);
+			BufferedInputStream bis;
+			InputStream is;
+			if (CarWindow.log) {
+				File f = new File(CarWindow.logfile);
+				FileInputStream i = new FileInputStream(f);
+				bis = new BufferedInputStream(i);
+			} else {
+				trafficServer = new Socket(hostname, port);
+				OutputStream os = trafficServer.getOutputStream();
+				DataOutputStream dos = new DataOutputStream(os);
+				dos.writeUTF("<disp>");
 
-			dos.writeUTF("<disp>");
-			InputStream is = trafficServer.getInputStream();
-
-			java.io.BufferedInputStream bis = new java.io.BufferedInputStream(
-					is);
-			
+				is = trafficServer.getInputStream();
+				bis = new BufferedInputStream(is);
+			}
 
 			// 512 KB
 			byte[] buff = new byte[524288];
@@ -69,6 +78,8 @@ public class NetworkThread extends Thread {
 			Traffic traffic = new Traffic();
 			int team_counter = 0;
 			while (!Thread.currentThread().isInterrupted()) {
+				if (CarWindow.log)
+					Thread.sleep(speed);
 				cop_list.clear();
 				gangster_list.clear();
 				caught_list.clear();
@@ -87,13 +98,14 @@ public class NetworkThread extends Thread {
 				// 4 bájtot olvasunk a bufferünkbe (0. indextől 3-ig)
 				// ez a 4 bájt az üzenet hossza, amit fogadunk
 				bis.read(buff, 0, 4);
-
 				// a ByteBuffer static wrap() metódusával egy ByteBufferbe
 				// rakjuk
 				// a beolvasott adatot. Utána gondoskodunk, hogy biztosan
 				// megfelelő
 				// bájtsorrendet alkalmazzunk, majd int-ként elkérjük
-				int toRead = java.nio.ByteBuffer.wrap(buff)
+				int toRead;
+
+				toRead = java.nio.ByteBuffer.wrap(buff)
 						.order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
 
 				// annyit olvasunk a bufferbe, amennyit előzőleg kaptunk
@@ -220,7 +232,7 @@ public class NetworkThread extends Thread {
 					}
 
 				}
-				
+
 				if (time >= minutes * 60 * 1000 / 200) {
 					throw new Exception();
 				}
@@ -233,14 +245,15 @@ public class NetworkThread extends Thread {
 				time = time - min * 60 * 5 - sec * 5;
 
 				sb.append("|");
-				if(min<10) sb.append("0");
+				if (min < 10)
+					sb.append("0");
 				sb.append(min);
 				sb.append(":");
-				if(sec<10) sb.append("0");
+				if (sec < 10)
+					sb.append("0");
 				sb.append(sec);
 				sb.append("|");
-				
-				
+
 				traffic = new Traffic();
 				traffic.copList = cop_list;
 				traffic.gangsterList = gangster_list;
@@ -258,13 +271,11 @@ public class NetworkThread extends Thread {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+
 		} finally {
 			try {
 				trafficServer.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 

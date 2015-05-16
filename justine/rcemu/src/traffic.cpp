@@ -164,19 +164,42 @@ void justine::robocar::Traffic::StepCars()
 {
   std::lock_guard<std::mutex> lock(cars_mutex);
 
-  *logfile_stream_ << running_time_elapsed_
-                   << " "
-                   << running_time_minutes_
-                   << " "
-                   << cars.size() << std::endl;
+  for(auto car:cars)car->step();
 
+
+  int msg_length = 0;
+  TrafficStateHeader traffic_state_header;
+  traffic_state_header.set_time_minutes(running_time_minutes_);
+  traffic_state_header.set_time_elapsed(running_time_elapsed_);
+  traffic_state_header.set_num_cars(cars.size());
+
+  std::stringbuf buf;
+  std::ostream os(&buf);
+  traffic_state_header.SerializeToOstream(&os);
+  msg_length = buf.str().length();
+  const char *char_len = reinterpret_cast<const char*>(&msg_length);
+  logfile_stream_->write(char_len, 4);
+  const std::string& tmp = buf.str();
+  const char* data = tmp.c_str();
+  logfile_stream_->write(data,msg_length);
   for(auto car:cars)
   {
-    car->step();
+    CarData car_data;
+    //Erre azért van szükség, mert ha a külső buffert használnánk, az memóriafragmentáció miatt elfogy =(
+    std::stringbuf buf;
+    std::ostream os(&buf);
 
-    *logfile_stream_ << *car
-                     <<  " " << std::endl;
+    car->assign(&car_data);
+    car_data.SerializeToOstream(&os);
+    msg_length = buf.str().length();
+    const char *char_len = reinterpret_cast<const char*>(&msg_length);
+    logfile_stream_->write(char_len,4);
+    const std::string& tmp = buf.str();
+    const char* data = tmp.c_str();
+    logfile_stream_->write(data,msg_length);
   }
+  
+
 }
 
 void justine::robocar::Traffic::CheckIfCaught(void)
@@ -408,6 +431,9 @@ int justine::robocar::Traffic::InitCmdHandler(CarLexer &car_lexer, char *buffer)
 // CAR IMPORTANT
 int justine::robocar::Traffic::RouteCmdHandler(CarLexer &car_lexer, char *buffer)
 {
+
+  std::lock_guard<std::mutex> lock(cars_mutex);
+
   int car_id = car_lexer.get_car_id();
 
   auto iterator = m_smart_cars_map.find(car_id);
@@ -426,6 +452,9 @@ int justine::robocar::Traffic::RouteCmdHandler(CarLexer &car_lexer, char *buffer
 // CAR IMPORTANT
 int justine::robocar::Traffic::CarCmdHandler(CarLexer &car_lexer, char *buffer)
 {
+
+std::lock_guard<std::mutex> lock(cars_mutex);
+
   int car_id = car_lexer.get_car_id();
 
   auto iterator = m_smart_cars_map.find(car_id);
@@ -594,7 +623,6 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
     {
       car->step();
     }
-
     // ebbe fog belekerülni a szerializált adat
     boost::asio::streambuf buf;
     // wrapper a buffer koré, hogy átadhassuk a SerializeToOstream-nek
@@ -671,6 +699,9 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
 // Written together with Krisztián Szendrődi
 int justine::robocar::Traffic::StopCmdHandler(CarLexer &car_lexer, char *buffer)
 {
+
+  std::lock_guard<std::mutex> lock(cars_mutex);
+
   int car_id = car_lexer.get_car_id();
 
   auto iterator = m_smart_cars_map.find(car_id);

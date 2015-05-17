@@ -16,12 +16,13 @@ public class Traffic {
     public static Map<Integer, Boolean> clicked_map = new HashMap<Integer, Boolean>();
     public LinkedList<LinkedList<? extends UpdateableWaypoint>> lists = new LinkedList<LinkedList<? extends UpdateableWaypoint>>();
     long timestamp;
-
-    public Traffic() {
+    public long seconds;
+    
+ Traffic() {
 	super();
     }
 
-    public Traffic(LinkedList<WaypointPolice> copList, LinkedList<WaypointGangster> gangsterList, LinkedList<WaypointCaught> caughtList, LinkedList<WaypointNormal> defaultList, String title, Map<String, CopTeamData> cop_teams, String longestTeamName) {
+    public Traffic(LinkedList<WaypointPolice> copList, LinkedList<WaypointGangster> gangsterList, LinkedList<WaypointCaught> caughtList, LinkedList<WaypointNormal> defaultList, String title, Map<String, CopTeamData> cop_teams, String longestTeamName,long minutes) {
 	this.copList.addAll(copList);
 	this.gangsterList.addAll(gangsterList);
 	this.caughtList.addAll(caughtList);
@@ -29,6 +30,7 @@ public class Traffic {
 	this.title = title;
 	this.cop_teams.putAll(cop_teams);
 	this.longestTeamName = longestTeamName;
+	this.seconds=minutes;
 	lists.clear();
 	lists.add(defaultList);
 	lists.add(gangsterList);
@@ -51,7 +53,7 @@ public class Traffic {
 	gangsterList.addAll(copy.gangsterList);
 	caughtList.addAll(copy.caughtList);
 	defaultList.addAll(copy.defaultList);
-	Traffic t = new Traffic(copList, gangsterList, caughtList, defaultList, copy.title, new_cop_teams, copy.longestTeamName);
+	Traffic t = new Traffic(copList, gangsterList, caughtList, defaultList, copy.title, new_cop_teams, copy.longestTeamName, copy.seconds);
 	t.timestamp = copy.timestamp;
 	return t;
     }

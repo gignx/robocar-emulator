@@ -13,6 +13,8 @@ import java.util.Map;
 
 import javax.swing.event.MouseInputListener;
 
+import justine.robocar.CarWindow.PlayBack;
+
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
 import org.jxmapviewer.VirtualEarthTileFactoryInfo;
@@ -34,7 +36,7 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 					VirtualEarthTileFactoryInfo.SATELLITE)),
 			new DefaultTileFactory(new VirtualEarthTileFactoryInfo(
 					VirtualEarthTileFactoryInfo.HYBRID)) };
-
+	
 	public MapViewer(final CarPainter carPainter) {
 		super();
 		setDoubleBuffered(false);
@@ -55,6 +57,8 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 					LinkedList<WaypointPolice> waypoints_ = carPainter.traffic.copList;
 
 					for (WaypointPolice waypoint : waypoints_) {
+						if (Traffic.clicked_map.get(waypoint.getID()) == null)
+							return;
 						if (Traffic.clicked_map.get(waypoint.getID())) {
 							Point2D point = getTileFactory().geoToPixel(
 									waypoint.getPosition(), getZoom());
@@ -110,15 +114,6 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 
 		if (evt.getKeyCode() == KeyEvent.VK_CONTROL) {
 			setZoom(getZoom() + 1);
-		}
-
-		if (evt.getKeyCode() == KeyEvent.VK_ADD) {
-			NetworkThread.speed += 10;
-		}
-
-		if (evt.getKeyCode() == KeyEvent.VK_SUBTRACT) {
-			if (NetworkThread.speed > 10)
-				NetworkThread.speed -= 10;
 		}
 
 		if (evt.getKeyCode() == KeyEvent.VK_SPACE) {

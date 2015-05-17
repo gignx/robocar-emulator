@@ -4,7 +4,6 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import justine.robocar.CarWindow.PlayBack;
 
 public class JSeekbar extends JSlider implements ChangeListener {
 
@@ -30,7 +29,7 @@ public class JSeekbar extends JSlider implements ChangeListener {
 	public void stateChanged(ChangeEvent e) {
 		if (byHuman) {
 			int p = ((JSeekbar) e.getSource()).getValue();
-			long pos = CarWindow.seekmap.get((long)p);
+			long pos = CarWindow.seekmap.get((long) p);
 			playback.seekTo(pos);
 		}
 	}

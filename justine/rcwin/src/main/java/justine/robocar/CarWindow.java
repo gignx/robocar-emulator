@@ -60,6 +60,7 @@ import justine.robocar.UpdateThread.Drawer;
 
 import org.jxmapviewer.viewer.GeoPosition;
 
+
 @SuppressWarnings("serial")
 public class CarWindow extends JFrame implements OnNewTrafficListener, Drawer, WindowListener {
 
@@ -79,17 +80,7 @@ public class CarWindow extends JFrame implements OnNewTrafficListener, Drawer, W
 	JLabel speed;
 	PlayBack playback;
 
-	public abstract interface PlayBack {
-		public void start_play();
 
-		public void stop_play();
-
-		public void seekTo(long position);
-
-		public void setSpeed(int speed);
-
-		public int getSpeed();
-	}
 
 	public CarWindow(String hostname, int port) {
 		this.hostname = hostname;

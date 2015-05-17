@@ -16,7 +16,6 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import justine.robocar.CarWindow.PlayBack;
 import justine.robocar.TrafficStateProtos.CarData;
 import justine.robocar.TrafficStateProtos.TrafficStateHeader;
 
@@ -272,7 +271,8 @@ public class NetworkThread extends Thread implements PlayBack {
 						onNewTrafficListener.onNewTraffic(Traffic.create(traffic));
 
 				} catch (Exception e) {
-					if(!CarWindow.log) throw e;
+					if (!CarWindow.log)
+						throw e;
 				}
 			}
 		} catch (Exception e) {

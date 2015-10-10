@@ -135,7 +135,10 @@ public:
       running_time_allowed_ = running_time_minutes_ * 60 * 1000;
     }
 
+    InitializePedestrians();
+    
     InitializeRoutineCars();
+
 
     OpenLogStream();
 
@@ -161,6 +164,8 @@ public:
   void CloseLogStream(void);
 
   void InitializeRoutineCars(void);
+
+  void InitializePedestrians(void);
 
   void SimulationLoop(void);
 
@@ -245,15 +250,15 @@ protected:
   boost::interprocess::managed_shared_memory *shm_segment_;
   boost::interprocess::offset_ptr<shm_map_Type> shm_map_;
   bool is_running_;
-  
+
 
 private:
   int num_cars_;
   int num_gangsters_;
-  int port_;  
+  int port_;
 
 
-protected:  
+protected:
   double catch_distance_;
 private:
   TrafficType traffic_type_;
@@ -281,7 +286,7 @@ private:
 
   boost::asio::io_service io_service_;
 
-  
+
 
   std::string   logfile_name_;
   std::fstream *logfile_stream_;

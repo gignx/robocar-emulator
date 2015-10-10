@@ -76,6 +76,7 @@ public class NetworkThread extends Thread implements PlayBack {
 			LinkedList<WaypointGangster> gangster_list = new LinkedList<WaypointGangster>();
 			LinkedList<WaypointCaught> caught_list = new LinkedList<WaypointCaught>();
 			LinkedList<WaypointNormal> default_list = new LinkedList<WaypointNormal>();
+			LinkedList<WaypointPedestrian> pedestrian_list = new LinkedList<WaypointPedestrian>();
 
 			LinkedList<Loc> path = new LinkedList<Loc>();
 
@@ -228,6 +229,9 @@ public class NetworkThread extends Thread implements PlayBack {
 						case 3:
 							caught_list.add(new WaypointCaught(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_)));
 							break;
+						case 4:
+							pedestrian_list.add(new WaypointPedestrian(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_)));
+							break;
 						default:
 							default_list.add(new WaypointNormal(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_)));
 							break;
@@ -261,6 +265,7 @@ public class NetworkThread extends Thread implements PlayBack {
 					traffic.gangsterList = gangster_list;
 					traffic.caughtList = caught_list;
 					traffic.defaultList = default_list;
+					traffic.pedestrianList = pedestrian_list;
 					traffic.title = sb.toString();
 					traffic.cop_teams = cop_teams;
 					traffic.longestTeamName = longestTeamName;

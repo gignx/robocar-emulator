@@ -38,6 +38,8 @@ public class CarPainter extends WaypointPainter<Waypoint> {
 		if (traffic != null) {
 			for (WaypointPolice way : traffic.copList)
 				way.drawPath(g, map);
+			for (WaypointPedestrian way : traffic.pedestrianList)
+					way.draw(g, map);
 			for (WaypointNormal way : traffic.defaultList)
 				way.draw(g, map);
 			for (WaypointCaught way : traffic.caughtList)

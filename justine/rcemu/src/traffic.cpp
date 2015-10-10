@@ -96,6 +96,49 @@ void justine::robocar::Traffic::InitializeRoutineCars(void)
   #endif
 }
 
+void justine::robocar::Traffic::InitializePedestrians(void)
+{
+  #ifdef DEBUG
+  std::cout << "Initializing pedestrians ... " << std::endl;
+  #endif
+
+  if (traffic_type_ != TrafficType::NORMAL)
+  {
+    for (shm_map_Type::iterator iter=shm_map_->begin();
+         iter!=shm_map_->end();
+         ++iter)
+    {
+      for (auto noderef : iter->second.m_alist)
+      {
+        Pedestrian::plist[iter->first].push_back(1);
+        Pedestrian::plist_evaporate[iter->first].push_back(1);
+      }
+    }
+  }
+
+  for (int i {0}; i < num_cars_; ++i)
+  {
+    if (traffic_type_ == TrafficType::NORMAL)
+    {
+      std::shared_ptr<Car> car(new Car {*this});
+      car->set_type(CarType::PEDESTRIAN);
+      car->init();
+      cars.push_back(car);
+    }
+    else
+    {
+      std::shared_ptr<Pedestrian> car(new Pedestrian {*this});
+      car->set_type(CarType::PEDESTRIAN);
+      car->init();
+      cars.push_back(car);
+    }
+  }
+
+  #ifdef DEBUG
+  std::cout << "All pedestrians initialized." <<"\n";
+  #endif
+}
+
 void justine::robocar::Traffic::SimulationLoop(void)
 {
   std::unique_lock<std::mutex> lock(m_mutex);
@@ -198,7 +241,7 @@ void justine::robocar::Traffic::StepCars()
     const char* data = tmp.c_str();
     logfile_stream_->write(data,msg_length);
   }
-  
+
 
 }
 

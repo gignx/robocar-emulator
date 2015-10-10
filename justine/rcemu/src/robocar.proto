@@ -9,6 +9,7 @@ message CarData {
     POLICE    = 1;
     GANGSTER  = 2;
     CAUGHT    = 3;
+    PEDESTRIAN = 4;
   }
 
   required fixed64 node_from  = 1;

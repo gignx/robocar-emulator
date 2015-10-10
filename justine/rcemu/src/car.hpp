@@ -49,7 +49,7 @@ namespace robocar
 
 enum class CarType: unsigned int
 {
-  NORMAL=0, POLICE, GANGSTER, CAUGHT
+  NORMAL=0, POLICE, GANGSTER, CAUGHT, PEDESTRIAN
 };
 
 class Traffic;
@@ -154,6 +154,8 @@ public:
        << static_cast<unsigned int> ( get_type() );
   }
 
+
+
   virtual void assign(CarData *car_data, bool full)
   {
     car_data->set_node_from(m_from);
@@ -175,6 +177,49 @@ private:
   bool rnd {true};
 };
 
+
+class Pedestrian : public Car
+{
+public:
+  Pedestrian ( Traffic & traffic );
+
+  virtual void nextSmarterEdge ( void );
+
+  virtual void print ( std::ostream & os ) const
+  {
+    os << m_from
+       << " "
+       << to_node()
+       << " "
+       << get_max_steps()
+       << " "
+       << get_step()
+       << " "
+       << static_cast<unsigned int> ( get_type() );
+  }
+
+
+
+  virtual void assign(CarData *car_data, bool full)
+  {
+    car_data->set_node_from(m_from);
+    car_data->set_node_to(to_node());
+    car_data->set_max_step(get_max_steps());
+    car_data->set_step(get_step());
+    car_data->set_type(static_cast<CarData::ProtoCarType>(get_type())); // safe
+  }
+
+  osmium::unsigned_object_id_type ped ( void );
+  osmium::unsigned_object_id_type ped_rnd ( void );
+  osmium::unsigned_object_id_type ped_rernd ( void );
+  osmium::unsigned_object_id_type ped_mrernd ( void );
+
+  static AdjacencyList plist;
+  static AdjacencyList plist_evaporate;
+
+private:
+  bool rnd {true};
+};
 
 class SmartCar : public Car
 {
@@ -226,7 +271,7 @@ private:
 protected:
   int id_;
   std::vector<long unsigned int> route;
- 
+
 };
 
 class CopCar : public SmartCar

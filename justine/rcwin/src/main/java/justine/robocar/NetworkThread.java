@@ -102,6 +102,7 @@ public class NetworkThread extends Thread implements PlayBack {
 					gangster_list.clear();
 					caught_list.clear();
 					default_list.clear();
+					pedestrian_list.clear();
 					path.clear();
 
 					int time = 0, size = 0, minutes = 0;

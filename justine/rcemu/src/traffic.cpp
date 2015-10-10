@@ -116,7 +116,7 @@ void justine::robocar::Traffic::InitializePedestrians(void)
     }
   }
 
-  for (int i {0}; i < num_cars_; ++i)
+  for (int i {0}; i < num_cars_*5; ++i)
   {
     if (traffic_type_ == TrafficType::NORMAL)
     {

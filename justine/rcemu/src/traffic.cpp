@@ -120,7 +120,7 @@ void justine::robocar::Traffic::InitializePedestrians(void)
   {
     if (traffic_type_ == TrafficType::NORMAL)
     {
-      std::shared_ptr<Car> car(new Car {*this});
+      std::shared_ptr<Car> car(new Pedestrian {*this});
       car->set_type(CarType::PEDESTRIAN);
       car->init();
       cars.push_back(car);

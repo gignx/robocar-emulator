@@ -183,7 +183,9 @@ class Pedestrian : public Car
 public:
   Pedestrian ( Traffic & traffic );
 
-  virtual void nextSmarterEdge ( void );
+  //virtual void nextSmarterEdge ( void );
+
+virtual void step();
 
   virtual void print ( std::ostream & os ) const
   {
@@ -219,6 +221,7 @@ public:
 
 private:
   bool rnd {true};
+  int counter = 0;
 };
 
 class SmartCar : public Car

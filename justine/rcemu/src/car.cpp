@@ -423,7 +423,7 @@ void justine::robocar::AntCar::nextSmarterEdge ( void )
   }
 }
 
-void justine::robocar::Pedestrian::nextSmarterEdge ( void )
+/*void justine::robocar::Pedestrian::nextSmarterEdge ( void )
 {
   osmium::unsigned_object_id_type next_m_from = traffic.alist ( m_from, m_to );
   size_t nes = traffic.nedges ( next_m_from );
@@ -446,7 +446,7 @@ void justine::robocar::Pedestrian::nextSmarterEdge ( void )
     default:
             next_m_to = ped_mrernd();
             break;
-  }
+  }*/
 
   /*
   if ( traffic.get_type() == TrafficType::ANT )
@@ -466,7 +466,7 @@ void justine::robocar::Pedestrian::nextSmarterEdge ( void )
     next_m_to = ant_mrernd();
   }
   */
-
+/*
   if ( traffic.alist ( next_m_from, next_m_to ) == m_from )
     next_m_to = ( next_m_to + 1 ) % nes;
 
@@ -481,7 +481,7 @@ void justine::robocar::Pedestrian::nextSmarterEdge ( void )
 
     traffic.set_salist ( m_from, m_to, traffic.salist ( m_from, m_to ) +1 );
   }
-}
+}*/
 
 
 void justine::robocar::Car::nextSmarterEdge ( void )
@@ -547,6 +547,15 @@ void justine::robocar::Car::step()
   else
   {
       // car stopped
+  }
+}
+
+void justine::robocar::Pedestrian::step() {
+  if (counter == 5) {
+    Car::step();
+    counter = 0;
+  } else {
+    counter++;
   }
 }
 

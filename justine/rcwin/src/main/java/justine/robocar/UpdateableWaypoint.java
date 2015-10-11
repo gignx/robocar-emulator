@@ -29,6 +29,15 @@ public class UpdateableWaypoint implements Waypoint {
 	steplat = (to.getLatitude() - from.getLatitude()) / (max);
     }
 
+    public UpdateableWaypoint(GeoPosition from, GeoPosition to, int pmax) {
+      max = pmax;
+      if (from.getLatitude() == to.getLatitude() && from.getLongitude() == to.getLongitude())
+    	    step = max;
+    	current = from;
+    	steplong = (to.getLongitude() - from.getLongitude()) / (max);
+    	steplat = (to.getLatitude() - from.getLatitude()) / (max);
+    }
+
     public void update() {
 	if (step < max) {
 	    current = new GeoPosition(current.getLatitude() + steplat, current.getLongitude() + steplong);

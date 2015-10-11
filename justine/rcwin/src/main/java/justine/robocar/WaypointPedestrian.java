@@ -14,8 +14,7 @@ public class WaypointPedestrian extends UpdateableWaypoint {
     private static Image sprite;
 
     public WaypointPedestrian(GeoPosition from, GeoPosition to) {
-	super(from, to);
-  max = 100;
+	      super(from, to, 500);
     }
 
     public Image getSprite() {

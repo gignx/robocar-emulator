@@ -73,6 +73,7 @@ public class NetworkThread extends Thread implements PlayBack {
 			byte[] buff = new byte[524288];
 
 			LinkedList<WaypointPolice> cop_list = new LinkedList<WaypointPolice>();
+			LinkedList<WaypointBus> bus_list = new LinkedList<WaypointBus>();
 			LinkedList<WaypointGangster> gangster_list = new LinkedList<WaypointGangster>();
 			LinkedList<WaypointCaught> caught_list = new LinkedList<WaypointCaught>();
 			LinkedList<WaypointNormal> default_list = new LinkedList<WaypointNormal>();
@@ -99,6 +100,7 @@ public class NetworkThread extends Thread implements PlayBack {
 				}
 				try {
 					cop_list.clear();
+					bus_list.clear();
 					gangster_list.clear();
 					caught_list.clear();
 					default_list.clear();
@@ -232,6 +234,10 @@ public class NetworkThread extends Thread implements PlayBack {
 							break;
 						case 4:
 							pedestrian_list.add(new WaypointPedestrian(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_)));
+							break;
+						case 5:
+							//TODO: Add path!
+							bus_list.add(new WaypointBus(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_), name, id));
 							break;
 						default:
 							default_list.add(new WaypointNormal(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_)));

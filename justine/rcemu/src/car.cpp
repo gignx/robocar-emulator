@@ -598,7 +598,7 @@ void justine::robocar::SmartCar::nextGuidedEdge ( void )
 
 void justine::robocar::SmartCar::step()
 {
-  if ( m_type == CarType::POLICE )
+  if ( (m_type == CarType::POLICE) || (m_type == CarType::BUS) )
   {
     if ( m_guided )
       nextGuidedEdge();

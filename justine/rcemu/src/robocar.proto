@@ -10,6 +10,7 @@ message CarData {
     GANGSTER  = 2;
     CAUGHT    = 3;
     PEDESTRIAN = 4;
+    BUS       = 5;
   }
 
   required fixed64 node_from  = 1;

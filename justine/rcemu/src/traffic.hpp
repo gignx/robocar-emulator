@@ -136,7 +136,7 @@ public:
     }
 
     InitializePedestrians();
-    
+
     InitializeRoutineCars();
 
 
@@ -166,6 +166,8 @@ public:
   void InitializeRoutineCars(void);
 
   void InitializePedestrians(void);
+
+  void InitializeBuses(void);
 
   void SimulationLoop(void);
 

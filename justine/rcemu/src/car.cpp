@@ -659,3 +659,11 @@ justine::robocar::CopCar::CopCar (
 {
 
 }
+
+justine::robocar::Bus::Bus (
+  justine::robocar::Traffic & traffic,
+  bool guided, const char *name, int id) :
+    justine::robocar::SmartCar(traffic, CarType::BUS, guided, id), line_(name)
+{
+
+}

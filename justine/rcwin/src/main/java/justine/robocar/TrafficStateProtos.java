@@ -310,6 +310,10 @@ public final class TrafficStateProtos {
        * <code>PEDESTRIAN = 4;</code>
        */
       PEDESTRIAN(4, 4),
+      /**
+       * <code>BUS = 5;</code>
+       */
+      BUS(5, 5),
       ;
 
       /**
@@ -332,6 +336,10 @@ public final class TrafficStateProtos {
        * <code>PEDESTRIAN = 4;</code>
        */
       public static final int PEDESTRIAN_VALUE = 4;
+      /**
+       * <code>BUS = 5;</code>
+       */
+      public static final int BUS_VALUE = 5;
 
 
       public final int getNumber() { return value; }
@@ -343,6 +351,7 @@ public final class TrafficStateProtos {
           case 2: return GANGSTER;
           case 3: return CAUGHT;
           case 4: return PEDESTRIAN;
+          case 5: return BUS;
           default: return null;
         }
       }
@@ -2040,18 +2049,18 @@ public final class TrafficStateProtos {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\021src/robocar.proto\022\017justine.robocar\"\232\002\n" +
+      "\n\021src/robocar.proto\022\017justine.robocar\"\243\002\n" +
       "\007CarData\022\021\n\tnode_from\030\001 \002(\006\022\017\n\007node_to\030\002" +
       " \002(\006\022\020\n\010max_step\030\003 \002(\006\022\014\n\004step\030\004 \002(\006\0223\n\004" +
       "type\030\005 \002(\0162%.justine.robocar.CarData.Pro" +
       "toCarType\022\016\n\006caught\030\006 \001(\005\022\014\n\004team\030\007 \001(\t\022" +
       "\n\n\002id\030\010 \001(\005\022\014\n\004size\030\t \001(\005\022\014\n\004path\030\n \003(\006\"" +
-      "P\n\014ProtoCarType\022\n\n\006NORMAL\020\000\022\n\n\006POLICE\020\001\022" +
+      "Y\n\014ProtoCarType\022\n\n\006NORMAL\020\000\022\n\n\006POLICE\020\001\022" +
       "\014\n\010GANGSTER\020\002\022\n\n\006CAUGHT\020\003\022\016\n\nPEDESTRIAN\020" +
-      "\004\"R\n\022TrafficStateHeader\022\024\n\014time_minutes\030" +
-      "\001 \002(\005\022\024\n\014time_elapsed\030\002 \002(\005\022\020\n\010num_cars\030",
-      "\003 \002(\005B%\n\017justine.robocarB\022TrafficStatePr" +
-      "otos"
+      "\004\022\007\n\003BUS\020\005\"R\n\022TrafficStateHeader\022\024\n\014time" +
+      "_minutes\030\001 \002(\005\022\024\n\014time_elapsed\030\002 \002(\005\022\020\n\010",
+      "num_cars\030\003 \002(\005B%\n\017justine.robocarB\022Traff" +
+      "icStateProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

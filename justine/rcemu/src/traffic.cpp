@@ -139,6 +139,21 @@ void justine::robocar::Traffic::InitializePedestrians(void)
   #endif
 }
 
+void justine::robocar::Traffic::InitializeBuses(void)
+{
+  // TODO read bus line data
+
+  std::string line;
+
+  std::shared_ptr<Car> bus(new Bus({*this, true, line.c_str(), 48}));
+
+  bus->set_type(CarType::BUS);
+
+  bus->init();
+
+  cars.push_back(bus);
+}
+
 void justine::robocar::Traffic::SimulationLoop(void)
 {
   std::unique_lock<std::mutex> lock(m_mutex);

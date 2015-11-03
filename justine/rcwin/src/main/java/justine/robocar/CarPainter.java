@@ -40,6 +40,8 @@ public class CarPainter extends WaypointPainter<Waypoint> {
 				way.drawPath(g, map);
 			for (WaypointPedestrian way : traffic.pedestrianList)
 					way.draw(g, map);
+			for (WaypointBus way : traffic.busList)
+							way.draw(g, map);
 			for (WaypointNormal way : traffic.defaultList)
 				way.draw(g, map);
 			for (WaypointCaught way : traffic.caughtList)

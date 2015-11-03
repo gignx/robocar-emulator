@@ -269,6 +269,7 @@ public class NetworkThread extends Thread implements PlayBack {
 
 					traffic = new Traffic();
 					traffic.copList = cop_list;
+					traffic.busList = bus_list;
 					traffic.gangsterList = gangster_list;
 					traffic.caughtList = caught_list;
 					traffic.defaultList = default_list;

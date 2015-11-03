@@ -139,6 +139,7 @@ public:
 
     InitializeRoutineCars();
 
+    InitializeBuses();
 
     OpenLogStream();
 

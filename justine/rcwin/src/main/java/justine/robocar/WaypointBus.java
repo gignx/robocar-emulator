@@ -42,8 +42,7 @@ class WaypointBus extends UpdateableWaypoint {
 	@Override
 	public void update() {
 		super.update();
-		path.set(0, new Loc(getPosition().getLatitude(), getPosition()
-				.getLongitude()));
+	//	path.set(0, new Loc(getPosition().getLatitude(), getPosition().getLongitude()));
 	}
 
 	public void drawPath(Graphics2D g, JXMapViewer map) {
@@ -157,7 +156,7 @@ class WaypointBus extends UpdateableWaypoint {
 	public Image getSprite() {
 		if (sprite == null) {
 			ClassLoader classLoader = this.getClass().getClassLoader();
-			sprite = new ImageIcon(classLoader.getResource("logo4.png"))
+			sprite = new ImageIcon(classLoader.getResource("logo6.png"))
 					.getImage();
 		}
 		return sprite;

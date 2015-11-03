@@ -7,6 +7,7 @@ import java.util.Map;
 public class Traffic {
 
     public LinkedList<WaypointPolice> copList = new LinkedList<WaypointPolice>();
+    public LinkedList<WaypointBus> busList = new LinkedList<WaypointBus>();
     public LinkedList<WaypointGangster> gangsterList = new LinkedList<WaypointGangster>();
     public LinkedList<WaypointCaught> caughtList = new LinkedList<WaypointCaught>();
     public LinkedList<WaypointNormal> defaultList = new LinkedList<WaypointNormal>();
@@ -23,8 +24,9 @@ public class Traffic {
 	super();
     }
 
-    public Traffic(LinkedList<WaypointPolice> copList, LinkedList<WaypointGangster> gangsterList, LinkedList<WaypointCaught> caughtList, LinkedList<WaypointNormal> defaultList, LinkedList<WaypointPedestrian> pedestrianList, String title, Map<String, CopTeamData> cop_teams, String longestTeamName,long minutes) {
+    public Traffic(LinkedList<WaypointPolice> copList, LinkedList<WaypointBus> busList, LinkedList<WaypointGangster> gangsterList, LinkedList<WaypointCaught> caughtList, LinkedList<WaypointNormal> defaultList, LinkedList<WaypointPedestrian> pedestrianList, String title, Map<String, CopTeamData> cop_teams, String longestTeamName,long minutes) {
 	this.copList.addAll(copList);
+  this.busList.addAll(busList);
 	this.gangsterList.addAll(gangsterList);
 	this.caughtList.addAll(caughtList);
 	this.defaultList.addAll(defaultList);
@@ -37,6 +39,7 @@ public class Traffic {
 	lists.add(defaultList);
 	lists.add(gangsterList);
 	lists.add(caughtList);
+  lists.add(busList);
 	lists.add(copList);
   lists.add(pedestrianList);
 	if (timestamp == 0)
@@ -49,16 +52,18 @@ public class Traffic {
 	    new_cop_teams.put(e.getKey(), new CopTeamData(e.getValue().num_caught, e.getValue().color));
 	}
 	LinkedList<WaypointPolice> copList = new LinkedList<WaypointPolice>();
+  LinkedList<WaypointBus> busList = new LinkedList<WaypointBus>();
 	LinkedList<WaypointGangster> gangsterList = new LinkedList<WaypointGangster>();
 	LinkedList<WaypointCaught> caughtList = new LinkedList<WaypointCaught>();
 	LinkedList<WaypointNormal> defaultList = new LinkedList<WaypointNormal>();
   LinkedList<WaypointPedestrian> pedestrianList = new LinkedList<WaypointPedestrian>();
 	copList.addAll(copy.copList);
+  busList.addAll(copy.busList);
 	gangsterList.addAll(copy.gangsterList);
 	caughtList.addAll(copy.caughtList);
 	defaultList.addAll(copy.defaultList);
   pedestrianList.addAll(copy.pedestrianList);
-	Traffic t = new Traffic(copList, gangsterList, caughtList, defaultList,pedestrianList, copy.title, new_cop_teams, copy.longestTeamName, copy.seconds);
+	Traffic t = new Traffic(copList,busList, gangsterList, caughtList, defaultList,pedestrianList, copy.title, new_cop_teams, copy.longestTeamName, copy.seconds);
 	t.timestamp = copy.timestamp;
 	return t;
     }

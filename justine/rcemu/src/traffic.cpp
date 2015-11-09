@@ -143,14 +143,42 @@ void justine::robocar::Traffic::InitializeBuses(void)
 {
   // TODO read bus line data
 
+  std::vector<osmium::unsigned_object_id_type> busway ;
+
+  //busway.push_back(3039407851);
+  busway.push_back(3039407852);
+  busway.push_back(3039407853);
+  busway.push_back(3039407854);
+  busway.push_back(3055243044);
+  busway.push_back(3055243045);
+  busway.push_back(3055243043);
+  busway.push_back(3055243041);
+  busway.push_back(3055243040);
+  busway.push_back(3055243039);
+  busway.push_back(3055243038);
+  busway.push_back(3055243033);
+  busway.push_back(3055242831);
+  busway.push_back(3055242830);
+  busway.push_back(3055242829);
+  busway.push_back(3055242832);
+  busway.push_back(3055243034);
+  busway.push_back(3055243037);
+  busway.push_back(3055243036);
+  busway.push_back(3055243035);
+
+
+
+
+
   std::string line;
 
   std::shared_ptr<Car> bus(new Bus({*this, true, line.c_str(), 48}));
+  std::shared_ptr<SmartCar> b = std::dynamic_pointer_cast<SmartCar>( bus);
+  b->set_route(busway);
+  b->set_type(CarType::BUS);
 
-  bus->set_type(CarType::BUS);
-
-  bus->init();
-
+  std::shared_ptr<Bus> b2 = std::dynamic_pointer_cast<Bus>( bus);
+  b2->init();
   cars.push_back(bus);
 }
 
@@ -222,7 +250,9 @@ void justine::robocar::Traffic::StepCars()
 {
   std::lock_guard<std::mutex> lock(cars_mutex);
 
-  for(auto car:cars)car->step();
+  for(auto car:cars)
+    car->step();
+
 
 
   int msg_length = 0;

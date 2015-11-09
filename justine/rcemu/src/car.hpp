@@ -123,7 +123,7 @@ public:
     return os;
   }
 
-protected:
+public:
   Traffic & traffic;
   CarType m_type {CarType::NORMAL};
   osmium::unsigned_object_id_type m_from {3130863972};
@@ -267,7 +267,7 @@ public:
   {
     return this->id_;
   }
-private:
+protected:
   bool m_guided {false};
   bool m_routed {false};
 
@@ -347,6 +347,8 @@ class Bus : public SmartCar
 {
 public:
   Bus (Traffic & traffic, bool guided, const char *name , int id);
+
+  void init();
 
   virtual void print (std::ostream & os) const
   {

@@ -499,6 +499,23 @@ void justine::robocar::SmartCar::init()
     Car::init();
 }
 
+void justine::robocar::Bus::init()
+{
+  std::cout << "bus_init" << std::endl;
+  if ( m_guided )
+  {
+
+    m_from = 3039407851;
+
+    m_to = 0;
+    m_step = 0;
+
+    traffic.set_salist ( m_from, m_to, traffic.salist ( m_from, m_to ) +1 );
+  }
+  else
+    Car::init();
+}
+
 void justine::robocar::SmartCar::nextEdge ( void )
 {
   if ( traffic.hasNode ( to_node() ) )

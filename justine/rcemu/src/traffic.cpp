@@ -145,10 +145,12 @@ void justine::robocar::Traffic::InitializeBuses(void)
 
   std::vector<osmium::unsigned_object_id_type> busway ;
 
-  //busway.push_back(3039407851);
+  busway.push_back(3039407850);
+  busway.push_back(3039407851);
   busway.push_back(3039407852);
   busway.push_back(3039407853);
   busway.push_back(3039407854);
+  busway.push_back(3055243042);
   busway.push_back(3055243044);
   busway.push_back(3055243045);
   busway.push_back(3055243043);
@@ -168,7 +170,15 @@ void justine::robocar::Traffic::InitializeBuses(void)
 
 
 
+  std::vector<osmium::unsigned_object_id_type> stops;
+  std::vector<std::string> names;
 
+  for(unsigned i = 0;i<stops.size();i++){
+    std::shared_ptr<BusStop> stop(new BusStop(*this, true, names[i].c_str(), 1));
+    stop->set_type(CarType::BUSSTOP);
+    stop->init(stops[i]);
+    cars.push_back(stop);
+  }
 
   std::string line;
 
@@ -176,9 +186,9 @@ void justine::robocar::Traffic::InitializeBuses(void)
   std::shared_ptr<SmartCar> b = std::dynamic_pointer_cast<SmartCar>( bus);
   b->set_route(busway);
   b->set_type(CarType::BUS);
-
+  b->init();
   std::shared_ptr<Bus> b2 = std::dynamic_pointer_cast<Bus>( bus);
-  b2->init();
+  b2->init(3039407851);
   cars.push_back(bus);
 }
 
@@ -335,16 +345,25 @@ int justine::robocar::Traffic::alist_inv(osmium::unsigned_object_id_type from, o
 
   int ret = -1;
 
+#ifdef DEBUG
+  std::cout << "ADJECENT: ";
+#endif
   for(uint_vector::iterator noderefi = iter->second.m_alist.begin();
         noderefi!=iter->second.m_alist.end();
         ++noderefi)
   {
+    #ifdef DEBUG
+      std::cout << *noderefi << " ";
+    #endif
     if(to == *noderefi)
     {
       ret = std::distance(iter->second.m_alist.begin(), noderefi);
       break;
     }
   }
+  #ifdef DEBUG
+  std::cout << std::endl;
+  #endif
 
   return ret;
 }

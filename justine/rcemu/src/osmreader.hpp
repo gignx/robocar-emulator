@@ -50,6 +50,7 @@
 #include <string>
 #include <algorithm>
 #include <fstream>
+#include <google/protobuf/stubs/common.h>
 
 #include <exception>
 #include <stdexcept>

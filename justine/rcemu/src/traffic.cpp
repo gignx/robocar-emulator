@@ -168,13 +168,40 @@ void justine::robocar::Traffic::InitializeBuses(void)
   busway.push_back(3055243036);
   busway.push_back(3055243035);
 
-
+  busway.push_back(3055243036);
+  busway.push_back(3055243037);
+  busway.push_back(3055243034);
+  busway.push_back(3055242832);
+  busway.push_back(3055242829);
+  busway.push_back(3055242830);
+  busway.push_back(3055242831);
+  busway.push_back(3055243033);
+  busway.push_back(3055243038);
+  busway.push_back(3055243039);
+  busway.push_back(3055243040);
+  busway.push_back(3055243041);
+  busway.push_back(3055243043);
+  busway.push_back(3055243045);
+  busway.push_back(3055243044);
+  busway.push_back(3055243042);
+  busway.push_back(3039407854);
+  busway.push_back(3039407853);
+  busway.push_back(3039407852);
+  busway.push_back(3039407851);
+  busway.push_back(3039407850);
 
   std::vector<osmium::unsigned_object_id_type> stops;
   std::vector<std::string> names;
 
+  //stops.push_back(3039407850);
+  //stops.push_back(3055243035);
+
+  //names.push_back("LA");
+  //names.push_back(" SF");
+
+//undefined reference to `justine::robocar::BusStop::BusStop(justine::robocar::Traffic&, bool, char const*, int)
   for(unsigned i = 0;i<stops.size();i++){
-    std::shared_ptr<BusStop> stop(new BusStop(*this, true, names[i].c_str(), 1));
+    std::shared_ptr<BusStop> stop(new BusStop({*this, true, names[i].c_str(), 1}));
     stop->set_type(CarType::BUSSTOP);
     stop->init(stops[i]);
     cars.push_back(stop);
@@ -188,6 +215,7 @@ void justine::robocar::Traffic::InitializeBuses(void)
   b->set_type(CarType::BUS);
   b->init();
   std::shared_ptr<Bus> b2 = std::dynamic_pointer_cast<Bus>( bus);
+  //b2->init(3039407851);
   b2->init(3039407851);
   cars.push_back(bus);
 }
@@ -345,19 +373,22 @@ int justine::robocar::Traffic::alist_inv(osmium::unsigned_object_id_type from, o
 
   int ret = -1;
 
-#ifdef DEBUG
+//#ifdef DEBUG
   std::cout << "ADJECENT: ";
-#endif
+//#endif
   for(uint_vector::iterator noderefi = iter->second.m_alist.begin();
         noderefi!=iter->second.m_alist.end();
         ++noderefi)
   {
-    #ifdef DEBUG
-      std::cout << *noderefi << " ";
-    #endif
+    //#ifdef DEBUG
+      std::cout << *noderefi<< " ";
+    //#endif
     if(to == *noderefi)
     {
       ret = std::distance(iter->second.m_alist.begin(), noderefi);
+      //#ifdef DEBUG
+        std::cout << " --- Ret: " << ret << " ";
+      //#endif
       break;
     }
   }

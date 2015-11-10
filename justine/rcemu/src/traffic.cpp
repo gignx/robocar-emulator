@@ -143,14 +143,52 @@ void justine::robocar::Traffic::InitializeBuses(void)
 {
   // TODO read bus line data
 
+  std::vector<osmium::unsigned_object_id_type> busway ;
+
+  busway.push_back(3039407850);
+  busway.push_back(3039407851);
+  busway.push_back(3039407852);
+  busway.push_back(3039407853);
+  busway.push_back(3039407854);
+  busway.push_back(3055243042);
+  busway.push_back(3055243044);
+  busway.push_back(3055243045);
+  busway.push_back(3055243043);
+  busway.push_back(3055243041);
+  busway.push_back(3055243040);
+  busway.push_back(3055243039);
+  busway.push_back(3055243038);
+  busway.push_back(3055243033);
+  busway.push_back(3055242831);
+  busway.push_back(3055242830);
+  busway.push_back(3055242829);
+  busway.push_back(3055242832);
+  busway.push_back(3055243034);
+  busway.push_back(3055243037);
+  busway.push_back(3055243036);
+  busway.push_back(3055243035);
+
+
+
+  std::vector<osmium::unsigned_object_id_type> stops;
+  std::vector<std::string> names;
+
+  for(unsigned i = 0;i<stops.size();i++){
+    std::shared_ptr<BusStop> stop(new BusStop(*this, true, names[i].c_str(), 1));
+    stop->set_type(CarType::BUSSTOP);
+    stop->init(stops[i]);
+    cars.push_back(stop);
+  }
+
   std::string line;
 
   std::shared_ptr<Car> bus(new Bus({*this, true, line.c_str(), 48}));
-
-  bus->set_type(CarType::BUS);
-
-  bus->init();
-
+  std::shared_ptr<SmartCar> b = std::dynamic_pointer_cast<SmartCar>( bus);
+  b->set_route(busway);
+  b->set_type(CarType::BUS);
+  b->init();
+  std::shared_ptr<Bus> b2 = std::dynamic_pointer_cast<Bus>( bus);
+  b2->init(3039407851);
   cars.push_back(bus);
 }
 
@@ -222,7 +260,9 @@ void justine::robocar::Traffic::StepCars()
 {
   std::lock_guard<std::mutex> lock(cars_mutex);
 
-  for(auto car:cars)car->step();
+  for(auto car:cars)
+    car->step();
+
 
 
   int msg_length = 0;
@@ -305,16 +345,25 @@ int justine::robocar::Traffic::alist_inv(osmium::unsigned_object_id_type from, o
 
   int ret = -1;
 
+#ifdef DEBUG
+  std::cout << "ADJECENT: ";
+#endif
   for(uint_vector::iterator noderefi = iter->second.m_alist.begin();
         noderefi!=iter->second.m_alist.end();
         ++noderefi)
   {
+    #ifdef DEBUG
+      std::cout << *noderefi << " ";
+    #endif
     if(to == *noderefi)
     {
       ret = std::distance(iter->second.m_alist.begin(), noderefi);
       break;
     }
   }
+  #ifdef DEBUG
+  std::cout << std::endl;
+  #endif
 
   return ret;
 }

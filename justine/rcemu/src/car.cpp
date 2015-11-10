@@ -499,6 +499,27 @@ void justine::robocar::SmartCar::init()
     Car::init();
 }
 
+void justine::robocar::Bus::init(osmium::unsigned_object_id_type place)
+{
+  if ( m_guided )
+  {
+
+    m_from = place;
+
+    m_to = 0;
+    m_step = 0;
+
+    traffic.set_salist ( m_from, m_to, traffic.salist ( m_from, m_to ) +1 );
+  }
+  else
+    Car::init();
+}
+
+void justine::robocar::BusStop::init(osmium::unsigned_object_id_type place)
+{
+    m_from = place;
+}
+
 void justine::robocar::SmartCar::nextEdge ( void )
 {
   if ( traffic.hasNode ( to_node() ) )
@@ -531,6 +552,20 @@ void justine::robocar::SmartCar::nextEdge ( void )
       // car stopped
   }
 }
+/*
+if ( traffic.hasNode ( to_node() ) )
+  {
+      std::cout << "lol" << std::endl;
+    if ( m_step >= traffic.palist ( m_from, m_to ) )
+    {
+      std::vector<long unsigned int>::iterator i
+          = std::find ( route.begin(), route.end(), to_node() );
+
+          std::cout << "lolend" << std::endl;
+
+      if ( i == route.end() )
+        return;
+*/
 
 void justine::robocar::SmartCar::nextGuidedEdge ( void )
 {
@@ -538,6 +573,7 @@ void justine::robocar::SmartCar::nextGuidedEdge ( void )
   {
     if ( m_step >= traffic.palist ( m_from, m_to ) )
     {
+      std::cout << "trace" << to_node() << std::endl;
       std::vector<long unsigned int>::iterator i
           = std::find ( route.begin(), route.end(), to_node() );
 
@@ -556,7 +592,8 @@ void justine::robocar::SmartCar::nextGuidedEdge ( void )
       {
         next_m_to;
         osmium::unsigned_object_id_type inv = traffic.alist_inv ( to_node(), * ( i+1 ) );
-
+        //osmium::unsigned_object_id_type inv = *(i+1);
+        std::cout << "inv: "<<  inv << std::endl;
         if ( inv != -1 )
         {
           next_m_to = inv;
@@ -572,6 +609,7 @@ void justine::robocar::SmartCar::nextGuidedEdge ( void )
       if ( traffic.palist ( next_m_from, next_m_to ) >=
            traffic.salist ( next_m_from, next_m_to ) )
       {
+        std::cout << "valami if: " << std::endl;
         traffic.set_salist ( m_from, m_to, traffic.salist ( m_from, m_to )-1 );
 
         m_from = next_m_from;

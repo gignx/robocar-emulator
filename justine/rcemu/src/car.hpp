@@ -49,7 +49,7 @@ namespace robocar
 
 enum class CarType: unsigned int
 {
-  NORMAL=0, POLICE, GANGSTER, CAUGHT, PEDESTRIAN, BUS
+  NORMAL=0, POLICE, GANGSTER, CAUGHT, PEDESTRIAN, BUS, BUSSTOP
 };
 
 class Traffic;
@@ -123,7 +123,7 @@ public:
     return os;
   }
 
-protected:
+public:
   Traffic & traffic;
   CarType m_type {CarType::NORMAL};
   osmium::unsigned_object_id_type m_from {3130863972};
@@ -176,6 +176,8 @@ public:
 private:
   bool rnd {true};
 };
+
+
 
 
 class Pedestrian : public Car
@@ -267,7 +269,7 @@ public:
   {
     return this->id_;
   }
-private:
+protected:
   bool m_guided {false};
   bool m_routed {false};
 
@@ -347,6 +349,58 @@ class Bus : public SmartCar
 {
 public:
   Bus (Traffic & traffic, bool guided, const char *name , int id);
+
+  void init(osmium::unsigned_object_id_type place);
+
+  virtual void print (std::ostream & os) const
+  {
+    os << m_from
+       << " "
+       << to_node()
+       << " "
+       << get_max_steps()
+       << " "
+       << get_step()
+       << " "
+       << static_cast<unsigned int> (get_type())
+       << " "
+       << line_
+       << " "
+       << id_;
+  }
+
+  virtual void assign(CarData *car_data, bool full)
+  {
+    car_data->set_node_from(m_from);
+    car_data->set_node_to(to_node());
+    car_data->set_max_step(get_max_steps());
+    car_data->set_step(get_step());
+    car_data->set_type(static_cast<CarData::ProtoCarType>(get_type())); // safe
+    car_data->set_team(line_);
+    car_data->set_id(id_);
+    if(full){
+      car_data->set_size(route.size());
+      for(auto it = route.begin();it!=route.end();it++)
+        car_data->add_path(*it);
+    }else{
+      car_data->set_size(0);
+    }
+  }
+
+  std::string get_line() const
+  {
+    return line_;
+  }
+protected:
+  std::string line_;
+};
+
+class BusStop : public SmartCar
+{
+public:
+  BusStop (Traffic & traffic, bool guided, const char *name , int id);
+
+  void init(osmium::unsigned_object_id_type);
 
   virtual void print (std::ostream & os) const
   {

@@ -32,7 +32,7 @@
 #include <myshmclient.hpp>
 #include <algorithm>
 
- 
+
 
 void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
 {
@@ -46,7 +46,7 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
     for(auto cop:cops)
     {
       cop = server->getCopData(cop);
-      
+
 
       if(gangsters.size()>0){
         sortByDistance(gangsters, cop);
@@ -57,6 +57,7 @@ void justine::sampleclient::MyShmClient::SimulateCarsLoop(void)
         if(graph->getDistance(gangsters[0].from, graph->getVertexNameMap()[v2]) > graph->getDistance(gangsters[0].to, graph->getVertexNameMap()[v2])) v=v2;
 
         Path path = graph->DetermineDijkstraPath(cop.to, graph->getVertexNameMap()[v]);
+
         if(path.size() > 1)
         {
           server->sendRoute(cop, path);

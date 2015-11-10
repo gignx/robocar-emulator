@@ -74,6 +74,7 @@ public class NetworkThread extends Thread implements PlayBack {
 
 			LinkedList<WaypointPolice> cop_list = new LinkedList<WaypointPolice>();
 			LinkedList<WaypointBus> bus_list = new LinkedList<WaypointBus>();
+			LinkedList<WaypointBusStop> busstop_list = new LinkedList<WaypointBusStop>();//
 			LinkedList<WaypointGangster> gangster_list = new LinkedList<WaypointGangster>();
 			LinkedList<WaypointCaught> caught_list = new LinkedList<WaypointCaught>();
 			LinkedList<WaypointNormal> default_list = new LinkedList<WaypointNormal>();
@@ -101,6 +102,7 @@ public class NetworkThread extends Thread implements PlayBack {
 				try {
 					cop_list.clear();
 					bus_list.clear();
+					busstop_list.clear();
 					gangster_list.clear();
 					caught_list.clear();
 					default_list.clear();
@@ -239,6 +241,9 @@ public class NetworkThread extends Thread implements PlayBack {
 							//TODO: Add path!
 							bus_list.add(new WaypointBus(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_), name, id));
 							break;
+						case 6:
+							busstop_list.add(new WaypointBusStop(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_), name, id));
+							break;
 						default:
 							default_list.add(new WaypointNormal(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_)));
 							break;
@@ -270,6 +275,7 @@ public class NetworkThread extends Thread implements PlayBack {
 					traffic = new Traffic();
 					traffic.copList = cop_list;
 					traffic.busList = bus_list;
+					traffic.busstopList = busstop_list;
 					traffic.gangsterList = gangster_list;
 					traffic.caughtList = caught_list;
 					traffic.defaultList = default_list;

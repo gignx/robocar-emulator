@@ -173,13 +173,12 @@ void justine::robocar::Traffic::InitializeBuses(void)
   std::vector<osmium::unsigned_object_id_type> stops;
   std::vector<std::string> names;
 
-  //stops.push_back(3039407850);
-  //stops.push_back(3055243035);
+  stops.push_back(3039407850);
+  stops.push_back(3055243035);
 
-  //names.push_back("LA");
-  //names.push_back(" SF");
+  names.push_back("LA");
+  names.push_back(" SF");
 
-//undefined reference to `justine::robocar::BusStop::BusStop(justine::robocar::Traffic&, bool, char const*, int)
   for(unsigned i = 0;i<stops.size();i++){
     std::shared_ptr<BusStop> stop(new BusStop({*this, true, names[i].c_str(), 1}));
     stop->set_type(CarType::BUSSTOP);
@@ -195,7 +194,6 @@ void justine::robocar::Traffic::InitializeBuses(void)
   b->set_type(CarType::BUS);
   b->init();
   std::shared_ptr<Bus> b2 = std::dynamic_pointer_cast<Bus>( bus);
-  //b2->init(3039407851);
   b2->init(3039407851);
   cars.push_back(bus);
 }

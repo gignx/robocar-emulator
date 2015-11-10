@@ -515,6 +515,12 @@ void justine::robocar::Bus::init(osmium::unsigned_object_id_type place)
     Car::init();
 }
 
+justine::robocar::BusStop::BusStop ( justine::robocar::Traffic & traffic, bool guided, const char *name, int id) :
+    justine::robocar::SmartCar(traffic, CarType::BUSSTOP, guided, id), line_(name)
+{
+
+}
+
 void justine::robocar::BusStop::init(osmium::unsigned_object_id_type place)
 {
     m_from = place;
@@ -656,6 +662,7 @@ void justine::robocar::SmartCar::step()
 
     if ((m_old_step == m_step) && (m_from == 3055243036))
     {
+	// TODO m_from = masodik | utolso_elotti csomopont
       std::vector<osmium::unsigned_object_id_type> busway ;
       busway.push_back(3055243036);
       busway.push_back(3055243037);
@@ -678,6 +685,33 @@ void justine::robocar::SmartCar::step()
       busway.push_back(3039407852);
       busway.push_back(3039407851);
       busway.push_back(3039407850);
+      this->set_route(busway);
+    }
+	if ((m_old_step == m_step) && (m_from == 3039407851))
+	// TODO m_from = masodik | utolso_elotti csomopont
+    {
+      std::vector<osmium::unsigned_object_id_type> busway ;
+	  busway.push_back(3039407851);
+	  busway.push_back(3039407852);
+	  busway.push_back(3039407853);
+	  busway.push_back(3039407854);
+	  busway.push_back(3055243042);
+	  busway.push_back(3055243044);
+	  busway.push_back(3055243045);
+	  busway.push_back(3055243043);
+	  busway.push_back(3055243041);
+	  busway.push_back(3055243040);
+	  busway.push_back(3055243039);
+	  busway.push_back(3055243038);
+	  busway.push_back(3055243033);
+	  busway.push_back(3055242831);
+	  busway.push_back(3055242830);
+	  busway.push_back(3055242829);
+	  busway.push_back(3055242832);
+	  busway.push_back(3055243034);
+	  busway.push_back(3055243037);
+	  busway.push_back(3055243036);
+	  busway.push_back(3055243035);
       this->set_route(busway);
     }
 

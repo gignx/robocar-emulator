@@ -573,7 +573,7 @@ void justine::robocar::SmartCar::nextGuidedEdge ( void )
   {
     if ( m_step >= traffic.palist ( m_from, m_to ) )
     {
-      std::cout << "trace" << to_node() << std::endl;
+      //std::cout << "trace" << to_node() << std::endl;
       std::vector<long unsigned int>::iterator i
           = std::find ( route.begin(), route.end(), to_node() );
 
@@ -593,7 +593,7 @@ void justine::robocar::SmartCar::nextGuidedEdge ( void )
         next_m_to;
         osmium::unsigned_object_id_type inv = traffic.alist_inv ( to_node(), * ( i+1 ) );
         //osmium::unsigned_object_id_type inv = *(i+1);
-        std::cout << "inv: "<<  inv << std::endl;
+        //std::cout << "inv: "<<  inv << std::endl;
         if ( inv != -1 )
         {
           next_m_to = inv;
@@ -609,7 +609,7 @@ void justine::robocar::SmartCar::nextGuidedEdge ( void )
       if ( traffic.palist ( next_m_from, next_m_to ) >=
            traffic.salist ( next_m_from, next_m_to ) )
       {
-        std::cout << "valami if: " << std::endl;
+        //std::cout << "valami if: " << std::endl;
         traffic.set_salist ( m_from, m_to, traffic.salist ( m_from, m_to )-1 );
 
         m_from = next_m_from;
@@ -649,6 +649,40 @@ void justine::robocar::SmartCar::step()
   }
   else
     Car::step();
+
+  if (m_type == CarType::BUS)
+  {
+    //std::cout << "Bus to" << m_to << " Bus from" << m_from << " Step" << m_step << std::endl;
+
+    if ((m_old_step == m_step) && (m_from == 3055243036))
+    {
+      std::vector<osmium::unsigned_object_id_type> busway ;
+      busway.push_back(3055243036);
+      busway.push_back(3055243037);
+      busway.push_back(3055243034);
+      busway.push_back(3055242832);
+      busway.push_back(3055242829);
+      busway.push_back(3055242830);
+      busway.push_back(3055242831);
+      busway.push_back(3055243033);
+      busway.push_back(3055243038);
+      busway.push_back(3055243039);
+      busway.push_back(3055243040);
+      busway.push_back(3055243041);
+      busway.push_back(3055243043);
+      busway.push_back(3055243045);
+      busway.push_back(3055243044);
+      busway.push_back(3055243042);
+      busway.push_back(3039407854);
+      busway.push_back(3039407853);
+      busway.push_back(3039407852);
+      busway.push_back(3039407851);
+      busway.push_back(3039407850);
+      this->set_route(busway);
+    }
+
+    m_old_step = m_step;
+  }
 }
 
 bool justine::robocar::SmartCar::set_route ( std::vector<long unsigned int> & route )

@@ -168,27 +168,7 @@ void justine::robocar::Traffic::InitializeBuses(void)
   busway.push_back(3055243036);
   busway.push_back(3055243035);
 
-  busway.push_back(3055243036);
-  busway.push_back(3055243037);
-  busway.push_back(3055243034);
-  busway.push_back(3055242832);
-  busway.push_back(3055242829);
-  busway.push_back(3055242830);
-  busway.push_back(3055242831);
-  busway.push_back(3055243033);
-  busway.push_back(3055243038);
-  busway.push_back(3055243039);
-  busway.push_back(3055243040);
-  busway.push_back(3055243041);
-  busway.push_back(3055243043);
-  busway.push_back(3055243045);
-  busway.push_back(3055243044);
-  busway.push_back(3055243042);
-  busway.push_back(3039407854);
-  busway.push_back(3039407853);
-  busway.push_back(3039407852);
-  busway.push_back(3039407851);
-  busway.push_back(3039407850);
+  
 
   std::vector<osmium::unsigned_object_id_type> stops;
   std::vector<std::string> names;

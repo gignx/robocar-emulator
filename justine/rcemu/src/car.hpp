@@ -128,6 +128,7 @@ public:
   CarType m_type {CarType::NORMAL};
   osmium::unsigned_object_id_type m_from {3130863972};
   osmium::unsigned_object_id_type m_to {0};
+  osmium::unsigned_object_id_type m_old_step {1};
   osmium::unsigned_object_id_type m_step {0};
 
 private:

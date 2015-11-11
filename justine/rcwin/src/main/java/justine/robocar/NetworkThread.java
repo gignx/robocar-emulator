@@ -201,7 +201,6 @@ public class NetworkThread extends Thread implements PlayBack {
 
 						lat += step * ((lat2 - lat) / maxstep);
 						lon += step * ((lon2 - lon) / maxstep);
-
 						switch (type) {
 						case 1:
 							num_captured_gangsters = carData.getCaught();

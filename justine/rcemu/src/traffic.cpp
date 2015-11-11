@@ -168,10 +168,14 @@ void justine::robocar::Traffic::InitializeBuses(void)
   busway.push_back(3055243036);
   busway.push_back(3055243035);
 
-  
+
 
   std::vector<osmium::unsigned_object_id_type> stops;
   std::vector<std::string> names;
+  std::vector<osmium::unsigned_object_id_type> busstop_route;
+
+  busstop_route.push_back(1);
+  busstop_route.push_back(1);
 
   stops.push_back(3039407850);
   stops.push_back(3055243035);
@@ -181,6 +185,7 @@ void justine::robocar::Traffic::InitializeBuses(void)
 
   for(unsigned i = 0;i<stops.size();i++){
     std::shared_ptr<BusStop> stop(new BusStop({*this, true, names[i].c_str(), 1}));
+    stop->set_route(busstop_route);
     stop->set_type(CarType::BUSSTOP);
     stop->init(stops[i]);
     cars.push_back(stop);
@@ -267,9 +272,7 @@ void justine::robocar::Traffic::StepCars()
   std::lock_guard<std::mutex> lock(cars_mutex);
 
   for(auto car:cars)
-    car->step();
-
-
+    if(!(car->get_type()==CarType::BUSSTOP)) car->step();
 
   int msg_length = 0;
   TrafficStateHeader traffic_state_header;

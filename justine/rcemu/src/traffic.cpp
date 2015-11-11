@@ -179,9 +179,40 @@ void justine::robocar::Traffic::InitializeBuses(void)
 
   stops.push_back(3039407850);
   stops.push_back(3055243035);
+  stops.push_back(3039407853);
+  stops.push_back(3039407854);
+  stops.push_back(3055243042);
+  stops.push_back(3055243044);
+  stops.push_back(3055243045);
+  stops.push_back(3055243043);
+  stops.push_back(3055243041);
+  stops.push_back(3055243040);
+  stops.push_back(3055243039);
+  stops.push_back(3055243038);
+  stops.push_back(3055243033);
+  stops.push_back(3055242831);
+  stops.push_back(3055242830);
+  stops.push_back(3055242829);
+  stops.push_back(3055242832);
 
   names.push_back("LA");
-  names.push_back(" SF");
+  names.push_back("LA1");
+  names.push_back("LA2");
+  names.push_back("LA3");
+  names.push_back("LA4");
+  names.push_back("LA5");
+  names.push_back("LA6");
+  names.push_back("LA7");
+  names.push_back("LA8");
+  names.push_back("LA9");
+  names.push_back("LA10");
+  names.push_back("LA11");
+  names.push_back("LA12");
+  names.push_back("LA13");
+  names.push_back("LA14");
+  names.push_back("LA15");
+  names.push_back(" LA16");
+
 
   for(unsigned i = 0;i<stops.size();i++){
     std::shared_ptr<BusStop> stop(new BusStop({*this, true, names[i].c_str(), 1}));
@@ -272,7 +303,7 @@ void justine::robocar::Traffic::StepCars()
   std::lock_guard<std::mutex> lock(cars_mutex);
 
   for(auto car:cars)
-    if(!(car->get_type()==CarType::BUSSTOP)) car->step();
+    car->step();
 
   int msg_length = 0;
   TrafficStateHeader traffic_state_header;

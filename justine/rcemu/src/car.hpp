@@ -403,6 +403,12 @@ public:
 
   void init(osmium::unsigned_object_id_type);
 
+    virtual void step()
+    {}
+
+    virtual void nextGuidedEdge (void)
+    {}
+
   virtual void print (std::ostream & os) const
   {
     os << m_from

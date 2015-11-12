@@ -1457,6 +1457,655 @@ public final class TrafficStateProtos {
     // @@protoc_insertion_point(class_scope:justine.robocar.CarData)
   }
 
+  public interface ImmovableObjectDataOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // required int32 id = 1;
+    /**
+     * <code>required int32 id = 1;</code>
+     */
+    boolean hasId();
+    /**
+     * <code>required int32 id = 1;</code>
+     */
+    int getId();
+
+    // required fixed64 node = 2;
+    /**
+     * <code>required fixed64 node = 2;</code>
+     */
+    boolean hasNode();
+    /**
+     * <code>required fixed64 node = 2;</code>
+     */
+    long getNode();
+
+    // optional string name = 3;
+    /**
+     * <code>optional string name = 3;</code>
+     */
+    boolean hasName();
+    /**
+     * <code>optional string name = 3;</code>
+     */
+    java.lang.String getName();
+    /**
+     * <code>optional string name = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+  }
+  /**
+   * Protobuf type {@code justine.robocar.ImmovableObjectData}
+   */
+  public static final class ImmovableObjectData extends
+      com.google.protobuf.GeneratedMessage
+      implements ImmovableObjectDataOrBuilder {
+    // Use ImmovableObjectData.newBuilder() to construct.
+    private ImmovableObjectData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private ImmovableObjectData(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final ImmovableObjectData defaultInstance;
+    public static ImmovableObjectData getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public ImmovableObjectData getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ImmovableObjectData(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              id_ = input.readInt32();
+              break;
+            }
+            case 17: {
+              bitField0_ |= 0x00000002;
+              node_ = input.readFixed64();
+              break;
+            }
+            case 26: {
+              bitField0_ |= 0x00000004;
+              name_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return justine.robocar.TrafficStateProtos.internal_static_justine_robocar_ImmovableObjectData_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return justine.robocar.TrafficStateProtos.internal_static_justine_robocar_ImmovableObjectData_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              justine.robocar.TrafficStateProtos.ImmovableObjectData.class, justine.robocar.TrafficStateProtos.ImmovableObjectData.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<ImmovableObjectData> PARSER =
+        new com.google.protobuf.AbstractParser<ImmovableObjectData>() {
+      public ImmovableObjectData parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ImmovableObjectData(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ImmovableObjectData> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // required int32 id = 1;
+    public static final int ID_FIELD_NUMBER = 1;
+    private int id_;
+    /**
+     * <code>required int32 id = 1;</code>
+     */
+    public boolean hasId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required int32 id = 1;</code>
+     */
+    public int getId() {
+      return id_;
+    }
+
+    // required fixed64 node = 2;
+    public static final int NODE_FIELD_NUMBER = 2;
+    private long node_;
+    /**
+     * <code>required fixed64 node = 2;</code>
+     */
+    public boolean hasNode() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>required fixed64 node = 2;</code>
+     */
+    public long getNode() {
+      return node_;
+    }
+
+    // optional string name = 3;
+    public static final int NAME_FIELD_NUMBER = 3;
+    private java.lang.Object name_;
+    /**
+     * <code>optional string name = 3;</code>
+     */
+    public boolean hasName() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional string name = 3;</code>
+     */
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          name_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string name = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private void initFields() {
+      id_ = 0;
+      node_ = 0L;
+      name_ = "";
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      if (!hasId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasNode()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeInt32(1, id_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeFixed64(2, node_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, getNameBytes());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, id_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFixed64Size(2, node_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, getNameBytes());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static justine.robocar.TrafficStateProtos.ImmovableObjectData parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static justine.robocar.TrafficStateProtos.ImmovableObjectData parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static justine.robocar.TrafficStateProtos.ImmovableObjectData parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static justine.robocar.TrafficStateProtos.ImmovableObjectData parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static justine.robocar.TrafficStateProtos.ImmovableObjectData parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static justine.robocar.TrafficStateProtos.ImmovableObjectData parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static justine.robocar.TrafficStateProtos.ImmovableObjectData parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static justine.robocar.TrafficStateProtos.ImmovableObjectData parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static justine.robocar.TrafficStateProtos.ImmovableObjectData parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static justine.robocar.TrafficStateProtos.ImmovableObjectData parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(justine.robocar.TrafficStateProtos.ImmovableObjectData prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code justine.robocar.ImmovableObjectData}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements justine.robocar.TrafficStateProtos.ImmovableObjectDataOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return justine.robocar.TrafficStateProtos.internal_static_justine_robocar_ImmovableObjectData_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return justine.robocar.TrafficStateProtos.internal_static_justine_robocar_ImmovableObjectData_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                justine.robocar.TrafficStateProtos.ImmovableObjectData.class, justine.robocar.TrafficStateProtos.ImmovableObjectData.Builder.class);
+      }
+
+      // Construct using justine.robocar.TrafficStateProtos.ImmovableObjectData.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        id_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        node_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        name_ = "";
+        bitField0_ = (bitField0_ & ~0x00000004);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return justine.robocar.TrafficStateProtos.internal_static_justine_robocar_ImmovableObjectData_descriptor;
+      }
+
+      public justine.robocar.TrafficStateProtos.ImmovableObjectData getDefaultInstanceForType() {
+        return justine.robocar.TrafficStateProtos.ImmovableObjectData.getDefaultInstance();
+      }
+
+      public justine.robocar.TrafficStateProtos.ImmovableObjectData build() {
+        justine.robocar.TrafficStateProtos.ImmovableObjectData result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public justine.robocar.TrafficStateProtos.ImmovableObjectData buildPartial() {
+        justine.robocar.TrafficStateProtos.ImmovableObjectData result = new justine.robocar.TrafficStateProtos.ImmovableObjectData(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.id_ = id_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.node_ = node_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.name_ = name_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof justine.robocar.TrafficStateProtos.ImmovableObjectData) {
+          return mergeFrom((justine.robocar.TrafficStateProtos.ImmovableObjectData)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(justine.robocar.TrafficStateProtos.ImmovableObjectData other) {
+        if (other == justine.robocar.TrafficStateProtos.ImmovableObjectData.getDefaultInstance()) return this;
+        if (other.hasId()) {
+          setId(other.getId());
+        }
+        if (other.hasNode()) {
+          setNode(other.getNode());
+        }
+        if (other.hasName()) {
+          bitField0_ |= 0x00000004;
+          name_ = other.name_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasId()) {
+          
+          return false;
+        }
+        if (!hasNode()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        justine.robocar.TrafficStateProtos.ImmovableObjectData parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (justine.robocar.TrafficStateProtos.ImmovableObjectData) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // required int32 id = 1;
+      private int id_ ;
+      /**
+       * <code>required int32 id = 1;</code>
+       */
+      public boolean hasId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required int32 id = 1;</code>
+       */
+      public int getId() {
+        return id_;
+      }
+      /**
+       * <code>required int32 id = 1;</code>
+       */
+      public Builder setId(int value) {
+        bitField0_ |= 0x00000001;
+        id_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 id = 1;</code>
+       */
+      public Builder clearId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        id_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required fixed64 node = 2;
+      private long node_ ;
+      /**
+       * <code>required fixed64 node = 2;</code>
+       */
+      public boolean hasNode() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>required fixed64 node = 2;</code>
+       */
+      public long getNode() {
+        return node_;
+      }
+      /**
+       * <code>required fixed64 node = 2;</code>
+       */
+      public Builder setNode(long value) {
+        bitField0_ |= 0x00000002;
+        node_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required fixed64 node = 2;</code>
+       */
+      public Builder clearNode() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        node_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // optional string name = 3;
+      private java.lang.Object name_ = "";
+      /**
+       * <code>optional string name = 3;</code>
+       */
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional string name = 3;</code>
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string name = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string name = 3;</code>
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string name = 3;</code>
+       */
+      public Builder clearName() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string name = 3;</code>
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        name_ = value;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:justine.robocar.ImmovableObjectData)
+    }
+
+    static {
+      defaultInstance = new ImmovableObjectData(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:justine.robocar.ImmovableObjectData)
+  }
+
   public interface TrafficStateHeaderOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
@@ -1489,6 +2138,16 @@ public final class TrafficStateProtos {
      * <code>required int32 num_cars = 3;</code>
      */
     int getNumCars();
+
+    // required int32 num_objects = 4;
+    /**
+     * <code>required int32 num_objects = 4;</code>
+     */
+    boolean hasNumObjects();
+    /**
+     * <code>required int32 num_objects = 4;</code>
+     */
+    int getNumObjects();
   }
   /**
    * Protobuf type {@code justine.robocar.TrafficStateHeader}
@@ -1554,6 +2213,11 @@ public final class TrafficStateProtos {
             case 24: {
               bitField0_ |= 0x00000004;
               numCars_ = input.readInt32();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              numObjects_ = input.readInt32();
               break;
             }
           }
@@ -1644,10 +2308,27 @@ public final class TrafficStateProtos {
       return numCars_;
     }
 
+    // required int32 num_objects = 4;
+    public static final int NUM_OBJECTS_FIELD_NUMBER = 4;
+    private int numObjects_;
+    /**
+     * <code>required int32 num_objects = 4;</code>
+     */
+    public boolean hasNumObjects() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>required int32 num_objects = 4;</code>
+     */
+    public int getNumObjects() {
+      return numObjects_;
+    }
+
     private void initFields() {
       timeMinutes_ = 0;
       timeElapsed_ = 0;
       numCars_ = 0;
+      numObjects_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1666,6 +2347,10 @@ public final class TrafficStateProtos {
         memoizedIsInitialized = 0;
         return false;
       }
+      if (!hasNumObjects()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -1681,6 +2366,9 @@ public final class TrafficStateProtos {
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeInt32(3, numCars_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt32(4, numObjects_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1702,6 +2390,10 @@ public final class TrafficStateProtos {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, numCars_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, numObjects_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1825,6 +2517,8 @@ public final class TrafficStateProtos {
         bitField0_ = (bitField0_ & ~0x00000002);
         numCars_ = 0;
         bitField0_ = (bitField0_ & ~0x00000004);
+        numObjects_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -1865,6 +2559,10 @@ public final class TrafficStateProtos {
           to_bitField0_ |= 0x00000004;
         }
         result.numCars_ = numCars_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.numObjects_ = numObjects_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1890,6 +2588,9 @@ public final class TrafficStateProtos {
         if (other.hasNumCars()) {
           setNumCars(other.getNumCars());
         }
+        if (other.hasNumObjects()) {
+          setNumObjects(other.getNumObjects());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -1904,6 +2605,10 @@ public final class TrafficStateProtos {
           return false;
         }
         if (!hasNumCars()) {
+          
+          return false;
+        }
+        if (!hasNumObjects()) {
           
           return false;
         }
@@ -2028,6 +2733,39 @@ public final class TrafficStateProtos {
         return this;
       }
 
+      // required int32 num_objects = 4;
+      private int numObjects_ ;
+      /**
+       * <code>required int32 num_objects = 4;</code>
+       */
+      public boolean hasNumObjects() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required int32 num_objects = 4;</code>
+       */
+      public int getNumObjects() {
+        return numObjects_;
+      }
+      /**
+       * <code>required int32 num_objects = 4;</code>
+       */
+      public Builder setNumObjects(int value) {
+        bitField0_ |= 0x00000008;
+        numObjects_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 num_objects = 4;</code>
+       */
+      public Builder clearNumObjects() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        numObjects_ = 0;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:justine.robocar.TrafficStateHeader)
     }
 
@@ -2044,6 +2782,11 @@ public final class TrafficStateProtos {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_justine_robocar_CarData_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_justine_robocar_ImmovableObjectData_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_justine_robocar_ImmovableObjectData_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_justine_robocar_TrafficStateHeader_descriptor;
   private static
@@ -2066,10 +2809,12 @@ public final class TrafficStateProtos {
       "\n\n\002id\030\010 \001(\005\022\014\n\004size\030\t \001(\005\022\014\n\004path\030\n \003(\006\"" +
       "f\n\014ProtoCarType\022\n\n\006NORMAL\020\000\022\n\n\006POLICE\020\001\022" +
       "\014\n\010GANGSTER\020\002\022\n\n\006CAUGHT\020\003\022\016\n\nPEDESTRIAN\020" +
-      "\004\022\007\n\003BUS\020\005\022\013\n\007BUSSTOP\020\006\"R\n\022TrafficStateH" +
-      "eader\022\024\n\014time_minutes\030\001 \002(\005\022\024\n\014time_elap",
-      "sed\030\002 \002(\005\022\020\n\010num_cars\030\003 \002(\005B%\n\017justine.r" +
-      "obocarB\022TrafficStateProtos"
+      "\004\022\007\n\003BUS\020\005\022\013\n\007BUSSTOP\020\006\"=\n\023ImmovableObje" +
+      "ctData\022\n\n\002id\030\001 \002(\005\022\014\n\004node\030\002 \002(\006\022\014\n\004name",
+      "\030\003 \001(\t\"g\n\022TrafficStateHeader\022\024\n\014time_min" +
+      "utes\030\001 \002(\005\022\024\n\014time_elapsed\030\002 \002(\005\022\020\n\010num_" +
+      "cars\030\003 \002(\005\022\023\n\013num_objects\030\004 \002(\005B%\n\017justi" +
+      "ne.robocarB\022TrafficStateProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -2082,12 +2827,18 @@ public final class TrafficStateProtos {
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_justine_robocar_CarData_descriptor,
               new java.lang.String[] { "NodeFrom", "NodeTo", "MaxStep", "Step", "Type", "Caught", "Team", "Id", "Size", "Path", });
-          internal_static_justine_robocar_TrafficStateHeader_descriptor =
+          internal_static_justine_robocar_ImmovableObjectData_descriptor =
             getDescriptor().getMessageTypes().get(1);
+          internal_static_justine_robocar_ImmovableObjectData_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_justine_robocar_ImmovableObjectData_descriptor,
+              new java.lang.String[] { "Id", "Node", "Name", });
+          internal_static_justine_robocar_TrafficStateHeader_descriptor =
+            getDescriptor().getMessageTypes().get(2);
           internal_static_justine_robocar_TrafficStateHeader_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_justine_robocar_TrafficStateHeader_descriptor,
-              new java.lang.String[] { "TimeMinutes", "TimeElapsed", "NumCars", });
+              new java.lang.String[] { "TimeMinutes", "TimeElapsed", "NumCars", "NumObjects", });
           return null;
         }
       };

@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 
 import justine.robocar.TrafficStateProtos.CarData;
 import justine.robocar.TrafficStateProtos.TrafficStateHeader;
+import justine.robocar.TrafficStateProtos.ImmovableObjectData;
 
 import org.jxmapviewer.viewer.GeoPosition;
 
@@ -109,8 +110,8 @@ public class NetworkThread extends Thread implements PlayBack {
 					pedestrian_list.clear();
 					path.clear();
 
-					int time = 0, size = 0, minutes = 0;
-					long ref_from = 0, ref_to = 0;
+					int time = 0, size = 0, sizeObjs = 0, minutes = 0;
+					long ref_from = 0, ref_to = 0, objNode = 0;
 					long step = 0, maxstep = 100;
 					int id = 0, type = 0;
 					double lat, lon;
@@ -156,6 +157,8 @@ public class NetworkThread extends Thread implements PlayBack {
 					minutes = trafficStateHeader.getTimeMinutes();
 					time = trafficStateHeader.getTimeElapsed();
 					size = trafficStateHeader.getNumCars();
+
+					sizeObjs = trafficStateHeader.getNumObjects();
 
 					for (CopTeamData value : cop_teams.values()) {
 						value.num_caught = 0;
@@ -238,16 +241,40 @@ public class NetworkThread extends Thread implements PlayBack {
 							break;
 						case 5:
 							//TODO: Add path!
+							name = carData.getTeam();
 							bus_list.add(new WaypointBus(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_), name, id));
 							break;
 						case 6:
-							busstop_list.add(new WaypointBusStop(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_), name, id));
 							break;
 						default:
 							default_list.add(new WaypointNormal(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_)));
 							break;
 						}
 
+					} // FOR_CARS
+
+					for (int i = 0; i < sizeObjs; ++i) {
+						// az üzenet mérete
+						bis.read(buff, 0, 4);
+						toRead = java.nio.ByteBuffer.wrap(buff).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+
+						// maga az üzenet
+						bis.read(buff, 0, toRead);
+
+						readFrom = new byte[toRead];
+
+						java.nio.ByteBuffer.wrap(buff).order(java.nio.ByteOrder.LITTLE_ENDIAN).get(readFrom, 0, toRead);
+
+						ImmovableObjectData objData = ImmovableObjectData.parseFrom(readFrom);
+
+						objNode = objData.getNode();
+						id = objData.getId();
+						name = objData.getName();
+
+						lat = lmap.get(objNode).lat;
+						lon = lmap.get(objNode).lon;
+
+						busstop_list.add(new WaypointBusStop(new GeoPosition(lat, lon), name, id));
 					}
 
 					if (time >= minutes * 60 * 1000 / 200) {

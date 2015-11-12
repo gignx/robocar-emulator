@@ -63,6 +63,7 @@ typedef osmium::index::map::SparseMemMap<osmium::unsigned_object_id_type, osmium
 
 typedef std::vector<osmium::unsigned_object_id_type> WayNodesVect;
 typedef std::map<std::string, WayNodesVect> WayNodesMap;
+typedef std::map<osmium::unsigned_object_id_type, osmium::Location> NodesMap;
 //typedef osmium::index::map::StlMap<osmium::unsigned_object_id_type, osmium::Location> WaynodeLocations;
 typedef std::map<osmium::unsigned_object_id_type, osmium::Location> WaynodeLocations;
 typedef std::map<osmium::unsigned_object_id_type, WayNodesVect> Way2Nodes;
@@ -78,11 +79,13 @@ public:
               AdjacencyList & palist,
               WaynodeLocations & waynode_locations,
               WayNodesMap & busWayNodesMap,
-              Way2Nodes & way2nodes ) : alist ( alist ),
+              Way2Nodes & way2nodes,
+              NodesMap & bsnm) : alist ( alist ),
     palist ( palist ),
     waynode_locations ( waynode_locations ),
     busWayNodesMap ( busWayNodesMap ),
-    way2nodes ( way2nodes )
+    way2nodes ( way2nodes ),
+    busStopNodesMap(bsnm)
   {
 
     try
@@ -179,9 +182,23 @@ public:
     return ( std::find ( alist[v1].begin(), alist[v1].end(), v2 ) != alist[v1].end() );
   }
 
-  void node ( osmium::Node& node )
+  void node(osmium::Node& node)
   {
     ++nOSM_nodes;
+
+    const char *highway = node.tags()["highway"];
+
+    if (!highway)
+    {
+      return;
+    }
+
+    if (strcmp(highway, "bus_stop") != 0)
+    {
+      return;
+    }
+
+    busStopNodesMap[node.id()] = node.location();
   }
 
   int onewayc {0};
@@ -310,46 +327,46 @@ public:
 
   }
 
-  void relation ( osmium::Relation& rel )
+  void relation (osmium::Relation& rel)
   {
-
     ++nOSM_relations;
 
-    const char* bus = rel.tags() ["route"];
-    if ( bus && !strcmp ( bus, "bus" ) )
+    const char *bus = rel.tags()["route"];
+
+    if (bus && !strcmp(bus, "bus"))
+    {
+      ++nbuses;
+
+      std::string ref_key;
+
+      try
       {
+        const char* ref = rel.tags() ["ref"];
 
-        ++nbuses;
-
-        std::string ref_key;
-
-        try
-          {
-            const char* ref = rel.tags() ["ref"];
-            if ( ref )
-              ref_key.append ( ref );
-            else
-              ref_key.append ( "Not specified" );
-
-          }
-        catch ( std::exception& e )
-          {
-            std::cout << "There is no bus number."<< e.what() << std::endl;
-          }
-
-        osmium::RelationMemberList& rml = rel.members();
-        for ( osmium::RelationMember& rm : rml )
-          {
-
-            if ( rm.type() == osmium::item_type::way )
-              {
-
-                busWayNodesMap[ref_key].push_back ( rm.ref() );
-
-              }
-          }
-
+        if (ref)
+        {
+          ref_key.append ( ref );
+        }
+        else
+        {
+          ref_key.append ( "Not specified" );
+        }
       }
+      catch ( std::exception& e )
+      {
+        std::cout << "There is no bus number."<< e.what() << std::endl;
+      }
+
+      const osmium::RelationMemberList& members = rel.members();
+
+      for (const auto& m : members )
+      {
+        if (m.type() == osmium::item_type::way)
+        {
+          busWayNodesMap[ref_key].push_back (m.ref());
+        }
+      }
+    }
   }
 
 protected:
@@ -386,6 +403,7 @@ private:
   WaynodeLocations & waynode_locations;
   WayNodesMap & busWayNodesMap;
   Way2Nodes & way2nodes;
+  NodesMap & busStopNodesMap;
 
 };
 
@@ -393,4 +411,3 @@ private:
 } // justine::robocar::
 
 #endif // ROBOCAR_OSMREADER_HPP
-

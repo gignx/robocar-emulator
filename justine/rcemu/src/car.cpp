@@ -515,17 +515,6 @@ void justine::robocar::Bus::init(osmium::unsigned_object_id_type place)
     Car::init();
 }
 
-justine::robocar::BusStop::BusStop ( justine::robocar::Traffic & traffic, bool guided, const char *name, int id) :
-    justine::robocar::SmartCar(traffic, CarType::BUSSTOP, guided, id), line_(name)
-{
-
-}
-
-void justine::robocar::BusStop::init(osmium::unsigned_object_id_type place)
-{
-    m_from = place;
-}
-
 void justine::robocar::SmartCar::nextEdge ( void )
 {
   if ( traffic.hasNode ( to_node() ) )

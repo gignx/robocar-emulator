@@ -94,6 +94,14 @@ namespace robocar
                 <<  " " << loc.second.lon() << std::endl;
       }
 
+      for  (auto loc : m_busStopNodesMap)
+      {
+        gpsFile << loc.first
+                << " " << loc.second.lat()
+                << " " << loc.second.lon()
+                << std::endl;
+      }
+
       gpsFile.close ();
     }
 
@@ -112,7 +120,8 @@ namespace robocar
         OSMReader osm_reader ( osm_file, alist, palist,
           m_waynode_locations,
           m_busWayNodesMap,
-          m_way2nodes );
+          m_way2nodes,
+          m_busStopNodesMap);
           estimated_size = 20*3*osm_reader.get_estimated_memory();
 
         #ifdef DEBUG
@@ -310,6 +319,7 @@ namespace robocar
     WaynodeLocations m_waynode_locations;
     WayNodesMap m_busWayNodesMap;
     Way2Nodes m_way2nodes;
+    NodesMap m_busStopNodesMap;
 
     struct shm_remove
     {

@@ -45,6 +45,7 @@
 #include <carlexer.hpp>
 #include <smartcity.hpp>
 #include <car.hpp>
+#include "immovableObject.hpp"
 
 #include <cstdlib>
 #include <iterator>
@@ -281,6 +282,8 @@ private:
   std::vector<std::shared_ptr<Car>> cars;
   std::vector<std::shared_ptr<SmartCar>> m_smart_cars;
   std::vector<std::shared_ptr<CopCar>> m_cop_cars;
+
+  std::vector<std::shared_ptr<ImmovableObject> > immovableObjects;
 
   std::map<int, std::shared_ptr<SmartCar>> m_smart_cars_map;
   std::map<int, char*> authenticated_teams_;

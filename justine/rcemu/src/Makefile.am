@@ -44,7 +44,7 @@ traffic_CXXFLAGS = $(CXXFLAGS)
 traffic_LDFLAGS = $(BOOST_LDFLAGS) $(BOOST_DATE_TIME_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_THREAD_LDFLAGS) $(BOOST_ASIO_LDFLAGS) $(SHM_OPEN_LIBS) $(BOOST_LOG_LDFLAGS) $(LIBS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) -lprotobuf
 traffic_LIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_DATE_TIME_LIBS) $(BOOST_THREAD_LIBS) $(BOOST_ASIO_LIBS) $(SHM_OPEN_LIBS) $(LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_LOG_LIBS) $(BOOST_FILESYSTEM_LIBS) -lprotobuf
 traffic_LDADD = $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_DATE_TIME_LDFLAGS) $(BOOST_THREAD_LDFLAGS) $(BOOST_ASIO_LDFLAGS) $(SHM_OPEN_LIBS) $(LIBS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_LOG_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) -lprotobuf
-traffic_SOURCES = carlexer.ll carlexer.hpp smartcity.hpp traffic.hpp traffic.cpp traffic-main.cpp car.hpp car.cpp robocar.pb.h robocar.pb.cc
+traffic_SOURCES = carlexer.ll carlexer.hpp smartcity.hpp traffic.hpp traffic.cpp traffic-main.cpp car.hpp car.cpp immovableObject.cpp robocar.pb.h robocar.pb.cc
 
 sampleshmclient_CXXFLAGS = $(CXXFLAGS)
 sampleshmclient_LDFLAGS = $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_THREAD_LDFLAGS) $(BOOST_ASIO_LDFLAGS) $(SHM_OPEN_LIBS) $(BOOST_LOG_LDFLAGS) $(LIBS) $(BOOST_SYSTEM_LDFLAGS)

@@ -30,7 +30,7 @@
  */
 
 #include <traffic.hpp>
-#include <robocar.pb.h>
+#include "src/robocar.pb.h"
 
 void justine::robocar::Traffic::OpenLogStream(void)
 {
@@ -177,7 +177,7 @@ void justine::robocar::Traffic::InitializeBuses(void)
   busstop_route.push_back(1);
   busstop_route.push_back(1);
 
-  stops.push_back(3039407850);
+  /*stops.push_back(3039407850);
   stops.push_back(3055243035);
   stops.push_back(3039407853);
   stops.push_back(3039407854);
@@ -193,9 +193,9 @@ void justine::robocar::Traffic::InitializeBuses(void)
   stops.push_back(3055242831);
   stops.push_back(3055242830);
   stops.push_back(3055242829);
-  stops.push_back(3055242832);
+  stops.push_back(3055242832);*/
 
-  names.push_back("LA");
+  /*names.push_back("LA");
   names.push_back("LA1");
   names.push_back("LA2");
   names.push_back("LA3");
@@ -211,16 +211,11 @@ void justine::robocar::Traffic::InitializeBuses(void)
   names.push_back("LA13");
   names.push_back("LA14");
   names.push_back("LA15");
-  names.push_back(" LA16");
+  names.push_back(" LA16");*/
 
+  std::shared_ptr<BusStop> busStop = std::make_shared<BusStop>(1452131578, 1, "Nagyállomás");
 
-  for(unsigned i = 0;i<stops.size();i++){
-    std::shared_ptr<BusStop> stop(new BusStop({*this, true, names[i].c_str(), 1}));
-    stop->set_route(busstop_route);
-    stop->set_type(CarType::BUSSTOP);
-    stop->init(stops[i]);
-    cars.push_back(stop);
-  }
+  immovableObjects.push_back(std::dynamic_pointer_cast<ImmovableObject>(busStop));
 
   std::string line;
 
@@ -310,16 +305,20 @@ void justine::robocar::Traffic::StepCars()
   traffic_state_header.set_time_minutes(running_time_minutes_);
   traffic_state_header.set_time_elapsed(running_time_elapsed_);
   traffic_state_header.set_num_cars(cars.size());
+  traffic_state_header.set_num_objects(immovableObjects.size());
 
   std::stringbuf buf;
   std::ostream os(&buf);
   traffic_state_header.SerializeToOstream(&os);
   msg_length = buf.str().length();
+  std::cout << "Header: " << msg_length << std::endl;
   const char *char_len = reinterpret_cast<const char*>(&msg_length);
   logfile_stream_->write(char_len, 4);
+
   const std::string& tmp = buf.str();
   const char* data = tmp.c_str();
   logfile_stream_->write(data,msg_length);
+
   for(auto car:cars)
   {
     CarData car_data;
@@ -330,6 +329,7 @@ void justine::robocar::Traffic::StepCars()
     car->assign(&car_data, full_logging);
     car_data.SerializeToOstream(&os);
     msg_length = buf.str().length();
+    std::cout << "Car: " << msg_length << std::endl;
     const char *char_len = reinterpret_cast<const char*>(&msg_length);
     logfile_stream_->write(char_len,4);
     const std::string& tmp = buf.str();
@@ -337,6 +337,22 @@ void justine::robocar::Traffic::StepCars()
     logfile_stream_->write(data,msg_length);
   }
 
+  for(const auto obj : immovableObjects)
+  {
+    ImmovableObjectData objData;
+    std::stringbuf buf;
+    std::ostream os(&buf);
+
+    obj->assign(&objData);
+    objData.SerializeToOstream(&os);
+    msg_length = buf.str().length();
+    const char *char_len = reinterpret_cast<const char*>(&msg_length);
+    logfile_stream_->write(char_len,4);
+    std::cout << "Obj: " << msg_length << std::endl;
+    const std::string& tmp = buf.str();
+    const char* data = tmp.c_str();
+    logfile_stream_->write(data,msg_length);
+  }
 
 }
 
@@ -754,6 +770,9 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
 
     cars_copy = cars;
 
+    std::vector<std::shared_ptr<ImmovableObject>> objs_copy;
+
+    objs_copy = immovableObjects;
 
 
     // A TrafficStateHeader küldjük el előszor, ez fogja tartalmazni, hogy hány
@@ -766,6 +785,8 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
     traffic_state_header.set_time_elapsed(running_time_elapsed_);
 
     traffic_state_header.set_num_cars(cars_copy.size());
+
+    traffic_state_header.set_num_objects(objs_copy.size());
 
     // vegigmegyunk a masolaton es leptetjuk a kocsikat
     for(auto car:cars_copy)
@@ -824,6 +845,29 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
       // innentől kezdve ugyanazt csináljuk, mint a TrafficStateHeader
       // esetén, csak a CarData objektummal
       car_data.SerializeToOstream(&os);
+      msg_length = buf.size();
+
+      #ifdef DEBUG
+      std::cout << msg_length << "\n";
+      #endif
+
+      char_len = reinterpret_cast<char*>(msg_length);
+
+      boost::asio::write(client_socket, boost::asio::buffer(&char_len, 4));
+      sent_bytes = boost::asio::write(client_socket, buf);
+
+      #ifdef DEBUG
+      std::cout << "Sent: " << sent_bytes << "/" << msg_length << std::endl;
+      #endif
+    }
+
+    for(auto obj : objs_copy)
+    {
+      ImmovableObjectData objData;
+
+      obj->assign(&objData);
+
+      objData.SerializeToOstream(&os);
       msg_length = buf.size();
 
       #ifdef DEBUG

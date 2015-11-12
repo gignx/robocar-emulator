@@ -28,10 +28,10 @@ class WaypointBusStop extends UpdateableWaypoint {
 	Color pathcolor = new Color(0, 66, 255, 170);
 	protected static boolean on = false;
 
-	public WaypointBusStop(GeoPosition from, GeoPosition to, String name, int id
+	public WaypointBusStop(GeoPosition node, String name, int id
 			){
 			//,LinkedList<Loc> path) {
-		super(from, to);
+		super(node, node);
 		//this.path = new LinkedList<Loc>();
 		//this.path.addAll(path);
 		this.c = Color.YELLOW;
@@ -43,25 +43,6 @@ class WaypointBusStop extends UpdateableWaypoint {
 	public void update() {
 		super.update();
 	//	path.set(0, new Loc(getPosition().getLatitude(), getPosition().getLongitude()));
-	}
-
-	public void drawPath(Graphics2D g, JXMapViewer map) {
-		if ((Traffic.clicked_map.get(getID()) != null)
-				&& Traffic.clicked_map.get(getID()) == true) {
-			g.setColor(pathcolor);
-			g.setStroke(new BasicStroke(5));
-			Point2D point = map.getTileFactory().geoToPixel(getPosition(),
-					map.getZoom());
-			for (Loc l : path) {
-				Point2D p = map.getTileFactory().geoToPixel(
-						new GeoPosition(l.lat, l.lon), map.getZoom());
-
-				g.drawLine((int) point.getX(), (int) point.getY(),
-						(int) p.getX(), (int) p.getY());
-				point = p;
-			}
-			g.setStroke(new BasicStroke(1));
-		}
 	}
 
 	public void drawWithInfo(Graphics2D g, JXMapViewer map) {

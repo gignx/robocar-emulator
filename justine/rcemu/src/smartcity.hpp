@@ -48,17 +48,12 @@
 
 #include <iomanip>
 
+#include "smartcity_defs.hpp"
+
 namespace justine
 {
 namespace robocar
 {
-
-  typedef boost::interprocess::managed_shared_memory::segment_manager segment_manager_Type;
-  typedef boost::interprocess::allocator<void, segment_manager_Type> void_allocator;
-  typedef boost::interprocess::allocator<unsigned int, segment_manager_Type> uint_allocator;
-  typedef boost::interprocess::vector<unsigned int, uint_allocator> uint_vector;
-  typedef boost::interprocess::allocator<uint_vector, segment_manager_Type> uint_vector_allocator;
-
   class SharedData
   {
   public:
@@ -76,10 +71,15 @@ namespace robocar
   };
 
   typedef std::pair<const unsigned int, SharedData> map_pair_Type;
+  typedef std::pair<const unsigned int, char_string > bus_stop_Type;
   //typedef std::pair<osmium::unsigned_object_id_type, std::string> map_pair_Type2;
   typedef boost::interprocess::allocator<map_pair_Type, segment_manager_Type> map_pair_Type_allocator;
+  typedef boost::interprocess::allocator<bus_stop_Type, segment_manager_Type> bus_stop_Type_allocator;
   typedef boost::interprocess::map< unsigned int, SharedData, std::less<unsigned int>,
   map_pair_Type_allocator> shm_map_Type;
+
+  typedef boost::interprocess::map< unsigned int, char_string, std::less<unsigned int>,
+                                    bus_stop_Type_allocator> bus_stop_map_Type;
 
   class SmartCity
   {
@@ -173,6 +173,11 @@ namespace robocar
       segment->construct<shm_map_Type>
       ( "JustineMap" ) ( std::less<unsigned int>(), alloc_obj );
 
+
+      bus_stop_map_Type* bus_stop_map_bs =
+      segment->construct<bus_stop_map_Type>
+      ( "BusStops" ) ( std::less<unsigned int>(), alloc_obj );
+
       try
       {
 
@@ -205,16 +210,14 @@ namespace robocar
 
         //busstops
 
-        /*shm_map_Type* shm_map_bs =
-        segment->construct<shm_map_Type>
-        ( "BusStops" ) ( std::less<unsigned int>(), alloc_obj );
-
         for  (auto bstp : m_busstops)
         {
-            map_pair_Type2 p (bstp.first, bstp.second);
-            shm_map_bs->insert ( p );
+            bus_stop_Type p(bstp.first, char_string(bstp.second.c_str(), alloc_obj));
+            bus_stop_map_bs->insert(p);
         }
-          */
+
+        //(*bus_stop_map_bs)[100] = "M8";
+
         #ifdef DEBUG
         std::cout << " alist.size = " << alist.size() << " (deg- >= 1)"<< std::endl;
         std::cout << " SHM/alist.size = " << shm_map_n->size() << std::endl;
@@ -255,6 +258,7 @@ namespace robocar
       #endif
 
       shm_map = segment->find<shm_map_Type> ( "JustineMap" ).first;
+      bus_stop_map = segment->find<bus_stop_map_Type> ("BusStops").first;
 
       m_cv.notify_one();
     }
@@ -324,7 +328,6 @@ namespace robocar
 
     virtual void city_run()
     {
-
       // activities that may occur in the city
 
       // std::cout << *this;
@@ -336,6 +339,7 @@ namespace robocar
   protected:
     boost::interprocess::managed_shared_memory *segment;
     boost::interprocess::offset_ptr<shm_map_Type> shm_map;
+    boost::interprocess::offset_ptr<bus_stop_map_Type> bus_stop_map;
 
     int m_delay {5000};
     bool m_run {true};

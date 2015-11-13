@@ -179,9 +179,9 @@ void justine::robocar::Traffic::InitializeBuses(void)
   nevek.push_back("Nagyállomás");
   nevek.push_back("IT");
 
- for (int i = 0; i < idk.size(); i++)
+  for (auto p: *bus_stop_map_)
   {
-    std::shared_ptr<BusStop> busStop = std::make_shared<BusStop>(idk[i], i+1, nevek[i]);
+    std::shared_ptr<BusStop> busStop = std::make_shared<BusStop>(p.first, 0, p.second.c_str());
     immovableObjects.push_back(std::dynamic_pointer_cast<ImmovableObject>(busStop));
   }
 

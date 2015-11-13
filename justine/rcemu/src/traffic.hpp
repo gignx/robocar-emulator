@@ -124,6 +124,9 @@ public:
     shm_map_ =
       shm_segment_->find<shm_map_Type>("JustineMap").first;
 
+    bus_stop_map_ =
+      shm_segment_->find<bus_stop_map_Type>("BusStops").first;
+
     running_time_elapsed_ = 0;
 
     // infinite mode
@@ -157,6 +160,7 @@ public:
 
     m_thread.join();
     shm_segment_->destroy<shm_map_Type>("JustineMap");
+    shm_segment_->destroy<bus_stop_map_Type>("BusStops");
 
     delete shm_segment_;
   }
@@ -252,6 +256,7 @@ public:
   int get_time() const;
 protected:
   boost::interprocess::managed_shared_memory *shm_segment_;
+  boost::interprocess::offset_ptr<bus_stop_map_Type> bus_stop_map_;
   boost::interprocess::offset_ptr<shm_map_Type> shm_map_;
   bool is_running_;
 

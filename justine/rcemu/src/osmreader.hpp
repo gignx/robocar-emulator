@@ -32,6 +32,9 @@
  *
  */
 
+#include <boost/interprocess/allocators/allocator.hpp>
+#include <boost/interprocess/containers/string.hpp>
+
 #include <osmium/io/any_input.hpp>
 #include <osmium/handler.hpp>
 #include <osmium/visitor.hpp>
@@ -55,10 +58,13 @@
 #include <exception>
 #include <stdexcept>
 
+#include "smartcity_defs.hpp"
+
 namespace justine
 {
 namespace robocar
 {
+
 typedef osmium::index::map::SparseMemMap<osmium::unsigned_object_id_type, osmium::Location> OSMLocations;
 
 typedef std::vector<osmium::unsigned_object_id_type> WayNodesVect;
@@ -200,7 +206,7 @@ public:
               nodeid = node.id();
               b_s_n = tag.value();
 
-                busstops[node.id()] = b_s_n;  
+                busstops[node.id()] = std::string(b_s_n);
 
                 #ifdef DEBUG
 

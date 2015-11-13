@@ -71,6 +71,9 @@ typedef std::map<osmium::unsigned_object_id_type, WayNodesVect> Way2Nodes;
 typedef std::map<osmium::unsigned_object_id_type, WayNodesVect> AdjacencyList;
 typedef osmium::index::map::SparseMemMap<osmium::unsigned_object_id_type, int > Vertices;
 
+//new
+typedef std::map<osmium::unsigned_object_id_type, std::string> BusStops;
+
 class OSMReader : public osmium::handler::Handler
 {
 public:
@@ -80,12 +83,14 @@ public:
               WaynodeLocations & waynode_locations,
               WayNodesMap & busWayNodesMap,
               Way2Nodes & way2nodes,
-              NodesMap & bsnm) : alist ( alist ),
+              NodesMap & bsnm,
+              BusStops & busstops) : alist ( alist ),
     palist ( palist ),
     waynode_locations ( waynode_locations ),
     busWayNodesMap ( busWayNodesMap ),
     way2nodes ( way2nodes ),
-    busStopNodesMap(bsnm)
+    busStopNodesMap( bsnm ),
+    busstops( busstops )
   {
 
     try
@@ -182,18 +187,54 @@ public:
     return ( std::find ( alist[v1].begin(), alist[v1].end(), v2 ) != alist[v1].end() );
   }
 
+
+  void bus_stop_name(osmium::Node& node)
+  {
+      const char *b_s_n;
+      int nodeid;
+
+        for (const osmium::Tag& tag : node.tags()) {
+
+            if (strcmp(tag.key(), "name") == 0)
+            {
+              nodeid = node.id();
+              b_s_n = tag.value();
+
+                busstops[node.id()] = b_s_n;  
+
+                #ifdef DEBUG
+
+                std::cout << "Bus Stop Node: " << nodeid << " Bus Stop Name: " << b_s_n << std::endl;
+
+                #endif
+            }
+        }
+  }
+
   void node(osmium::Node& node)
   {
     ++nOSM_nodes;
 
-    const char *highway = node.tags()["highway"];
+    int nmid;
 
-    if (!highway)
+    for (const osmium::Tag& tag : node.tags()) {
+
+          if ( (strcmp(tag.key(), "highway") == 0) && (strcmp(tag.value(), "bus_stop") == 0) )
+          {
+              nmid = node.id();
+              if (nmid > 0) bus_stop_name(node);
+          }
+
+      }
+
+      const char *highway = node.tags()["highway"];
+
+   if (!highway)
     {
       return;
     }
 
-    if (strcmp(highway, "bus_stop") != 0)
+   if (strcmp(highway, "bus_stop") != 0)
     {
       return;
     }
@@ -404,6 +445,7 @@ private:
   WayNodesMap & busWayNodesMap;
   Way2Nodes & way2nodes;
   NodesMap & busStopNodesMap;
+  BusStops & busstops;
 
 };
 

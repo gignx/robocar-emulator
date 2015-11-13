@@ -76,6 +76,7 @@ namespace robocar
   };
 
   typedef std::pair<const unsigned int, SharedData> map_pair_Type;
+  //typedef std::pair<osmium::unsigned_object_id_type, std::string> map_pair_Type2;
   typedef boost::interprocess::allocator<map_pair_Type, segment_manager_Type> map_pair_Type_allocator;
   typedef boost::interprocess::map< unsigned int, SharedData, std::less<unsigned int>,
   map_pair_Type_allocator> shm_map_Type;
@@ -121,8 +122,24 @@ namespace robocar
           m_waynode_locations,
           m_busWayNodesMap,
           m_way2nodes,
-          m_busStopNodesMap);
-          estimated_size = 20*3*osm_reader.get_estimated_memory();
+          m_busStopNodesMap,
+          m_busstops);
+          estimated_size = 30*3*osm_reader.get_estimated_memory(); //20*3
+
+        #ifdef DEBUG
+
+          for  (auto bstp : m_busstops)
+          {
+            std::cout << "idk.push_back(" << bstp.first << ");" << std::endl;
+          }
+
+          for  (auto bstp : m_busstops)
+          {
+            std::cout << "nevek.push_back(\"" << bstp.second << "\");" << std::endl;
+          }
+
+        #endif
+
 
         #ifdef DEBUG
         std::cout << " Processing OSM: "
@@ -186,6 +203,18 @@ namespace robocar
           shm_map_n->insert ( p );
         }
 
+        //busstops
+
+        /*shm_map_Type* shm_map_bs =
+        segment->construct<shm_map_Type>
+        ( "BusStops" ) ( std::less<unsigned int>(), alloc_obj );
+
+        for  (auto bstp : m_busstops)
+        {
+            map_pair_Type2 p (bstp.first, bstp.second);
+            shm_map_bs->insert ( p );
+        }
+          */
         #ifdef DEBUG
         std::cout << " alist.size = " << alist.size() << " (deg- >= 1)"<< std::endl;
         std::cout << " SHM/alist.size = " << shm_map_n->size() << std::endl;
@@ -320,6 +349,7 @@ namespace robocar
     WayNodesMap m_busWayNodesMap;
     Way2Nodes m_way2nodes;
     NodesMap m_busStopNodesMap;
+    BusStops m_busstops;
 
     struct shm_remove
     {

@@ -168,54 +168,29 @@ void justine::robocar::Traffic::InitializeBuses(void)
   busway.push_back(3055243036);
   busway.push_back(3055243035);
 
+  std::shared_ptr<BusStop> busStop;
+  std::vector<std::string> nevek;
+  std::vector<int> idk;
 
 
-  std::vector<osmium::unsigned_object_id_type> stops;
-  std::vector<std::string> names;
-  std::vector<osmium::unsigned_object_id_type> busstop_route;
+  idk.push_back(1452131578);
+  idk.push_back(2128041028);
 
-  busstop_route.push_back(1);
-  busstop_route.push_back(1);
+  nevek.push_back("Nagyállomás");
+  nevek.push_back("IT");
 
-  /*stops.push_back(3039407850);
-  stops.push_back(3055243035);
-  stops.push_back(3039407853);
-  stops.push_back(3039407854);
-  stops.push_back(3055243042);
-  stops.push_back(3055243044);
-  stops.push_back(3055243045);
-  stops.push_back(3055243043);
-  stops.push_back(3055243041);
-  stops.push_back(3055243040);
-  stops.push_back(3055243039);
-  stops.push_back(3055243038);
-  stops.push_back(3055243033);
-  stops.push_back(3055242831);
-  stops.push_back(3055242830);
-  stops.push_back(3055242829);
-  stops.push_back(3055242832);*/
+ for (int i = 0; i < idk.size(); i++)
+  {
+    std::shared_ptr<BusStop> busStop = std::make_shared<BusStop>(idk[i], i+1, nevek[i]);
+    immovableObjects.push_back(std::dynamic_pointer_cast<ImmovableObject>(busStop));
+  }
 
-  /*names.push_back("LA");
-  names.push_back("LA1");
-  names.push_back("LA2");
-  names.push_back("LA3");
-  names.push_back("LA4");
-  names.push_back("LA5");
-  names.push_back("LA6");
-  names.push_back("LA7");
-  names.push_back("LA8");
-  names.push_back("LA9");
-  names.push_back("LA10");
-  names.push_back("LA11");
-  names.push_back("LA12");
-  names.push_back("LA13");
-  names.push_back("LA14");
-  names.push_back("LA15");
-  names.push_back(" LA16");*/
+  //std::shared_ptr<BusStop> busStop = std::make_shared<BusStop>(1452131578, 1, "Nagyállomás");
+  //std::shared_ptr<BusStop> busStop2 = std::make_shared<BusStop>(2128041028, 2, "IT");
 
-  std::shared_ptr<BusStop> busStop = std::make_shared<BusStop>(1452131578, 1, "Nagyállomás");
+  //immovableObjects.push_back(std::dynamic_pointer_cast<ImmovableObject>(busStop));
+//  immovableObjects.push_back(std::dynamic_pointer_cast<ImmovableObject>(busStop2));
 
-  immovableObjects.push_back(std::dynamic_pointer_cast<ImmovableObject>(busStop));
 
   std::string line;
 
@@ -311,7 +286,7 @@ void justine::robocar::Traffic::StepCars()
   std::ostream os(&buf);
   traffic_state_header.SerializeToOstream(&os);
   msg_length = buf.str().length();
-  std::cout << "Header: " << msg_length << std::endl;
+  //std::cout << "Header: " << msg_length << std::endl;
   const char *char_len = reinterpret_cast<const char*>(&msg_length);
   logfile_stream_->write(char_len, 4);
 
@@ -329,7 +304,7 @@ void justine::robocar::Traffic::StepCars()
     car->assign(&car_data, full_logging);
     car_data.SerializeToOstream(&os);
     msg_length = buf.str().length();
-    std::cout << "Car: " << msg_length << std::endl;
+  //  std::cout << "Car: " << msg_length << std::endl;
     const char *char_len = reinterpret_cast<const char*>(&msg_length);
     logfile_stream_->write(char_len,4);
     const std::string& tmp = buf.str();
@@ -348,7 +323,7 @@ void justine::robocar::Traffic::StepCars()
     msg_length = buf.str().length();
     const char *char_len = reinterpret_cast<const char*>(&msg_length);
     logfile_stream_->write(char_len,4);
-    std::cout << "Obj: " << msg_length << std::endl;
+    //std::cout << "Obj: " << msg_length << std::endl;
     const std::string& tmp = buf.str();
     const char* data = tmp.c_str();
     logfile_stream_->write(data,msg_length);
@@ -401,22 +376,22 @@ int justine::robocar::Traffic::alist_inv(osmium::unsigned_object_id_type from, o
 
   int ret = -1;
 
-//#ifdef DEBUG
+#ifdef DEBUG
   std::cout << "ADJECENT: ";
-//#endif
+#endif
   for(uint_vector::iterator noderefi = iter->second.m_alist.begin();
         noderefi!=iter->second.m_alist.end();
         ++noderefi)
   {
-    //#ifdef DEBUG
+    #ifdef DEBUG
       std::cout << *noderefi<< " ";
-    //#endif
+    #endif
     if(to == *noderefi)
     {
       ret = std::distance(iter->second.m_alist.begin(), noderefi);
-      //#ifdef DEBUG
+      #ifdef DEBUG
         std::cout << " --- Ret: " << ret << " ";
-      //#endif
+      #endif
       break;
     }
   }

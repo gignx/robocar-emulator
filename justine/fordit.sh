@@ -53,7 +53,7 @@ rcwin(){
 	echo "-------------------------------------------------------";
 }
 
-rcemusrc(){
+src(){
  	cd rcemu/src &&
 	echo "-------------------------------------------------------";
 	echo "In rcemu/src: make";
@@ -76,7 +76,23 @@ case $mit in
 	rcwin)
 	rcwin;
 ;;
-	rcemusrc)
-	rcemusrc;
+	src)
+	src;
+;;
+	allstart)
+	all;
+	./start.sh;
+;;
+	rcemustart)
+	rcemu;
+	./start.sh;
+;;
+	rcwinstart)
+	rcwin;
+	./start.sh;
+;;
+	srcstart)
+	src;
+	./start.sh;
 ;;
 esac

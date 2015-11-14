@@ -123,7 +123,8 @@ namespace robocar
           m_busWayNodesMap,
           m_way2nodes,
           m_busStopNodesMap,
-          m_busstops);
+          m_busstops,
+          m_buswaystops);//ezt meg nem hasznaljuk sehol, csak ugy itt van, mar en sem tudom, hogy miert
           estimated_size = 30*3*osm_reader.get_estimated_memory(); //20*3
 
         #ifdef DEBUG
@@ -354,6 +355,7 @@ namespace robocar
     Way2Nodes m_way2nodes;
     NodesMap m_busStopNodesMap;
     BusStops m_busstops;
+    BusWayStops m_buswaystops;//ezt meg nem hasznaljuk sehol, csak ugy itt van, mar en sem tudom, hogy miert
 
     struct shm_remove
     {

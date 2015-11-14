@@ -77,12 +77,24 @@ typedef std::map<osmium::unsigned_object_id_type, WayNodesVect> Way2Nodes;
 typedef std::map<osmium::unsigned_object_id_type, WayNodesVect> AdjacencyList;
 typedef osmium::index::map::SparseMemMap<osmium::unsigned_object_id_type, int > Vertices;
 
-//new
+//new busstops
 typedef std::map<osmium::unsigned_object_id_type, std::string> BusStops;
+//new bus_ways_read
+typedef std::map<std::string, osmium::unsigned_object_id_type> BusWayStops;
+
+
+
 
 class OSMReader : public osmium::handler::Handler
 {
 public:
+
+  std::map<osmium::unsigned_object_id_type, std::vector<osmium::unsigned_object_id_type>> bfw;
+  //std::map<std::string, std::vector<osmium::unsigned_object_id_type>> jarat_relation;
+  std::vector<osmium::unsigned_object_id_type> bfwlocal;
+  std::vector<osmium::unsigned_object_id_type> node_list;
+  std::vector<std::string> jarat_vektor;
+
   OSMReader ( const char * osm_file,
               AdjacencyList & alist,
               AdjacencyList & palist,
@@ -90,13 +102,15 @@ public:
               WayNodesMap & busWayNodesMap,
               Way2Nodes & way2nodes,
               NodesMap & bsnm,
-              BusStops & busstops) : alist ( alist ),
+              BusStops & busstops,
+              BusWayStops & buswaystops) : alist ( alist ),
     palist ( palist ),
     waynode_locations ( waynode_locations ),
     busWayNodesMap ( busWayNodesMap ),
     way2nodes ( way2nodes ),
     busStopNodesMap( bsnm ),
-    busstops( busstops )
+    busstops( busstops ),
+    buswaystops( buswaystops )
   {
 
     try
@@ -251,8 +265,19 @@ public:
   int onewayc {0};
   int onewayf {false};
 
+  void build_from_way (osmium::Way& way)
+  {
+    for (const osmium::NodeRef& nr : way.nodes()) {
+          bfwlocal.push_back(nr.ref());
+    }
+
+    bfw.insert(std::make_pair(way.id(), bfwlocal));
+  }
+
   void way ( osmium::Way& way )
   {
+    //hack
+    build_from_way(way);
 
     const char* highway = way.tags() ["highway"];
     if ( !highway )
@@ -374,8 +399,95 @@ public:
 
   }
 
+  //busway kiolvasas
+
+  void bus_ways_read(osmium::Relation& relat)
+  {
+    int szamlalo=0;
+        for (const osmium::Tag& tag : relat.tags()) {
+
+              if (strcmp(tag.key(), "ref") == 0)
+              {
+                szamlalo=0;
+                for(int i=0;i<jarat_vektor.size();i++)
+                {
+                  if(tag.value() == jarat_vektor[i])
+                    szamlalo++;
+                }
+                if(szamlalo == 0)
+                  jarat_vektor.push_back(tag.value());
+
+                  //TODO trafficban vektorban a jaratok neve, mapban <jaratok neve,
+                  // utvonal csomopontjait tartalmazo vektor>
+
+                    #ifdef DEBUG
+                    std::cout << "beleptem az ifbe, es itt a jara szam: " << jarat << std::endl;
+                    #endif
+              }
+                        #ifdef DEBUG
+                        std::cout << "tag.key(): " << tag.key() << " tag.value(): " << tag.value() << std::endl;
+                        #endif
+        }
+
+
+        osmium::RelationMemberList& rml = relat.members();
+        for (osmium::RelationMember& rm : rml) {
+
+          if (strcmp(rm.role(), "stop") == 0)
+          {
+              //TODO stop kezelese
+                //std::cout << "stop vagyok, a nodeom: " << rm.ref() << std::endl;
+          }
+          else
+          {
+
+              for (std::map<osmium::unsigned_object_id_type, std::vector<osmium::unsigned_object_id_type>>::iterator it = bfw.begin(); it != bfw.end(); it++)
+              {
+                //std::cout << it->first << "values:" << std::endl;
+                if (rm.ref() == it->first)
+                {
+                      for (std::vector<osmium::unsigned_object_id_type>::iterator t = it->second.begin(); t != it->second.end(); t++ )
+                                node_list.push_back(*t);
+                }
+
+              }
+
+              /*  for (const osmium::Tag& tag : relat.tags()) {
+                std::cout << "A " << jarat << " node listaja:" <<std::endl;
+
+              for (auto t : node_list)
+                    std::cout << t << std::endl;
+                  }*/
+
+          }
+
+            #ifdef DEBUG
+            std::cout << "type: " << rm.type() << " ref: " << rm.ref() << " (role=" << rm.role() << ")\n";
+            #endif
+        }
+
+  }
+
+
   void relation (osmium::Relation& rel)
   {
+
+
+    for (const osmium::Tag& tag : rel.tags()) {
+
+        if ((strcmp(tag.key(),"route") == 0) && (strcmp(tag.value(),"bus") == 0))
+        {
+            bus_ways_read(rel);
+        }
+
+        #ifdef DEBUG
+
+        std::cout << "key: " << tag.key() << " value: " << tag.value() << std::endl;
+
+        #endif
+    }
+
+
     ++nOSM_relations;
 
     const char *bus = rel.tags()["route"];
@@ -452,6 +564,7 @@ private:
   Way2Nodes & way2nodes;
   NodesMap & busStopNodesMap;
   BusStops & busstops;
+  BusWayStops & buswaystops;
 
 };
 

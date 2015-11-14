@@ -89,9 +89,12 @@ class OSMReader : public osmium::handler::Handler
 {
 public:
 
+  //FIXME
+  //void build_from_way () fgvhez tartoznak, atmenetileg nem hasznaljuk, bug miatt
   std::map<osmium::unsigned_object_id_type, std::vector<osmium::unsigned_object_id_type>> bfw;
-  //std::map<std::string, std::vector<osmium::unsigned_object_id_type>> jarat_relation;
   std::vector<osmium::unsigned_object_id_type> bfwlocal;
+
+  //std::map<std::string, std::vector<osmium::unsigned_object_id_type>> jarat_relation;
   std::vector<osmium::unsigned_object_id_type> node_list;
   std::vector<std::string> jarat_vektor;
 
@@ -265,6 +268,9 @@ public:
   int onewayc {0};
   int onewayf {false};
 
+//FIXME atmenetileg nem hasznalva, bug miatt
+// ha hasznalni akarod, hivd is majd meg :D
+/*
   void build_from_way (osmium::Way& way)
   {
     for (const osmium::NodeRef& nr : way.nodes()) {
@@ -272,13 +278,10 @@ public:
     }
 
     bfw.insert(std::make_pair(way.id(), bfwlocal));
-  }
+  }*/
 
   void way ( osmium::Way& way )
   {
-    //hack
-    build_from_way(way);
-
     const char* highway = way.tags() ["highway"];
     if ( !highway )
       return;
@@ -400,6 +403,7 @@ public:
   }
 
   //busway kiolvasas
+  //FIXME atmenetileg nem hasznaljuk bug miatt (csak annyi hogy nincs meghivva)
 
   void bus_ways_read(osmium::Relation& relat)
   {
@@ -477,7 +481,8 @@ public:
 
         if ((strcmp(tag.key(),"route") == 0) && (strcmp(tag.value(),"bus") == 0))
         {
-            bus_ways_read(rel);
+            //FIXME na hat igen, mondta hogy nincs meghivva!!!
+            //bus_ways_read(rel);
         }
 
         #ifdef DEBUG

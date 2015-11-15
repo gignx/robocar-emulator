@@ -72,6 +72,14 @@ namespace robocar
 
   typedef std::pair<const unsigned int, SharedData> map_pair_Type;
   typedef std::pair<const unsigned int, char_string > bus_stop_Type;
+
+/*TODO FIXME
+  typedef std::vector<const unsigned int> wnv;
+  typedef std::pair<char_string, SharedData> bus_way_nodes_m_Type;
+  typedef boost::interprocess::allocator<bus_way_nodes_m_Type, segment_manager_Type> bus_way_nodes_m_Type_allocator;
+  typedef boost::interprocess::map< unsigned int, char_string, std::less<unsigned int>,
+                                    bus_way_nodes_m_Type_allocator> bus_way_nodes_m_map_Type;
+*/
   //typedef std::pair<osmium::unsigned_object_id_type, std::string> map_pair_Type2;
   typedef boost::interprocess::allocator<map_pair_Type, segment_manager_Type> map_pair_Type_allocator;
   typedef boost::interprocess::allocator<bus_stop_Type, segment_manager_Type> bus_stop_Type_allocator;
@@ -123,9 +131,36 @@ namespace robocar
           m_busWayNodesMap,
           m_way2nodes,
           m_busStopNodesMap,
-          m_busstops,
-          m_buswaystops);//ezt meg nem hasznaljuk sehol, csak ugy itt van, mar en sem tudom, hogy miert
+          m_busstops);
           estimated_size = 30*3*osm_reader.get_estimated_memory(); //20*3
+
+          #ifdef DEBUG
+
+          std::cout << "m_busWayNodesMap" << std::endl;
+          for(std::map<std::string, std::vector<osmium::unsigned_object_id_type>>::iterator it = m_busWayNodesMap.begin(); it != m_busWayNodesMap.end(); ++it)
+          {
+              std::cout << (*it).first << std::endl;
+              std::vector<osmium::unsigned_object_id_type> inVect = (*it).second;
+              for (unsigned j=0; j<inVect.size(); j++)
+                  std::cout << inVect[j] << " - ";
+
+                  std::cout << std::endl;
+                  std::cout << "-------------------------------------------------------------------" << std::endl;
+          }
+
+          std::cout << "m_way2nodes" << std::endl;
+          for(std::map<osmium::unsigned_object_id_type, std::vector<osmium::unsigned_object_id_type>>::iterator it = m_way2nodes.begin(); it != m_way2nodes.end(); ++it)
+          {
+              std::cout << (*it).first << std::endl;
+              std::vector<osmium::unsigned_object_id_type> inVect = (*it).second;
+              for (unsigned j=0; j<inVect.size(); j++)
+                  std::cout << inVect[j] << " - ";
+
+                  std::cout << std::endl;
+                  std::cout << "-------------------------------------------------------------------" << std::endl;
+          }
+
+        #endif
 
         #ifdef DEBUG
 
@@ -178,6 +213,11 @@ namespace robocar
       bus_stop_map_Type* bus_stop_map_bs =
       segment->construct<bus_stop_map_Type>
       ( "BusStops" ) ( std::less<unsigned int>(), alloc_obj );
+
+//  TODO FIXME
+    /*  bus_way_nodes_m_map_Type* bus_way_nodes_m_map_bs =
+      segment->construct<bus_way_nodes_m_map_Type>
+      ( "BusWayNodesMap" ) ( std::less<unsigned int>(),alloc_obj );*/
 
       try
       {
@@ -342,6 +382,9 @@ namespace robocar
     boost::interprocess::offset_ptr<shm_map_Type> shm_map;
     boost::interprocess::offset_ptr<bus_stop_map_Type> bus_stop_map;
 
+    //TODO FIXME
+    //boost::interprocess::offset_ptr<bus_way_nodes_m_map_Type> bus_way_nodes_map;
+
     int m_delay {5000};
     bool m_run {true};
 
@@ -355,7 +398,6 @@ namespace robocar
     Way2Nodes m_way2nodes;
     NodesMap m_busStopNodesMap;
     BusStops m_busstops;
-    BusWayStops m_buswaystops;//ezt meg nem hasznaljuk sehol, csak ugy itt van, mar en sem tudom, hogy miert
 
     struct shm_remove
     {

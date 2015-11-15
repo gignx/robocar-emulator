@@ -168,16 +168,16 @@ void justine::robocar::Traffic::InitializeBuses(void)
   busway.push_back(3055243036);
   busway.push_back(3055243035);
 
-  std::shared_ptr<BusStop> busStop;
+  /*std::shared_ptr<BusStop> busStop;
   std::vector<std::string> nevek;
   std::vector<int> idk;
 
 
-  idk.push_back(1452131578);
-  idk.push_back(2128041028);
+  idk.push_back(2153653218);
+  idk.push_back(1348141994);
 
-  nevek.push_back("Nagyállomás");
-  nevek.push_back("IT");
+  nevek.push_back("honnan");
+  nevek.push_back("hova");*/
 
   for (auto p: *bus_stop_map_)
   {

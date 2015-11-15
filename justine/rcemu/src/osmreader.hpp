@@ -79,8 +79,6 @@ typedef osmium::index::map::SparseMemMap<osmium::unsigned_object_id_type, int > 
 
 //new busstops
 typedef std::map<osmium::unsigned_object_id_type, std::string> BusStops;
-//new bus_ways_read
-typedef std::map<std::string, osmium::unsigned_object_id_type> BusWayStops;
 
 
 
@@ -88,14 +86,6 @@ typedef std::map<std::string, osmium::unsigned_object_id_type> BusWayStops;
 class OSMReader : public osmium::handler::Handler
 {
 public:
-
-  //FIXME
-  //void build_from_way () fgvhez tartoznak, atmenetileg nem hasznaljuk, bug miatt
-  std::map<osmium::unsigned_object_id_type, std::vector<osmium::unsigned_object_id_type>> bfw;
-  std::vector<osmium::unsigned_object_id_type> bfwlocal;
-
-  //std::map<std::string, std::vector<osmium::unsigned_object_id_type>> jarat_relation;
-  std::vector<osmium::unsigned_object_id_type> node_list;
   std::vector<std::string> jarat_vektor;
 
   OSMReader ( const char * osm_file,
@@ -105,15 +95,13 @@ public:
               WayNodesMap & busWayNodesMap,
               Way2Nodes & way2nodes,
               NodesMap & bsnm,
-              BusStops & busstops,
-              BusWayStops & buswaystops) : alist ( alist ),
+              BusStops & busstops) : alist ( alist ),
     palist ( palist ),
     waynode_locations ( waynode_locations ),
     busWayNodesMap ( busWayNodesMap ),
     way2nodes ( way2nodes ),
     busStopNodesMap( bsnm ),
-    busstops( busstops ),
-    buswaystops( buswaystops )
+    busstops( busstops )
   {
 
     try
@@ -268,21 +256,9 @@ public:
   int onewayc {0};
   int onewayf {false};
 
-//FIXME atmenetileg nem hasznalva, bug miatt
-// ha hasznalni akarod, hivd is majd meg :D
-/*
-  void build_from_way (osmium::Way& way)
-  {
-    for (const osmium::NodeRef& nr : way.nodes()) {
-          bfwlocal.push_back(nr.ref());
-    }
-
-    bfw.insert(std::make_pair(way.id(), bfwlocal));
-  }*/
-
   void way ( osmium::Way& way )
   {
-    const char* highway = way.tags() ["highway"];
+    const char* highway = way.tags() ["highway"]; //ebbe kerul bele, hogy milyen fajta az utunk
     if ( !highway )
       return;
     // http://wiki.openstreetmap.org/wiki/Key:highway
@@ -318,7 +294,11 @@ public:
 
         osmium::unsigned_object_id_type vertex = nr.positive_ref();
 
-        way2nodes[way.id()].push_back ( vertex );
+        #ifdef DEBUG
+        std::cout << "way2nodes.map< " << way.id() << ", " << vertex << ">;" << std::endl;
+        #endif
+
+        way2nodes[way.id()].push_back ( vertex ); //map<way.id (elozo mapben a ref vektor egyik tagja), egy vektor, ami tartalmazza a ref nodejait>
 
         try
           {
@@ -402,9 +382,6 @@ public:
 
   }
 
-  //busway kiolvasas
-  //FIXME atmenetileg nem hasznaljuk bug miatt (csak annyi hogy nincs meghivva)
-
   void bus_ways_read(osmium::Relation& relat)
   {
     int szamlalo=0;
@@ -421,18 +398,9 @@ public:
                 if(szamlalo == 0)
                   jarat_vektor.push_back(tag.value());
 
-                  //TODO trafficban vektorban a jaratok neve, mapban <jaratok neve,
-                  // utvonal csomopontjait tartalmazo vektor>
-
-                    #ifdef DEBUG
-                    std::cout << "beleptem az ifbe, es itt a jara szam: " << jarat << std::endl;
-                    #endif
               }
-                        #ifdef DEBUG
-                        std::cout << "tag.key(): " << tag.key() << " tag.value(): " << tag.value() << std::endl;
-                        #endif
-        }
 
+        }
 
         osmium::RelationMemberList& rml = relat.members();
         for (osmium::RelationMember& rm : rml) {
@@ -445,29 +413,10 @@ public:
           else
           {
 
-              for (std::map<osmium::unsigned_object_id_type, std::vector<osmium::unsigned_object_id_type>>::iterator it = bfw.begin(); it != bfw.end(); it++)
-              {
-                //std::cout << it->first << "values:" << std::endl;
-                if (rm.ref() == it->first)
-                {
-                      for (std::vector<osmium::unsigned_object_id_type>::iterator t = it->second.begin(); t != it->second.end(); t++ )
-                                node_list.push_back(*t);
-                }
-
-              }
-
-              /*  for (const osmium::Tag& tag : relat.tags()) {
-                std::cout << "A " << jarat << " node listaja:" <<std::endl;
-
-              for (auto t : node_list)
-                    std::cout << t << std::endl;
-                  }*/
+              //TODO Matyi talad ki hogy kell e csinalni itt valamit
 
           }
 
-            #ifdef DEBUG
-            std::cout << "type: " << rm.type() << " ref: " << rm.ref() << " (role=" << rm.role() << ")\n";
-            #endif
         }
 
   }
@@ -485,11 +434,6 @@ public:
             //bus_ways_read(rel);
         }
 
-        #ifdef DEBUG
-
-        std::cout << "key: " << tag.key() << " value: " << tag.value() << std::endl;
-
-        #endif
     }
 
 
@@ -497,7 +441,7 @@ public:
 
     const char *bus = rel.tags()["route"];
 
-    if (bus && !strcmp(bus, "bus"))
+    if (bus && !strcmp(bus, "bus")) // ha buszrol van szo, akkor belepunk
     {
       ++nbuses;
 
@@ -505,9 +449,9 @@ public:
 
       try
       {
-        const char* ref = rel.tags() ["ref"];
+        const char* ref = rel.tags() ["ref"]; //a ref valtozo tarolja a busz jaratszamat
 
-        if (ref)
+        if (ref)//ha letzik akkor hozzafuzi a ref_key hez
         {
           ref_key.append ( ref );
         }
@@ -516,7 +460,7 @@ public:
           ref_key.append ( "Not specified" );
         }
       }
-      catch ( std::exception& e )
+      catch ( std::exception& e )//ha az osmbol hianyoznak a buszok
       {
         std::cout << "There is no bus number."<< e.what() << std::endl;
       }
@@ -525,8 +469,12 @@ public:
 
       for (const auto& m : members )
       {
-        if (m.type() == osmium::item_type::way)
+        if (m.type() == osmium::item_type::way) //map<jaratszam, hozza tartozo ref vektor> //a ref vektor tagjai, hivatkozasok egy way-re, amibol ki tudjuk majd nyerni a hozzajuk tartozo nodeokat
         {
+          #ifdef DEBUG
+          std::cout << "busWayNodesMap<" << ref_key << ", " << m.ref() << ">;" << std::endl;
+          #endif
+
           busWayNodesMap[ref_key].push_back (m.ref());
         }
       }
@@ -569,7 +517,6 @@ private:
   Way2Nodes & way2nodes;
   NodesMap & busStopNodesMap;
   BusStops & busstops;
-  BusWayStops & buswaystops;
 
 };
 

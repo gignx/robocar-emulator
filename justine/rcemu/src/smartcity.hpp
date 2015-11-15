@@ -271,6 +271,14 @@ namespace robocar
 
             if (temp.size() != 0)
             {
+              if (i == 1)
+              {
+                if ((temp[0] == vec[0]) || (temp[0] == vec.back()))
+                {
+                  std::reverse(temp.begin(), temp.end());
+                }
+              }
+
               if (temp.back() != vec[0])
               {
                 std::reverse(vec.begin(), vec.end());

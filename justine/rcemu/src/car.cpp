@@ -647,8 +647,8 @@ void justine::robocar::SmartCar::step()
 
   if (m_type == CarType::BUS)
   {
-    //std::cout << "Bus to" << m_to << " Bus from" << m_from << " Step" << m_step << std::endl;
-
+    std::cout << "Bus to" << m_to << " Bus from" << m_from << " Step" << m_step << std::endl;
+    /*
     if ((m_old_step == m_step) && (m_from == 3055243036))
     {
 	// TODO m_from = masodik | utolso_elotti csomopont
@@ -704,7 +704,7 @@ void justine::robocar::SmartCar::step()
       this->set_route(busway);
     }
 
-    m_old_step = m_step;
+    m_old_step = m_step;*/
   }
 }
 
@@ -758,7 +758,8 @@ justine::robocar::CopCar::CopCar (
 justine::robocar::Bus::Bus (
   justine::robocar::Traffic & traffic,
   bool guided, const char *name, int id) :
-    justine::robocar::SmartCar(traffic, CarType::BUS, guided, id), line_(name)
+    justine::robocar::SmartCar(traffic, CarType::BUS, guided, id), line_(name),
+    isGoingFrom(true)
 {
 
 }

@@ -353,6 +353,62 @@ public:
 
   void init(osmium::unsigned_object_id_type place);
 
+  /*virtual void step()
+  {
+    std::cout << "Bus step'd" << std::endl;
+
+    nextGuidedEdge();
+
+    long unsigned int last;
+
+    if (isGoingFrom)
+    {
+      last = routeWayFrom[routeWayFrom.size() - 2];
+    }
+    else
+    {
+      // safety not yolo
+      if (routeWayTo.size() > 0)
+      {
+        last = routeWayTo[routeWayTo.size() - 2];
+      }
+    }
+
+    if ((m_old_step == m_step) && (m_from == last))
+    {
+      if (isGoingFrom)
+      {
+        if (routeWayTo.size() > 0)
+        {
+          this->init(this->routeWayTo[0]);
+
+          this->set_route(this->routeWayTo);
+
+          isGoingFrom = false;
+        }
+        else
+        {
+          this->init(this->routeWayFrom[0]);
+
+          this->set_route(this->routeWayFrom);
+
+          isGoingFrom = true;
+        }
+      }
+      else
+      {
+        this->init(this->routeWayFrom[0]);
+
+        this->set_route(this->routeWayFrom);
+
+        isGoingFrom = true;
+      }
+    }
+
+    m_old_step = m_step;
+}
+*/
+
   virtual void print (std::ostream & os) const
   {
     os << m_from
@@ -392,8 +448,12 @@ public:
   {
     return line_;
   }
+
+  std::vector<long unsigned int> routeWayFrom, routeWayTo;
 protected:
   std::string line_;
+private:
+  bool isGoingFrom;
 };
 
 }

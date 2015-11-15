@@ -187,7 +187,34 @@ void justine::robocar::Traffic::InitializeBuses(void)
 
   for (auto sbw : *bus_way_vector_)
   {
-    std::cout << sbw.ref.c_str() << std::endl;
+    if (sbw.nodesFrom.size() > 0)
+    {
+    std::shared_ptr<Car> bus(new Bus({*this, true, sbw.ref.c_str(), 48}));
+    std::shared_ptr<SmartCar> b = std::dynamic_pointer_cast<SmartCar>(bus);
+    b->set_type(CarType::BUS);
+    b->init();
+
+    std::shared_ptr<Bus> b2 = std::dynamic_pointer_cast<Bus>( bus);
+
+    std::vector<long unsigned int> lol;
+
+    for (std::size_t i = 0; i < sbw.nodesFrom.size(); ++i)
+    {
+        b2->routeWayFrom.push_back(sbw.nodesFrom[i]);
+        lol.push_back(sbw.nodesFrom[i]);
+        std::cout << lol.back() << std::endl;
+    }
+
+    for (std::size_t i = 0; i < sbw.nodesTo.size(); ++i)
+    {
+        b2->routeWayTo.push_back(sbw.nodesTo[i]);
+    }
+    b2->init(b2->routeWayFrom[0]);
+
+    b2->set_route(b2->routeWayFrom);
+
+    cars.push_back(bus);
+    }
   }
 
   //std::shared_ptr<BusStop> busStop = std::make_shared<BusStop>(1452131578, 1, "Nagyállomás");
@@ -197,7 +224,7 @@ void justine::robocar::Traffic::InitializeBuses(void)
 //  immovableObjects.push_back(std::dynamic_pointer_cast<ImmovableObject>(busStop2));
 
 
-  std::string line;
+  /*std::string line;
 
   std::shared_ptr<Car> bus(new Bus({*this, true, line.c_str(), 48}));
   std::shared_ptr<SmartCar> b = std::dynamic_pointer_cast<SmartCar>( bus);
@@ -206,7 +233,7 @@ void justine::robocar::Traffic::InitializeBuses(void)
   b->init();
   std::shared_ptr<Bus> b2 = std::dynamic_pointer_cast<Bus>( bus);
   b2->init(3039407851);
-  cars.push_back(bus);
+  cars.push_back(bus);*/
 }
 
 void justine::robocar::Traffic::SimulationLoop(void)

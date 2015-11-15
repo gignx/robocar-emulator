@@ -66,33 +66,47 @@ src(){
 	echo "-------------------------------------------------------";
 }
 
+sound(){
+
+	aplay people074.wav
+
+}
+
 case $mit in
 	all)
 	all;
+	sound;
 ;;
 	rcemu)
 	rcemu;
+	sound;
 ;;
 	rcwin)
 	rcwin;
+	sound;
 ;;
 	src)
 	src;
+	sound;
 ;;
 	allstart)
 	all;
 	./start.sh;
+	sound;
 ;;
 	rcemustart)
 	rcemu;
 	./start.sh;
+	sound;
 ;;
 	rcwinstart)
 	rcwin;
 	./start.sh;
+	sound;
 ;;
 	srcstart)
 	src;
 	./start.sh;
+	sound;
 ;;
 esac

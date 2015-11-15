@@ -127,6 +127,9 @@ public:
     bus_stop_map_ =
       shm_segment_->find<bus_stop_map_Type>("BusStops").first;
 
+    bus_way_vector_ =
+      shm_segment_->find<shm_bus_way_Type>("BusWays").first;
+
     running_time_elapsed_ = 0;
 
     // infinite mode
@@ -258,6 +261,7 @@ protected:
   boost::interprocess::managed_shared_memory *shm_segment_;
   boost::interprocess::offset_ptr<bus_stop_map_Type> bus_stop_map_;
   boost::interprocess::offset_ptr<shm_map_Type> shm_map_;
+  boost::interprocess::offset_ptr<shm_bus_way_Type> bus_way_vector_;
   bool is_running_;
 
 

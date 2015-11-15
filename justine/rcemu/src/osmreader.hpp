@@ -59,6 +59,7 @@
 #include <stdexcept>
 
 #include "smartcity_defs.hpp"
+#include "osmDataTypes.hpp"
 
 namespace justine
 {
@@ -66,7 +67,6 @@ namespace robocar
 {
 
 typedef osmium::index::map::SparseMemMap<osmium::unsigned_object_id_type, osmium::Location> OSMLocations;
-
 typedef std::vector<osmium::unsigned_object_id_type> WayNodesVect;
 typedef std::map<std::string, WayNodesVect> WayNodesMap;
 typedef std::map<osmium::unsigned_object_id_type, osmium::Location> NodesMap;
@@ -80,8 +80,7 @@ typedef osmium::index::map::SparseMemMap<osmium::unsigned_object_id_type, int > 
 //new busstops
 typedef std::map<osmium::unsigned_object_id_type, std::string> BusStops;
 
-
-
+typedef std::vector<OSMBusWay> BusWayVector;
 
 class OSMReader : public osmium::handler::Handler
 {
@@ -95,13 +94,15 @@ public:
               WayNodesMap & busWayNodesMap,
               Way2Nodes & way2nodes,
               NodesMap & bsnm,
-              BusStops & busstops) : alist ( alist ),
+              BusStops & busstops,
+              BusWayVector & busWayVector) : alist ( alist ),
     palist ( palist ),
     waynode_locations ( waynode_locations ),
     busWayNodesMap ( busWayNodesMap ),
     way2nodes ( way2nodes ),
     busStopNodesMap( bsnm ),
-    busstops( busstops )
+    busstops( busstops ),
+    busWayVector(busWayVector)
   {
 
     try
@@ -445,6 +446,8 @@ public:
     {
       ++nbuses;
 
+      bool busWayFrom = true;
+
       std::string ref_key;
 
       try
@@ -454,6 +457,25 @@ public:
         if (ref)//ha letzik akkor hozzafuzi a ref_key hez
         {
           ref_key.append ( ref );
+
+          //std::cout << rel.id() << " " << ref_key << std::endl;
+
+          auto it = std::find_if(busWayVector.begin(),
+                                 busWayVector.end(),
+            [ref_key](OSMBusWay obw)
+            {
+              return obw.ref == ref_key;
+            });
+
+          if (it == busWayVector.end())
+          {
+            busWayVector.emplace_back(ref_key);
+          }
+          else
+          {
+              it->timesFound++;
+              //std::cout << it->timesFound << std::endl;
+          }
         }
         else
         {
@@ -467,13 +489,33 @@ public:
 
       const osmium::RelationMemberList& members = rel.members();
 
+      auto it = std::find_if(busWayVector.begin(),
+                             busWayVector.end(),
+        [ref_key](OSMBusWay obw)
+        {
+          return obw.ref == ref_key;
+        });
+
       for (const auto& m : members )
       {
         if (m.type() == osmium::item_type::way) //map<jaratszam, hozza tartozo ref vektor> //a ref vektor tagjai, hivatkozasok egy way-re, amibol ki tudjuk majd nyerni a hozzajuk tartozo nodeokat
         {
-          #ifdef DEBUG
-          std::cout << "busWayNodesMap<" << ref_key << ", " << m.ref() << ">;" << std::endl;
-          #endif
+
+          //std::cout << "busWayNodesMap<" << ref_key << ", " << m.ref() << ">;" << std::endl;
+
+
+          if (it != busWayVector.end())
+          {
+            if (it->timesFound == 1)
+            {
+              it->nodesFrom.push_back(m.ref());
+              //std::cout << "push " << ref_key << " s " << it->nodesFrom.size() << std::endl;
+            }
+            else if (it->timesFound == 2)
+            {
+              it->nodesTo.push_back(m.ref());
+            }
+          }
 
           busWayNodesMap[ref_key].push_back (m.ref());
         }
@@ -517,6 +559,7 @@ private:
   Way2Nodes & way2nodes;
   NodesMap & busStopNodesMap;
   BusStops & busstops;
+  BusWayVector & busWayVector;
 
 };
 

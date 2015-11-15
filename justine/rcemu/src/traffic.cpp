@@ -185,6 +185,11 @@ void justine::robocar::Traffic::InitializeBuses(void)
     immovableObjects.push_back(std::dynamic_pointer_cast<ImmovableObject>(busStop));
   }
 
+  for (auto sbw : *bus_way_vector_)
+  {
+    std::cout << sbw.ref.c_str() << std::endl;
+  }
+
   //std::shared_ptr<BusStop> busStop = std::make_shared<BusStop>(1452131578, 1, "Nagyállomás");
   //std::shared_ptr<BusStop> busStop2 = std::make_shared<BusStop>(2128041028, 2, "IT");
 

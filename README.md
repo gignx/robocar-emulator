@@ -117,6 +117,8 @@ The argument list, for the compile.sh:
 ->	[rcemu&start]			compiles only the rcemu folder's codes, than starts the stuff
 ->	[rcwin&start]			compiles only the rcwin folder's codes, than starts the stuff
 ->	[rcemu/src&start]		compiles only the rcemu/src folder's codes, than starts the stuff
+
+**IMPORTANT!: the scripts are located in the robocar-emulator/justine directory
 ```
 
 

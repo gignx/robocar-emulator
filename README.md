@@ -94,3 +94,26 @@ There are some other options for all the applications listed above, so here they
 ```
 
 If you'd like to replay a log file, there's no need to start the other processes, just the Car Window with the `--playlog=x` option where `x` denotes a valid log file. If you've been running the simulation with full logging enabled, then the routes of the cop cars can be examined during the replay.
+
+
+`NEW` 
+#### Scripts
+There are some scripts, what you can use, if you want to do things more faster.
+The scripts:
+```
+./start.sh			-> this script will automatically start the stuff
+./kill.sh			-> this script, will run some killall commands, which kills the smartcity and the traffic processes
+./compile.sh [argument]*	-> this script, will compile the codes, but there is an argument list, that you need to know:
+ 
+The argument list, for the compile.sh:
+->	[all]			compiles the rcemu and the rcwin folder's codes
+->	[rcemu]			compiles only the rcemu folder's codes	
+->	[rcwin]			compiles only the rcwin folder's codes
+->	[rcemu/src]		compiles only the rcemu/src folder's codes
+->	[all&start]		compiles the rcemu and the rcwin folder's codes, than starts the stuff
+->	[rcemu&start]		compiles only the rcemu folder's codes, than starts the stuff
+->	[rcwin&start]		compiles only the rcwin folder's codes, than starts the stuff
+->	[rcemu/src&start]	compiles only the rcemu/src folder's codes, than starts the stuff
+```
+
+

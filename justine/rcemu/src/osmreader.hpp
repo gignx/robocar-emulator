@@ -227,14 +227,11 @@ public:
   {
     ++nOSM_nodes;
 
-    int nmid;
-
     for (const osmium::Tag& tag : node.tags()) {
 
           if ( (strcmp(tag.key(), "highway") == 0) && (strcmp(tag.value(), "bus_stop") == 0) )
           {
-              nmid = node.id();
-              if (nmid > 0) bus_stop_name(node);
+              bus_stop_name(node);
           }
 
       }
@@ -250,7 +247,6 @@ public:
     {
       return;
     }
-
     busStopNodesMap[node.id()] = node.location();
   }
 

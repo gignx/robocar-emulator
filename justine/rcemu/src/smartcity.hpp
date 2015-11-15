@@ -257,23 +257,76 @@ namespace robocar
         {
           SharedBusWay sbw(iter->ref, alloc_obj);
 
+          std::vector<osmium::unsigned_object_id_type> temp;
+
           for (std::size_t i = 0; i < iter->nodesFrom.size(); ++i)
           {
-            const auto& vec = m_way2nodes[iter->nodesFrom[i]];
+            // igen, másolatot akarunk
+            std::vector<osmium::unsigned_object_id_type> vec = m_way2nodes[iter->nodesFrom[i]];
+
+            if (vec.size() == 0)
+            {
+              continue;
+            }
+
+            if (temp.size() != 0)
+            {
+              if (temp.back() != vec[0])
+              {
+                std::reverse(vec.begin(), vec.end());
+              }
+            }
 
             for (std::size_t j = 0; j < vec.size(); ++j)
             {
-                sbw.nodesFrom.push_back(vec[j]);
+                temp.push_back(vec[j]);
             }
           }
 
+          if (temp.size() > 0)
+          {
+            std::unique(temp.begin(), temp.end());
+
+            for (std::size_t i = 0; i < temp.size(); ++i)
+            {
+              sbw.nodesFrom.push_back(temp[i]);
+            }
+          }
+
+          temp.clear();
+
+
           for (std::size_t i = 0; i < iter->nodesTo.size(); ++i)
           {
-            const auto& vec = m_way2nodes[iter->nodesTo[i]];
+            // újabb másolat
+            std::vector<osmium::unsigned_object_id_type> vec = m_way2nodes[iter->nodesTo[i]];
+
+            if (vec.size() == 0)
+            {
+              continue;
+            }
+
+            if (temp.size() != 0)
+            {
+              if (temp.back() != vec[0])
+              {
+                std::reverse(vec.begin(), vec.end());
+              }
+            }
 
             for (std::size_t j = 0; j < vec.size(); ++j)
             {
-                sbw.nodesTo.push_back(vec[j]);
+                temp.push_back(vec[j]);
+            }
+          }
+
+          if (temp.size() > 0)
+          {
+            std::unique(temp.begin(), temp.end());
+
+            for (std::size_t i = 0; i < temp.size(); ++i)
+            {
+              sbw.nodesTo.push_back(temp[i]);
             }
           }
 

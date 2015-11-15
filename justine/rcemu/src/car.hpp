@@ -353,10 +353,8 @@ public:
 
   void init(osmium::unsigned_object_id_type place);
 
-  /*virtual void step()
+  virtual void step()
   {
-    std::cout << "Bus step'd" << std::endl;
-
     nextGuidedEdge();
 
     long unsigned int last;
@@ -407,7 +405,7 @@ public:
 
     m_old_step = m_step;
 }
-*/
+
 
   virtual void print (std::ostream & os) const
   {

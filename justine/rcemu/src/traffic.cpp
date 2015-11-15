@@ -202,14 +202,14 @@ void justine::robocar::Traffic::InitializeBuses(void)
     {
         b2->routeWayFrom.push_back(sbw.nodesFrom[i]);
         lol.push_back(sbw.nodesFrom[i]);
-        std::cout << lol.back() << std::endl;
     }
 
     for (std::size_t i = 0; i < sbw.nodesTo.size(); ++i)
     {
         b2->routeWayTo.push_back(sbw.nodesTo[i]);
     }
-    b2->init(b2->routeWayFrom[0]);
+
+    b2->init(b2->routeWayFrom[1]);
 
     b2->set_route(b2->routeWayFrom);
 

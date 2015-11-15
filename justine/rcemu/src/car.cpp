@@ -647,7 +647,6 @@ void justine::robocar::SmartCar::step()
 
   if (m_type == CarType::BUS)
   {
-    std::cout << "Bus to" << m_to << " Bus from" << m_from << " Step" << m_step << std::endl;
     /*
     if ((m_old_step == m_step) && (m_from == 3055243036))
     {

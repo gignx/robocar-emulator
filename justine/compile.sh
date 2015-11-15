@@ -89,24 +89,39 @@ case $mit in
 	src;
 	sound;
 ;;
-	all&start)
+	all\&start)
 	all;
 	./start.sh;
 	sound;
 ;;
-	rcemu&start)
+	rcemu\&start)
 	rcemu;
 	./start.sh;
 	sound;
 ;;
-	rcwin&start)
+	rcwin\&start)
 	rcwin;
 	./start.sh;
 	sound;
 ;;
-	rcemu/src&start)
+	rcemu/src\&start)
 	src;
 	./start.sh;
 	sound;
+;;
+	*)
+	echo "--------------------------------------------------------------------------------";
+	echo "Incorrect use! Usage: ./compile.sh [argument]";
+	echo "";
+	echo "Argument list:";
+	echo "->[all] compiles the rcemu and the rcwin folder's codes";
+	echo "->[rcemu] compiles only the rcemu folder's codes";	
+	echo "->[rcwin]	compiles only the rcwin folder's codes";
+	echo "->[rcemu/src] compiles only the rcemu/src folder's codes";
+	echo "->[all&start] compiles the rcemu and the rcwin folder's codes, than starts the stuff";
+	echo "->[rcemu&start] compiles only the rcemu folder's codes, than starts the stuff";
+	echo "->[rcwin&start] compiles only the rcwin folder's codes, than starts the stuff";
+	echo "->[rcemu/src&start] compiles only the rcemu/src folder's codes, than starts the stuff";
+	echo "--------------------------------------------------------------------------------";
 ;;
 esac

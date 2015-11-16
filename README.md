@@ -11,6 +11,8 @@ In the latest commit, in order to untrack binary and local files we've changed t
  - `sampleshmclient.out`
  - `samplemyshmclient.out`
 
+Command line arguments for `traffic.out` are no longer available. A configuration file in JSON format must be specified.
+
 ### How to kickstart this stuff?
 
 You should start with checking whether you have all the dependencies required, please refer to the `README_ORIGINAL.md` file.
@@ -27,13 +29,15 @@ After acquiring the right `.osm` file, the first thing you start should be the `
 After the `--osm` you must the `.osm` file to run the simulation on. Make sure you specify the same `shm` option from now on to all applications.
 
 #### Traffic
-We have our playground, let's get some toys! Or something that can handle our toys, that's what `traffic` is:
+We have our playground, let's get some toys! Or something that can handle our toys, that's what `traffic.out` is:
 
 ```
-rcemu$ src/traffic.out --shm=BerlinSharedMemory
+rcemu$ src/traffic.out
 ```
 
 **IMPORTANT: The default port is 10007. You can change it using the --port option!**
+
+The default configuration file, `traffic.json` is located in the `robocar-emulator/justine/rcemu` directory. You may change it using the `--config` option.
 
 #### Car Window
 At the moment we are *blind*, so let's just visualise what's happening:
@@ -74,15 +78,7 @@ There are some other options for all the applications listed above, so here they
 ```
 --version     -> produce version message
 --help -h     -> produce help message
---full_log -f -> enable logging of routes (much larger log file)
---verbose -v  -> verbose mode
---shm -s      -> shared memory segment name
---port -p     -> the TCP port that the traffic server is listening on to allow agents to communicate with the traffic simulation, the default value is 10007.
---cars -c     -> number of the random cars, the default value is 100.
---delay -d    -> sleep duration between calculations, the default value is 200
---minutes -m  -> how long does the traffic simulation run for? (-1 means infinite), default is 10
---catchdist   -> the catch distance of cop cars, default is 15.5
---traffictype -> NORMAL|ANTS|ANTS_RND|ANTS_RERND|ANTS_MRERND (default is NORMAL)
+--config -c   -> configuration file in JSON format. Default: "traffic.json"
 ```
 #### Samplemyshmclient.out
 ```
@@ -101,3 +97,10 @@ There are some other options for all the applications listed above, so here they
 ```
 
 If you'd like to replay a log file, there's no need to start the other processes, just the Car Window with the `--playlog=x` option where `x` denotes a valid log file. If you've been running the simulation with full logging enabled, then the routes of the cop cars can be examined during the replay.
+
+#### Configuration file
+From now on, `traffic.out` uses a JSON-format configuration file instead of the huge amount of command line parameters. 
+
+The default configuration file is fully specified. You may specify less settings, since for the unspecified settings the default values will be used. Unknown settings will be ignored without any note or warning. 
+
+**Even if you do not specify any settings, an empty configuration file must be given to the `traffic.out`!**

@@ -36,3 +36,4 @@ justine/rcemu/src/.deps/*
 *~
 *.lmap
 *.osm
+*.log

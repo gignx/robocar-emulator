@@ -37,7 +37,7 @@ void justine::robocar::Traffic::OpenLogStream(void)
   boost::posix_time::ptime now =
     boost::posix_time::second_clock::universal_time();
 
-  logfile_name_   = boost::posix_time::to_simple_string(now);
+  logfile_name_   = boost::posix_time::to_simple_string(now) + ".log";
   logfile_stream_ = new std::fstream(logfile_name_.c_str() , std::ios_base::out);
 }
 

@@ -4,6 +4,13 @@
 
 *The file `README_ORIGINAL.md` contains all information related to the Robocar World Championship and the research platform it uses. This file focuses on making things work to participate in the Championship.*
 
+#### IMPORTANT:
+In the latest commit, in order to untrack binary and local files we've changed the .gitignore and the binary files now have the `.out` ending. So, please pay attention to the fact that you may execute the following files and make targets from now on:
+ - `traffic.out`
+ - `smartcity.out`
+ - `sampleshmclient.out`
+ - `samplemyshmclient.out`
+
 ### How to kickstart this stuff?
 
 You should start with checking whether you have all the dependencies required, please refer to the `README_ORIGINAL.md` file.

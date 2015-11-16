@@ -29,8 +29,8 @@
  *
  */
 
-#include <traffic.hpp>
-#include <robocar.pb.h>
+#include "traffic.hpp"
+#include "robocar.pb.h"
 
 void justine::robocar::Traffic::OpenLogStream(void)
 {
@@ -59,7 +59,7 @@ void justine::robocar::Traffic::InitializeRoutineCars(void)
   std::cout << "Initializing routine cars ... " << std::endl;
   #endif
 
-  if (traffic_type_ != TrafficType::NORMAL)
+  if (simulationSettings.trafficType != TrafficType::NORMAL)
   {
     for (shm_map_Type::iterator iter=shm_map_->begin();
          iter!=shm_map_->end();
@@ -73,9 +73,9 @@ void justine::robocar::Traffic::InitializeRoutineCars(void)
     }
   }
 
-  for (int i {0}; i < num_cars_; ++i)
+  for (int i {0}; i < entitySettings.routineCarCount; ++i)
   {
-    if (traffic_type_ == TrafficType::NORMAL)
+    if (simulationSettings.trafficType == TrafficType::NORMAL)
     {
       std::shared_ptr<Car> car(new Car {*this});
 
@@ -102,7 +102,7 @@ void justine::robocar::Traffic::InitializePedestrians(void)
   std::cout << "Initializing pedestrians ... " << std::endl;
   #endif
 
-  if (traffic_type_ != TrafficType::NORMAL)
+  if (simulationSettings.trafficType != TrafficType::NORMAL)
   {
     for (shm_map_Type::iterator iter=shm_map_->begin();
          iter!=shm_map_->end();
@@ -116,13 +116,14 @@ void justine::robocar::Traffic::InitializePedestrians(void)
     }
   }
 
-  for (int i {0}; i < num_cars_*5; ++i)
+  for (int i {0}; i < entitySettings.pedestrianCount; ++i)
   {
-    if (traffic_type_ == TrafficType::NORMAL)
+    if (simulationSettings.trafficType == TrafficType::NORMAL)
     {
       std::shared_ptr<Car> car(new Pedestrian {*this});
       car->set_type(CarType::PEDESTRIAN);
       car->init();
+
       cars.push_back(car);
     }
     else
@@ -130,6 +131,7 @@ void justine::robocar::Traffic::InitializePedestrians(void)
       std::shared_ptr<Pedestrian> car(new Pedestrian {*this});
       car->set_type(CarType::PEDESTRIAN);
       car->init();
+
       cars.push_back(car);
     }
   }
@@ -151,7 +153,7 @@ void justine::robocar::Traffic::SimulationLoop(void)
 
   while(is_running_)
   {
-    if (++running_time_elapsed_ > (running_time_allowed_ / delay_))
+    if (++running_time_elapsed_ > (running_time_allowed_ / simulationSettings.delay))
     {
       is_running_ = false;
 
@@ -161,7 +163,7 @@ void justine::robocar::Traffic::SimulationLoop(void)
     {
       UpdateTraffic();
 
-      std::this_thread::sleep_for(std::chrono::milliseconds(delay_));
+      std::this_thread::sleep_for(std::chrono::milliseconds(simulationSettings.delay));
     }
   }
 
@@ -209,10 +211,9 @@ void justine::robocar::Traffic::StepCars()
 
   for(auto car:cars)car->step();
 
-
   int msg_length = 0;
   TrafficStateHeader traffic_state_header;
-  traffic_state_header.set_time_minutes(running_time_minutes_);
+  traffic_state_header.set_time_minutes(simulationSettings.minutes);
   traffic_state_header.set_time_elapsed(running_time_elapsed_);
   traffic_state_header.set_num_cars(cars.size());
 
@@ -232,7 +233,7 @@ void justine::robocar::Traffic::StepCars()
     std::stringbuf buf;
     std::ostream os(&buf);
 
-    car->assign(&car_data, full_logging);
+    car->assign(&car_data, simulationSettings.fullLog);
     car_data.SerializeToOstream(&os);
     msg_length = buf.str().length();
     const char *char_len = reinterpret_cast<const char*>(&msg_length);
@@ -260,7 +261,7 @@ void justine::robocar::Traffic::CheckIfCaught(void)
         toGPS(smart_car->from(), smart_car->to() , smart_car->get_step(), &lon2, &lat2);
         double d = Distance(lon1, lat1, lon2, lat2);
 
-        if(d < catch_distance_)
+        if(d < simulationSettings.catchDistance)
         {
           cop_car->GangsterCaught();
           smart_car->set_type(CarType::CAUGHT);
@@ -655,7 +656,7 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
     TrafficStateHeader traffic_state_header;
 
     // a protobuf által generált setter függvények
-    traffic_state_header.set_time_minutes(running_time_minutes_);
+    traffic_state_header.set_time_minutes(simulationSettings.minutes);
     traffic_state_header.set_time_elapsed(running_time_elapsed_);
 
     traffic_state_header.set_num_cars(cars_copy.size());
@@ -712,7 +713,7 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
       // az oroklődésnek és a polimorfiuzmusnak koszonhetően
       // a megfelelő adatok bele lesznek pakolva a CarData-ba
       // lsd.: Car.cpp Lines: 106, 257
-      car->assign(&car_data, true);
+      car->assign(&car_data, simulationSettings.fullLog);
 
       // innentől kezdve ugyanazt csináljuk, mint a TrafficStateHeader
       // esetén, csak a CarData objektummal
@@ -733,7 +734,7 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
       #endif
     }
     cars_mutex.unlock();
-    std::this_thread::sleep_for(std::chrono::milliseconds(delay_));
+    std::this_thread::sleep_for(std::chrono::milliseconds(simulationSettings.delay));
   }
 }
 
@@ -867,7 +868,7 @@ void justine::robocar::Traffic::StartServer(void)
 {
   boost::asio::ip::tcp::acceptor acceptor(
       io_service_,
-      boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port_));
+      boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), connnectivitySettings.portNumber));
 
   for(;;)
   {

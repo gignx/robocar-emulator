@@ -25,15 +25,16 @@
  * @section DESCRIPTION
  * Robocar City Emulator and Robocar World Championship
  *
- * desc
- *
  */
 
-#include <traffic.hpp>
 #include <boost/program_options.hpp>
+
+#include "traffic.hpp"
 
 int main(int argc, char* argv[])
 {
+  namespace po = boost::program_options;
+
   int t = std::time(nullptr);
 
   #ifdef DEBUG
@@ -42,52 +43,23 @@ int main(int argc, char* argv[])
 
   std::srand(t);
 
-  boost::program_options::options_description desc("Options");
+  po::options_description desc("Options");
+
   desc.add_options()
- ("version",      "produce version message")
- ("help,h",       "produce help message")
- ("full_log,f",   boost::program_options::bool_switch(), "Enable logging of routes")
- ("verbose,v",    boost::program_options::bool_switch(), "verbose mode")
- ("shm,s",        boost::program_options::value<std::string>()->default_value("JustineSharedMemory"), "shared memory segment name")
- ("port,p",       boost::program_options::value<std::string>()->default_value("10007"), "the TCP port that the traffic server is listening on to allow agents to communicate with the traffic simulation, the default value is 10007")
- ("cars,c",       boost::program_options::value<int>()->default_value(100), "number of the random cars")
- ("delay,d",      boost::program_options::value<int>()->default_value(200), "sleep duration between calculations")
- ("minutes,m",    boost::program_options::value<int>()->default_value(10), "how long does the traffic simulation run for? (-1 means infinite)")
- ("catchdist",    boost::program_options::value<double>()->default_value(15.5), "the catch distance of cop cars")
- ("traffictype",  boost::program_options::value<std::string>()->default_value("NORMAL"), "traffic type = NORMAL|ANTS|ANTS_RND|ANTS_RERND|ANTS_MRERND");
+    ("version",  "produce version message")
+    ("help,h",   "produce help message")
+    ("config,c", po::value<std::string>()->default_value("traffic.json"),
+                 "The file containing the configuration settings");
 
   std::string traffic_type;
 
-  boost::program_options::variables_map vm;
+  po::variables_map vm;
 
-  try
-  {
-    boost::program_options::store(
-      boost::program_options::parse_command_line(argc, argv, desc), vm);
+  po::store(po::parse_command_line(argc, argv, desc), vm);
 
-    boost::program_options::notify(vm);
+  po::notify(vm);
 
-    std::string enabled_traffic_types[] =
-      { "NORMAL", "ANTS", "ANTS_RND", "ANTS_RERND", "ANTS_MRERND" };
-
-    traffic_type.assign(vm["traffictype"].as<std::string>());
-
-    if (std::end(enabled_traffic_types) ==
-        std::find(std::begin(enabled_traffic_types), std::end(enabled_traffic_types), traffic_type))
-    {
-      throw boost::program_options::validation_error(
-        boost::program_options::validation_error::invalid_option_value);
-    }
-  }
-  catch (boost::program_options::error &e)
-  {
-    std::cerr << "ERROR: " << e.what() << std::endl << std::endl
-              << desc << std::endl;
-
-    return -1;
-  }
-
-  if(vm.count("version"))
+  if (vm.count("version"))
   {
     std::cout << "Robocar City Emulator and Robocar World Championship, Traffic Server" << std::endl
               << "Copyright(C) 2014, 2015 Norbert B�tfai\n" << std::endl
@@ -98,7 +70,7 @@ int main(int argc, char* argv[])
     return 0;
   }
 
-  if(vm.count("help"))
+  if (vm.count("help"))
   {
     std::cout << "Robocar City Emulator and Robocar World Championship home page: https://code.google.com/p/robocar-emulator/" << std::endl
               << desc << std::endl
@@ -106,44 +78,9 @@ int main(int argc, char* argv[])
     return 0;
   }
 
-  std::string shm   = vm["shm"].as<std::string>();
+  std::string configFile = vm["config"].as<std::string>();
 
-  std::string port  = vm["port"].as<std::string>();
-
-  bool full  = vm["full_log"].as<bool>();
-
-  int num_cars      = vm["cars"].as<int>();
-
-  int delay         = vm["delay"].as<int>();
-
-  int minutes       = vm["minutes"].as<int>();
-
-  double catchdist  = vm["catchdist"].as<double>();
-
-  bool verbose_mode = vm["verbose"].as<bool>();
-
-  justine::robocar::TrafficType type;
-
-  if(traffic_type == "ANTS_RND")
-    type = justine::robocar::TrafficType::ANT_RND;
-  else if(traffic_type == "ANTS_RERND")
-    type = justine::robocar::TrafficType::ANT_RERND;
-  else if(traffic_type == "ANTS_MRERND")
-    type = justine::robocar::TrafficType::ANT_MRERND;
-  else if(traffic_type == "ANTS")
-    type = justine::robocar::TrafficType::ANT;
-  else
-    type = justine::robocar::TrafficType::NORMAL;
-
-  justine::robocar::Traffic traffic {num_cars,
-                                     shm.c_str(),
-                                     std::atoi(port.c_str()),
-                                     catchdist,
-                                     type,
-                                     delay,
-                                     minutes,
-                                     verbose_mode,
-                                     full};
+  justine::robocar::Traffic traffic(configFile);
 
   try
   {

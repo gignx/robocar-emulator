@@ -4,6 +4,13 @@
 
 *The file `README_ORIGINAL.md` contains all information related to the Robocar World Championship and the research platform it uses. This file focuses on making things work to participate in the Championship.*
 
+#### IMPORTANT:
+In the latest commit, in order to untrack binary and local files we've changed the `.gitignore` and the binary files now have the `.out` ending. So, please pay attention to the fact that you may execute the following files and make targets from now on:
+ - `traffic.out`
+ - `smartcity.out`
+ - `sampleshmclient.out`
+ - `samplemyshmclient.out`
+
 ### How to kickstart this stuff?
 
 You should start with checking whether you have all the dependencies required, please refer to the `README_ORIGINAL.md` file.
@@ -14,7 +21,7 @@ From now on, we assume that you were able to `make` the contents of `rcemu` and 
 After acquiring the right `.osm` file, the first thing you start should be the `smartcity`, somehow like this:
 
 ```
- rcemu$ src/smartcity --osm=../berlin.osm --city=Berlin --shm=BerlinSharedMemory --node2gps=../berlin-lmap.txt
+ rcemu$ src/smartcity.out --osm=../berlin.osm --city=Berlin --shm=BerlinSharedMemory --node2gps=../berlin-lmap.txt
 ```
 
 After the `--osm` you must the `.osm` file to run the simulation on. Make sure you specify the same `shm` option from now on to all applications.
@@ -23,7 +30,7 @@ After the `--osm` you must the `.osm` file to run the simulation on. Make sure y
 We have our playground, let's get some toys! Or something that can handle our toys, that's what `traffic` is:
 
 ```
-rcemu$ src/traffic --shm=BerlinSharedMemory
+rcemu$ src/traffic.out --shm=BerlinSharedMemory
 ```
 
 **IMPORTANT: The default port is 10007. You can change it using the --port option!**
@@ -47,10 +54,10 @@ rcwin$ mvn clean compile package site assembly:assembly
 And here it comes! The fun part, adding cop cars and the gangsters:
 
 ```
-rcemu$ src/samplemyshmclient --shm=BerlinSharedMemory --team=BerlinPolice
+rcemu$ src/samplemyshmclient.out --shm=BerlinSharedMemory --team=BerlinPolice
 ```
 
-The default port is 10007.
+The default port is `10007`.
 
 Gangsters:
 
@@ -63,7 +70,7 @@ $ (sleep 1; echo "<init 0 50 g>"; sleep 1)|telnet localhost 10007
 ### Some program options if you're in trouble
 There are some other options for all the applications listed above, so here they are:
 
-#### Traffic
+#### Traffic.out
 ```
 --version     -> produce version message
 --help -h     -> produce help message
@@ -77,7 +84,7 @@ There are some other options for all the applications listed above, so here they
 --catchdist   -> the catch distance of cop cars, default is 15.5
 --traffictype -> NORMAL|ANTS|ANTS_RND|ANTS_RERND|ANTS_MRERND (default is NORMAL)
 ```
-#### Samplemyshmclient
+#### Samplemyshmclient.out
 ```
 --version     -> produce version message
 --help -h     -> produce help message

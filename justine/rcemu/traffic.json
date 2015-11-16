@@ -1,0 +1,32 @@
+{
+  "connectivity" : {
+    "shm"   : "JustineSharedMemory",
+    "port"  : "10007"
+  },
+  "entity": {
+    "routineCars" : {
+      "enabled" : true,
+      "count"   : 100
+    },
+    "pedestrians"  : {
+      "enabled" : true,
+      "count"   : 100
+    },
+    "gangsterCars": {
+      "count"   : 0
+    },
+    "buses"        : {
+      "enabled" : false
+    }
+  },
+  "simulation": {
+    "delay"          : 200,
+    "minutes"        : 10,
+    "catchDistance"  : 15.5,
+    "trafficType"    : "NORMAL",
+    "fullLog"        : false
+  },
+  "debug": {
+    "verboseMode" : false
+  }
+}

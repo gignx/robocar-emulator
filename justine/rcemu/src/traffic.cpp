@@ -73,7 +73,8 @@ void justine::robocar::Traffic::InitializeRoutineCars(void)
     }
   }
 
-  for (int i {0}; i < num_cars_; ++i)
+  //for (int i {0}; i < num_cars_; ++i)
+  for (int i {0}; i < 4; ++i)
   {
     if (traffic_type_ == TrafficType::NORMAL)
     {
@@ -116,7 +117,8 @@ void justine::robocar::Traffic::InitializePedestrians(void)
     }
   }
 
-  for (int i {0}; i < num_cars_*5; ++i)
+  //for (int i {0}; i < num_cars_*5; ++i)
+  for (int i {0}; i < 8; ++i)
   {
     if (traffic_type_ == TrafficType::NORMAL)
     {
@@ -141,43 +143,6 @@ void justine::robocar::Traffic::InitializePedestrians(void)
 
 void justine::robocar::Traffic::InitializeBuses(void)
 {
-  // TODO read bus line data
-
-  std::vector<osmium::unsigned_object_id_type> busway ;
-
-  busway.push_back(3039407850);
-  busway.push_back(3039407851);
-  busway.push_back(3039407852);
-  busway.push_back(3039407853);
-  busway.push_back(3039407854);
-  busway.push_back(3055243042);
-  busway.push_back(3055243044);
-  busway.push_back(3055243045);
-  busway.push_back(3055243043);
-  busway.push_back(3055243041);
-  busway.push_back(3055243040);
-  busway.push_back(3055243039);
-  busway.push_back(3055243038);
-  busway.push_back(3055243033);
-  busway.push_back(3055242831);
-  busway.push_back(3055242830);
-  busway.push_back(3055242829);
-  busway.push_back(3055242832);
-  busway.push_back(3055243034);
-  busway.push_back(3055243037);
-  busway.push_back(3055243036);
-  busway.push_back(3055243035);
-
-  /*std::shared_ptr<BusStop> busStop;
-  std::vector<std::string> nevek;
-  std::vector<int> idk;
-
-
-  idk.push_back(2153653218);
-  idk.push_back(1348141994);
-
-  nevek.push_back("honnan");
-  nevek.push_back("hova");*/
 
   for (auto p: *bus_stop_map_)
   {
@@ -216,24 +181,6 @@ void justine::robocar::Traffic::InitializeBuses(void)
     cars.push_back(bus);
     }
   }
-
-  //std::shared_ptr<BusStop> busStop = std::make_shared<BusStop>(1452131578, 1, "Nagyállomás");
-  //std::shared_ptr<BusStop> busStop2 = std::make_shared<BusStop>(2128041028, 2, "IT");
-
-  //immovableObjects.push_back(std::dynamic_pointer_cast<ImmovableObject>(busStop));
-//  immovableObjects.push_back(std::dynamic_pointer_cast<ImmovableObject>(busStop2));
-
-
-  /*std::string line;
-
-  std::shared_ptr<Car> bus(new Bus({*this, true, line.c_str(), 48}));
-  std::shared_ptr<SmartCar> b = std::dynamic_pointer_cast<SmartCar>( bus);
-  b->set_route(busway);
-  b->set_type(CarType::BUS);
-  b->init();
-  std::shared_ptr<Bus> b2 = std::dynamic_pointer_cast<Bus>( bus);
-  b2->init(3039407851);
-  cars.push_back(bus);*/
 }
 
 void justine::robocar::Traffic::SimulationLoop(void)

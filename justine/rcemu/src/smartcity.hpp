@@ -87,14 +87,6 @@ namespace robocar
   typedef std::pair<const unsigned int, SharedData> map_pair_Type;
   typedef std::pair<const unsigned int, char_string > bus_stop_Type;
 
-/*TODO FIXME
-  typedef std::vector<const unsigned int> wnv;
-  typedef std::pair<char_string, SharedData> bus_way_nodes_m_Type;
-  typedef boost::interprocess::allocator<bus_way_nodes_m_Type, segment_manager_Type> bus_way_nodes_m_Type_allocator;
-  typedef boost::interprocess::map< unsigned int, char_string, std::less<unsigned int>,
-                                    bus_way_nodes_m_Type_allocator> bus_way_nodes_m_map_Type;
-*/
-  //typedef std::pair<osmium::unsigned_object_id_type, std::string> map_pair_Type2;
   typedef boost::interprocess::allocator<map_pair_Type, segment_manager_Type> map_pair_Type_allocator;
   typedef boost::interprocess::allocator<bus_stop_Type, segment_manager_Type> bus_stop_Type_allocator;
   typedef boost::interprocess::allocator<SharedBusWay, segment_manager_Type> bus_way_Type_allocator;
@@ -150,7 +142,7 @@ namespace robocar
           m_busStopNodesMap,
           m_busstops,
           m_busWayVector);
-          estimated_size = 30*3*osm_reader.get_estimated_memory(); //20*3
+          estimated_size = 7*3*osm_reader.get_estimated_memory(); //20*3
 
 
           #ifdef DEBUG
@@ -245,11 +237,6 @@ namespace robocar
       segment->construct<shm_bus_way_Type>
       ( "BusWays" ) (alloc_obj);
 
-//  TODO FIXME
-    /*  bus_way_nodes_m_map_Type* bus_way_nodes_m_map_bs =
-      segment->construct<bus_way_nodes_m_map_Type>
-      ( "BusWayNodesMap" ) ( std::less<unsigned int>(),alloc_obj );*/
-
       try
       {
         for ( BusWayVector::iterator iter = m_busWayVector.begin();
@@ -338,8 +325,10 @@ namespace robocar
             }
           }
 
+          #ifdef DEBUG
           std::cout << sbw.ref << " | " << sbw.nodesFrom.size()
                     << " - " << sbw.nodesTo.size() << std::endl;
+          #endif
 
           bus_way_vector->push_back(sbw);
         }
@@ -381,6 +370,8 @@ namespace robocar
         std::cout << " alist.size = " << alist.size() << " (deg- >= 1)"<< std::endl;
         std::cout << " SHM/alist.size = " << shm_map_n->size() << std::endl;
         #endif
+
+
       }
       catch ( boost::interprocess::bad_alloc e )
       {
@@ -499,9 +490,6 @@ namespace robocar
     boost::interprocess::managed_shared_memory *segment;
     boost::interprocess::offset_ptr<shm_map_Type> shm_map;
     boost::interprocess::offset_ptr<bus_stop_map_Type> bus_stop_map;
-
-    //TODO FIXME
-    //boost::interprocess::offset_ptr<bus_way_nodes_m_map_Type> bus_way_nodes_map;
 
     int m_delay {5000};
     bool m_run {true};

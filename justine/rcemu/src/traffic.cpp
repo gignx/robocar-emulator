@@ -143,7 +143,7 @@ void justine::robocar::Traffic::InitializeBuses(void)
 {
   // TODO read bus line data
 
-  int bus_stop_id = 1;
+  int bus_stop_id = 5000;
   for (auto p: *bus_stop_map_)
   {
 
@@ -1100,4 +1100,3 @@ osmium::unsigned_object_id_type justine::robocar::Traffic::naive_node_for_neares
 
   return ret;
 }
-

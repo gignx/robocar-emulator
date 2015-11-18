@@ -434,6 +434,9 @@ public:
     car_data->set_team(line_);
     car_data->set_id(id_);
     if(full){
+      car_data->set_num_stops(busstops.size());
+      for(auto it = busstops.begin();it!=busstops.end();it++)
+        car_data->add_busstops(*it);
       car_data->set_size(route.size());
       for(auto it = route.begin();it!=route.end();it++)
         car_data->add_path(*it);
@@ -447,6 +450,11 @@ public:
     return line_;
   }
 
+  // TODO: Ide jönnek az adott busz megállóinak ID-i
+  //       (azok amiket mi adtunk nekik) (relax, már el van küldve a JAVA-nak, csak feltölteni kell!!)
+
+
+  std::vector<int> busstops = {5000, 5001, 5002};
   std::vector<long unsigned int> routeWayFrom, routeWayTo;
 protected:
   std::string line_;

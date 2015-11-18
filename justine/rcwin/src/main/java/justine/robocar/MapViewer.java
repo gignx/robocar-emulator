@@ -53,6 +53,7 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 			public void mouseMoved(MouseEvent e) {
 				if (carPainter.traffic != null) {
 					LinkedList<WaypointPolice> waypoints_ = carPainter.traffic.copList;
+					LinkedList<WaypointBus> busses = carPainter.traffic.busList;
 				//TEST
 				//LinkedList<WaypointBus> waypoints_b = carPainter.traffic.busList;
 
@@ -68,8 +69,26 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 											.getY() - rect.y);
 							if (con_p.distance(e.getPoint()) < 22) {
 								WaypointPolice.on = true;
+								WaypointBus.on = false;
 							} else {
 								WaypointPolice.on = false;
+							}
+						}
+					}
+					for (WaypointBus waypoint : busses) {
+						if (Traffic.clicked_map.get(waypoint.getID()) == null)
+							return;
+						if (Traffic.clicked_map.get(waypoint.getID())) {
+							Point2D point = getTileFactory().geoToPixel(
+									waypoint.getPosition(), getZoom());
+							Rectangle rect = getViewportBounds();
+							Point con_p = new Point(
+									(int) point.getX() - rect.x, (int) point
+											.getY() - rect.y);
+							if (con_p.distance(e.getPoint()) < 22) {
+								WaypointBus.on = true;
+							} else {
+								WaypointBus.on = false;
 							}
 						}
 					}
@@ -94,7 +113,7 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 						gp_pt = getTileFactory().geoToPixel(
 								waypoint.getPosition(), getZoom());
 					}
-					for (WaypointBus waypoint : waypoints_b) {
+					for (WaypointPolice waypoint : waypoints_) {
 						gp_pt = getTileFactory().geoToPixel(
 								waypoint.getPosition(), getZoom());
 
@@ -107,7 +126,7 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 						} else {
 							clicked_map.put(waypoint.getID(), false);
 						}
-						Traffic.clicked_map = clicked_map;
+						//Traffic.clicked_map = clicked_map;
 					}
 					//TEST
 					for (WaypointBus waypoint : waypoints_b) {
@@ -121,11 +140,17 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 
 						if (converted_gp_pt.distance(me.getPoint()) < 22) {
 							clicked_map.put(waypoint.getID(), true);
+							for(WaypointBusStop stop : carPainter.traffic.busstopList){
+								if(waypoint.stops.contains(stop.getID()))
+									Traffic.bus_stop_on_map.put(stop.getID(), true);
+								else
+									Traffic.bus_stop_on_map.put(stop.getID(), false);
+							}
 						} else {
 							clicked_map.put(waypoint.getID(), false);
 						}
-						Traffic.clicked_map = clicked_map;
 						}
+					Traffic.clicked_map = clicked_map;
 					}
 					//TEST END
 				}

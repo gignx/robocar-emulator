@@ -240,9 +240,19 @@ public class NetworkThread extends Thread implements PlayBack {
 							pedestrian_list.add(new WaypointPedestrian(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_)));
 							break;
 						case 5:
-							//TODO: Add path!
+							path.clear();
+							int pathl = carData.getSize();
+							for (int j = 0; j < pathl; j++) {
+								path.add(lmap.get(carData.getPath(j)));
+							}
 							name = carData.getTeam();
-							bus_list.add(new WaypointBus(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_), name, id));
+							id = carData.getId(); //YOLO
+							LinkedList<Integer> stops = new LinkedList<Integer>();
+							int num = carData.getNumStops();
+							for(int z = 0;z<num;z++){
+								stops.add((int)carData.getBusstops(z));
+							}
+							bus_list.add(new WaypointBus(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_), name, id, path, stops));
 
 							break;
 						case 6:
@@ -274,8 +284,14 @@ public class NetworkThread extends Thread implements PlayBack {
 
 						lat = lmap.get(objNode).lat;
 						lon = lmap.get(objNode).lon;
-
-						busstop_list.add(new WaypointBusStop(new GeoPosition(lat, lon), name, id));
+						boolean asd;
+						if(Traffic.bus_stop_on_map.get(id) == null){
+							Traffic.bus_stop_on_map.put(id, false);
+							asd = false;
+						}else{
+							asd = Traffic.bus_stop_on_map.get(id);
+						}
+						busstop_list.add(new WaypointBusStop(new GeoPosition(lat, lon), name, id, asd));
 					}
 
 					if (time >= minutes * 60 * 1000 / 200) {

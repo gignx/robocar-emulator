@@ -27,6 +27,8 @@ message CarData {
   optional int32 id           = 8;
   optional int32 size         = 9;
   repeated fixed64 path       = 10;
+  optional int32 num_stops         = 11;
+  repeated fixed64 busstops   = 12;
 }
 
 message ImmovableObjectData {

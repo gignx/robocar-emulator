@@ -20,6 +20,7 @@ public class Traffic {
     public LinkedList<LinkedList<? extends UpdateableWaypoint>> lists = new LinkedList<LinkedList<? extends UpdateableWaypoint>>();
     long timestamp;
     public long seconds;
+    static HashMap<Integer, Boolean> bus_stop_on_map = new HashMap<Integer, Boolean>();
 
  Traffic() {
 	super();

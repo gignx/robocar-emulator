@@ -25,17 +25,19 @@ class WaypointBus extends UpdateableWaypoint {
 	static Font serif = new Font("Serif", Font.BOLD, 14);
 	static FontMetrics font_metrics;
 	LinkedList<Loc> path;
-	Color pathcolor = new Color(0, 66, 255, 170);
+	LinkedList<Integer> stops;
+	Color pathcolor = new Color(255, 255, 0, 255);
 	protected static boolean on = false;
 
 	public WaypointBus(GeoPosition from, GeoPosition to, String name, int id
-			){
-			//,LinkedList<Loc> path) {
+			,LinkedList<Loc> path, LinkedList<Integer> stops) {
+			
 		super(from, to);
-		//this.path = new LinkedList<Loc>();
-		//this.path.addAll(path);
+		this.path = new LinkedList<Loc>();
+		this.path.addAll(path);
 		this.c = Color.YELLOW;
 		this.name = name;
+		this.stops=stops;
 		id_ = id;
 	}
 
@@ -50,7 +52,7 @@ class WaypointBus extends UpdateableWaypoint {
 				&& Traffic.clicked_map.get(getID()) == true) {
 			g.setColor(pathcolor);
 			g.setStroke(new BasicStroke(5));
-			Point2D point = map.getTileFactory().geoToPixel(getPosition(),
+			Point2D point = map.getTileFactory().geoToPixel(new GeoPosition(path.get(0).lat, path.get(0).lon),
 					map.getZoom());
 			for (Loc l : path) {
 				Point2D p = map.getTileFactory().geoToPixel(

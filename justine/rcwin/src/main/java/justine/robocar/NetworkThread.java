@@ -243,6 +243,7 @@ public class NetworkThread extends Thread implements PlayBack {
 							//TODO: Add path!
 							name = carData.getTeam();
 							bus_list.add(new WaypointBus(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_), name, id));
+
 							break;
 						case 6:
 							break;

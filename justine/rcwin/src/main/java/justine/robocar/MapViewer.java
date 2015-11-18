@@ -34,7 +34,7 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 					VirtualEarthTileFactoryInfo.SATELLITE)),
 			new DefaultTileFactory(new VirtualEarthTileFactoryInfo(
 					VirtualEarthTileFactoryInfo.HYBRID)) };
-	
+
 	public MapViewer(final CarPainter carPainter) {
 		super();
 		setDoubleBuffered(false);
@@ -53,6 +53,8 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 			public void mouseMoved(MouseEvent e) {
 				if (carPainter.traffic != null) {
 					LinkedList<WaypointPolice> waypoints_ = carPainter.traffic.copList;
+				//TEST
+				//LinkedList<WaypointBus> waypoints_b = carPainter.traffic.busList;
 
 					for (WaypointPolice waypoint : waypoints_) {
 						if (Traffic.clicked_map.get(waypoint.getID()) == null)
@@ -84,8 +86,15 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 				Point2D gp_pt = null;
 				if (carPainter.traffic != null) {
 					LinkedList<WaypointPolice> waypoints_ = carPainter.traffic.copList;
+				LinkedList<WaypointBus> waypoints_b = carPainter.traffic.busList;
+			//	LinkedList<WaypointBusStop> waypoints_bt = carPainter.traffic.busstopList;
+				//TESTEND
 					Map<Integer, Boolean> clicked_map = Traffic.clicked_map;
 					for (WaypointPolice waypoint : waypoints_) {
+						gp_pt = getTileFactory().geoToPixel(
+								waypoint.getPosition(), getZoom());
+					}
+					for (WaypointBus waypoint : waypoints_b) {
 						gp_pt = getTileFactory().geoToPixel(
 								waypoint.getPosition(), getZoom());
 
@@ -100,9 +109,27 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 						}
 						Traffic.clicked_map = clicked_map;
 					}
+					//TEST
+					for (WaypointBus waypoint : waypoints_b) {
+						gp_pt = getTileFactory().geoToPixel(
+								waypoint.getPosition(), getZoom());
+
+
+						Rectangle rect = getViewportBounds();
+						Point converted_gp_pt = new Point((int) gp_pt.getX()
+								- rect.x, (int) gp_pt.getY() - rect.y);
+
+						if (converted_gp_pt.distance(me.getPoint()) < 22) {
+							clicked_map.put(waypoint.getID(), true);
+						} else {
+							clicked_map.put(waypoint.getID(), false);
+						}
+						Traffic.clicked_map = clicked_map;
+						}
+					}
+					//TEST END
 				}
 
-			}
 		});
 	}
 

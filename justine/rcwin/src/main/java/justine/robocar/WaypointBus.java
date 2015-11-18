@@ -97,7 +97,7 @@ class WaypointBus extends UpdateableWaypoint {
 			g.setColor(new Color(255, 255, 255, 20));
 		}
 
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < data.length; i++) {
 			if (i == 0) {
 				g.drawString(data[i],
 						(int) point.getX() + 2 + (int) center_pos,

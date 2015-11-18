@@ -78,7 +78,7 @@ class WaypointBusStop extends UpdateableWaypoint {
 			g.setColor(new Color(255, 255, 255, 20));
 		}
 
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < data.length; i++) {
 			if (i == 0) {
 				g.drawString(data[i],
 						(int) point.getX() + 2 + (int) center_pos,
@@ -122,15 +122,15 @@ class WaypointBusStop extends UpdateableWaypoint {
 				(int) point.getX() - getSprite().getWidth(map),
 				(int) point.getY() - getSprite().getHeight(map), null);
 		Rectangle rect = new Rectangle((int) point.getX(), (int) point.getY(),
-				nameWidth + 4, 20);
+						nameWidth + 4, 20);
 
-		g.fill(rect);
-		g.setColor(c);
-		g.draw(rect);
-		g.setColor(Color.WHITE);
+		//g.fill(rect);
+		//g.setColor(c);
+		//g.draw(rect);
+		//g.setColor(Color.WHITE);
 
-		g.drawString(getName(), (int) point.getX() + 2,
-				(int) point.getY() + 20 - 5);
+		//g.drawString(getName(), (int) point.getX() + 2,
+		//		(int) point.getY() + 20 - 5);
 
 	}
 

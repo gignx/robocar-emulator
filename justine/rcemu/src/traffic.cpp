@@ -148,7 +148,7 @@ void justine::robocar::Traffic::InitializeBuses(void)
   {
 
     std::shared_ptr<BusStop> busStop = std::make_shared<BusStop>(p.first, bus_stop_id, p.second.c_str());
-    std::cout << "bs_id: " << bus_stop_id << std::endl;
+    //std::cout << "bs_id: " << bus_stop_id << std::endl;
     bus_stop_id++;
     immovableObjects.push_back(std::dynamic_pointer_cast<ImmovableObject>(busStop));
   }
@@ -160,7 +160,7 @@ void justine::robocar::Traffic::InitializeBuses(void)
     if (sbw.nodesFrom.size() > 0)
     {
     std::shared_ptr<Car> bus(new Bus({*this, true, sbw.ref.c_str(), bus_id}));
-    std::cout << "id: " << bus_id << std::endl;
+  //std::cout << "id: " << bus_id << std::endl;
     bus_id++;
     std::shared_ptr<SmartCar> b = std::dynamic_pointer_cast<SmartCar>(bus);
     b->set_type(CarType::BUS);

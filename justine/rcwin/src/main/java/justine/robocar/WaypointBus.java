@@ -31,7 +31,7 @@ class WaypointBus extends UpdateableWaypoint {
 
 	public WaypointBus(GeoPosition from, GeoPosition to, String name, int id
 			,LinkedList<Loc> path, LinkedList<Integer> stops) {
-			
+
 		super(from, to);
 		this.path = new LinkedList<Loc>();
 		this.path.addAll(path);
@@ -74,9 +74,9 @@ class WaypointBus extends UpdateableWaypoint {
 		font_metrics = g.getFontMetrics();
 		int nameWidth = font_metrics.stringWidth(getName() + " jelzésű busz");
 		int fontHeight = font_metrics.getHeight();
-		int boxWidth = Math.max(162, nameWidth);
+		int boxWidth = Math.max(140, nameWidth);
 		Rectangle rect = new Rectangle((int) point.getX(), (int) point.getY(),
-				boxWidth + 4, fontHeight * 4 + 10);
+				boxWidth + 4, fontHeight * 1 + 10);
 		double center_pos = (boxWidth - nameWidth) / 2.0;
 
 		if (on)

@@ -119,6 +119,30 @@ public final class TrafficStateProtos {
      * <code>repeated fixed64 path = 10;</code>
      */
     long getPath(int index);
+
+    // optional int32 num_stops = 11;
+    /**
+     * <code>optional int32 num_stops = 11;</code>
+     */
+    boolean hasNumStops();
+    /**
+     * <code>optional int32 num_stops = 11;</code>
+     */
+    int getNumStops();
+
+    // repeated fixed64 busstops = 12;
+    /**
+     * <code>repeated fixed64 busstops = 12;</code>
+     */
+    java.util.List<java.lang.Long> getBusstopsList();
+    /**
+     * <code>repeated fixed64 busstops = 12;</code>
+     */
+    int getBusstopsCount();
+    /**
+     * <code>repeated fixed64 busstops = 12;</code>
+     */
+    long getBusstops(int index);
   }
   /**
    * Protobuf type {@code justine.robocar.CarData}
@@ -243,6 +267,32 @@ public final class TrafficStateProtos {
               input.popLimit(limit);
               break;
             }
+            case 88: {
+              bitField0_ |= 0x00000200;
+              numStops_ = input.readInt32();
+              break;
+            }
+            case 97: {
+              if (!((mutable_bitField0_ & 0x00000800) == 0x00000800)) {
+                busstops_ = new java.util.ArrayList<java.lang.Long>();
+                mutable_bitField0_ |= 0x00000800;
+              }
+              busstops_.add(input.readFixed64());
+              break;
+            }
+            case 98: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000800) == 0x00000800) && input.getBytesUntilLimit() > 0) {
+                busstops_ = new java.util.ArrayList<java.lang.Long>();
+                mutable_bitField0_ |= 0x00000800;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                busstops_.add(input.readFixed64());
+              }
+              input.popLimit(limit);
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -253,6 +303,9 @@ public final class TrafficStateProtos {
       } finally {
         if (((mutable_bitField0_ & 0x00000200) == 0x00000200)) {
           path_ = java.util.Collections.unmodifiableList(path_);
+        }
+        if (((mutable_bitField0_ & 0x00000800) == 0x00000800)) {
+          busstops_ = java.util.Collections.unmodifiableList(busstops_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -607,6 +660,45 @@ public final class TrafficStateProtos {
       return path_.get(index);
     }
 
+    // optional int32 num_stops = 11;
+    public static final int NUM_STOPS_FIELD_NUMBER = 11;
+    private int numStops_;
+    /**
+     * <code>optional int32 num_stops = 11;</code>
+     */
+    public boolean hasNumStops() {
+      return ((bitField0_ & 0x00000200) == 0x00000200);
+    }
+    /**
+     * <code>optional int32 num_stops = 11;</code>
+     */
+    public int getNumStops() {
+      return numStops_;
+    }
+
+    // repeated fixed64 busstops = 12;
+    public static final int BUSSTOPS_FIELD_NUMBER = 12;
+    private java.util.List<java.lang.Long> busstops_;
+    /**
+     * <code>repeated fixed64 busstops = 12;</code>
+     */
+    public java.util.List<java.lang.Long>
+        getBusstopsList() {
+      return busstops_;
+    }
+    /**
+     * <code>repeated fixed64 busstops = 12;</code>
+     */
+    public int getBusstopsCount() {
+      return busstops_.size();
+    }
+    /**
+     * <code>repeated fixed64 busstops = 12;</code>
+     */
+    public long getBusstops(int index) {
+      return busstops_.get(index);
+    }
+
     private void initFields() {
       nodeFrom_ = 0L;
       nodeTo_ = 0L;
@@ -618,6 +710,8 @@ public final class TrafficStateProtos {
       id_ = 0;
       size_ = 0;
       path_ = java.util.Collections.emptyList();
+      numStops_ = 0;
+      busstops_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -681,6 +775,12 @@ public final class TrafficStateProtos {
       for (int i = 0; i < path_.size(); i++) {
         output.writeFixed64(10, path_.get(i));
       }
+      if (((bitField0_ & 0x00000200) == 0x00000200)) {
+        output.writeInt32(11, numStops_);
+      }
+      for (int i = 0; i < busstops_.size(); i++) {
+        output.writeFixed64(12, busstops_.get(i));
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -731,6 +831,16 @@ public final class TrafficStateProtos {
         dataSize = 8 * getPathList().size();
         size += dataSize;
         size += 1 * getPathList().size();
+      }
+      if (((bitField0_ & 0x00000200) == 0x00000200)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(11, numStops_);
+      }
+      {
+        int dataSize = 0;
+        dataSize = 8 * getBusstopsList().size();
+        size += dataSize;
+        size += 1 * getBusstopsList().size();
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -868,6 +978,10 @@ public final class TrafficStateProtos {
         bitField0_ = (bitField0_ & ~0x00000100);
         path_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000200);
+        numStops_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000400);
+        busstops_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000800);
         return this;
       }
 
@@ -937,6 +1051,15 @@ public final class TrafficStateProtos {
           bitField0_ = (bitField0_ & ~0x00000200);
         }
         result.path_ = path_;
+        if (((from_bitField0_ & 0x00000400) == 0x00000400)) {
+          to_bitField0_ |= 0x00000200;
+        }
+        result.numStops_ = numStops_;
+        if (((bitField0_ & 0x00000800) == 0x00000800)) {
+          busstops_ = java.util.Collections.unmodifiableList(busstops_);
+          bitField0_ = (bitField0_ & ~0x00000800);
+        }
+        result.busstops_ = busstops_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -989,6 +1112,19 @@ public final class TrafficStateProtos {
           } else {
             ensurePathIsMutable();
             path_.addAll(other.path_);
+          }
+          onChanged();
+        }
+        if (other.hasNumStops()) {
+          setNumStops(other.getNumStops());
+        }
+        if (!other.busstops_.isEmpty()) {
+          if (busstops_.isEmpty()) {
+            busstops_ = other.busstops_;
+            bitField0_ = (bitField0_ & ~0x00000800);
+          } else {
+            ensureBusstopsIsMutable();
+            busstops_.addAll(other.busstops_);
           }
           onChanged();
         }
@@ -1442,6 +1578,105 @@ public final class TrafficStateProtos {
       public Builder clearPath() {
         path_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000200);
+        onChanged();
+        return this;
+      }
+
+      // optional int32 num_stops = 11;
+      private int numStops_ ;
+      /**
+       * <code>optional int32 num_stops = 11;</code>
+       */
+      public boolean hasNumStops() {
+        return ((bitField0_ & 0x00000400) == 0x00000400);
+      }
+      /**
+       * <code>optional int32 num_stops = 11;</code>
+       */
+      public int getNumStops() {
+        return numStops_;
+      }
+      /**
+       * <code>optional int32 num_stops = 11;</code>
+       */
+      public Builder setNumStops(int value) {
+        bitField0_ |= 0x00000400;
+        numStops_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 num_stops = 11;</code>
+       */
+      public Builder clearNumStops() {
+        bitField0_ = (bitField0_ & ~0x00000400);
+        numStops_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // repeated fixed64 busstops = 12;
+      private java.util.List<java.lang.Long> busstops_ = java.util.Collections.emptyList();
+      private void ensureBusstopsIsMutable() {
+        if (!((bitField0_ & 0x00000800) == 0x00000800)) {
+          busstops_ = new java.util.ArrayList<java.lang.Long>(busstops_);
+          bitField0_ |= 0x00000800;
+         }
+      }
+      /**
+       * <code>repeated fixed64 busstops = 12;</code>
+       */
+      public java.util.List<java.lang.Long>
+          getBusstopsList() {
+        return java.util.Collections.unmodifiableList(busstops_);
+      }
+      /**
+       * <code>repeated fixed64 busstops = 12;</code>
+       */
+      public int getBusstopsCount() {
+        return busstops_.size();
+      }
+      /**
+       * <code>repeated fixed64 busstops = 12;</code>
+       */
+      public long getBusstops(int index) {
+        return busstops_.get(index);
+      }
+      /**
+       * <code>repeated fixed64 busstops = 12;</code>
+       */
+      public Builder setBusstops(
+          int index, long value) {
+        ensureBusstopsIsMutable();
+        busstops_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated fixed64 busstops = 12;</code>
+       */
+      public Builder addBusstops(long value) {
+        ensureBusstopsIsMutable();
+        busstops_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated fixed64 busstops = 12;</code>
+       */
+      public Builder addAllBusstops(
+          java.lang.Iterable<? extends java.lang.Long> values) {
+        ensureBusstopsIsMutable();
+        super.addAll(values, busstops_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated fixed64 busstops = 12;</code>
+       */
+      public Builder clearBusstops() {
+        busstops_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000800);
         onChanged();
         return this;
       }
@@ -2801,20 +3036,21 @@ public final class TrafficStateProtos {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\021src/robocar.proto\022\017justine.robocar\"\260\002\n" +
+      "\n\021src/robocar.proto\022\017justine.robocar\"\325\002\n" +
       "\007CarData\022\021\n\tnode_from\030\001 \002(\006\022\017\n\007node_to\030\002" +
       " \002(\006\022\020\n\010max_step\030\003 \002(\006\022\014\n\004step\030\004 \002(\006\0223\n\004" +
       "type\030\005 \002(\0162%.justine.robocar.CarData.Pro" +
       "toCarType\022\016\n\006caught\030\006 \001(\005\022\014\n\004team\030\007 \001(\t\022" +
-      "\n\n\002id\030\010 \001(\005\022\014\n\004size\030\t \001(\005\022\014\n\004path\030\n \003(\006\"" +
-      "f\n\014ProtoCarType\022\n\n\006NORMAL\020\000\022\n\n\006POLICE\020\001\022" +
-      "\014\n\010GANGSTER\020\002\022\n\n\006CAUGHT\020\003\022\016\n\nPEDESTRIAN\020" +
-      "\004\022\007\n\003BUS\020\005\022\013\n\007BUSSTOP\020\006\"=\n\023ImmovableObje" +
-      "ctData\022\n\n\002id\030\001 \002(\005\022\014\n\004node\030\002 \002(\006\022\014\n\004name",
-      "\030\003 \001(\t\"g\n\022TrafficStateHeader\022\024\n\014time_min" +
-      "utes\030\001 \002(\005\022\024\n\014time_elapsed\030\002 \002(\005\022\020\n\010num_" +
-      "cars\030\003 \002(\005\022\023\n\013num_objects\030\004 \002(\005B%\n\017justi" +
-      "ne.robocarB\022TrafficStateProtos"
+      "\n\n\002id\030\010 \001(\005\022\014\n\004size\030\t \001(\005\022\014\n\004path\030\n \003(\006\022" +
+      "\021\n\tnum_stops\030\013 \001(\005\022\020\n\010busstops\030\014 \003(\006\"f\n\014" +
+      "ProtoCarType\022\n\n\006NORMAL\020\000\022\n\n\006POLICE\020\001\022\014\n\010" +
+      "GANGSTER\020\002\022\n\n\006CAUGHT\020\003\022\016\n\nPEDESTRIAN\020\004\022\007" +
+      "\n\003BUS\020\005\022\013\n\007BUSSTOP\020\006\"=\n\023ImmovableObjectD",
+      "ata\022\n\n\002id\030\001 \002(\005\022\014\n\004node\030\002 \002(\006\022\014\n\004name\030\003 " +
+      "\001(\t\"g\n\022TrafficStateHeader\022\024\n\014time_minute" +
+      "s\030\001 \002(\005\022\024\n\014time_elapsed\030\002 \002(\005\022\020\n\010num_car" +
+      "s\030\003 \002(\005\022\023\n\013num_objects\030\004 \002(\005B%\n\017justine." +
+      "robocarB\022TrafficStateProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -2826,7 +3062,7 @@ public final class TrafficStateProtos {
           internal_static_justine_robocar_CarData_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_justine_robocar_CarData_descriptor,
-              new java.lang.String[] { "NodeFrom", "NodeTo", "MaxStep", "Step", "Type", "Caught", "Team", "Id", "Size", "Path", });
+              new java.lang.String[] { "NodeFrom", "NodeTo", "MaxStep", "Step", "Type", "Caught", "Team", "Id", "Size", "Path", "NumStops", "Busstops", });
           internal_static_justine_robocar_ImmovableObjectData_descriptor =
             getDescriptor().getMessageTypes().get(1);
           internal_static_justine_robocar_ImmovableObjectData_fieldAccessorTable = new

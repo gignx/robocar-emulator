@@ -454,7 +454,7 @@ public:
   //       (azok amiket mi adtunk nekik) (relax, már el van küldve a JAVA-nak, csak feltölteni kell!!)
 
 
-  std::vector<int> busstops = {5000, 5001, 5002};
+  std::vector<int> busstops = {};
   std::vector<long unsigned int> routeWayFrom, routeWayTo;
 protected:
   std::string line_;

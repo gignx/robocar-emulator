@@ -26,12 +26,12 @@ class WaypointBusStop extends UpdateableWaypoint {
 	static FontMetrics font_metrics;
 	LinkedList<Loc> path;
 	Color pathcolor = new Color(0, 66, 255, 170);
-	public boolean on = false;
+	protected static boolean on = false;
 
 	public WaypointBusStop(GeoPosition node, String name, int id, boolean on) {
 		// ,LinkedList<Loc> path) {
 		super(node, node);
-		this.on = on;
+	//	this.on = on;
 		// this.path = new LinkedList<Loc>();
 		// this.path.addAll(path);
 		this.c = Color.YELLOW;
@@ -46,7 +46,14 @@ class WaypointBusStop extends UpdateableWaypoint {
 		// getPosition().getLongitude()));
 	}
 
-	public void drawWithInfo(Graphics2D g, JXMapViewer map) {
+  @Override
+	public void draw(Graphics2D g, JXMapViewer map) {
+
+		if(Traffic.clicked_map.get(id_)!=null)
+		if(Traffic.clicked_map.get(id_)){
+			drawWithInfo(g, map);
+			return;
+		}
 
 		Point2D point = map.getTileFactory().geoToPixel(getPosition(),
 				map.getZoom());
@@ -60,8 +67,7 @@ class WaypointBusStop extends UpdateableWaypoint {
 		// map.setCenterPosition(getPosition());
 	}
 
-	@Override
-	public void draw(Graphics2D g, JXMapViewer map) {
+	public void drawWithInfo(Graphics2D g, JXMapViewer map) {
 
 		Point2D point = map.getTileFactory().geoToPixel(getPosition(),
 				map.getZoom());
@@ -78,19 +84,18 @@ class WaypointBusStop extends UpdateableWaypoint {
 		if (on) {
 			g.setFont(serif);
 			font_metrics = g.getFontMetrics();
-			 nameWidth = font_metrics.stringWidth(getName()
-					+ " jelzésű buszmegálló");
+			 nameWidth = font_metrics.stringWidth(getName());
 			int fontHeight = font_metrics.getHeight();
-			int boxWidth = Math.max(162, nameWidth);
+			int boxWidth = Math.max(180, nameWidth);
 			Rectangle rect = new Rectangle((int) point.getX(), (int) point.getY(),
-					boxWidth + 4, fontHeight * 4 + 10);
+					boxWidth + 4, fontHeight * 1 + 10);
 			double center_pos = (boxWidth - nameWidth) / 2.0;
 			g.setColor(borderbg);
 			g.fill(rect);
 			g.setColor(c);
 			g.draw(rect);
 			g.setColor(Color.WHITE);
-			String data[] = { getName() + " jelzésű buszmegálló" };
+			String data[] = { getName() };
 			for (int i = 0; i < data.length; i++) {
 				if (i == 0) {
 					g.drawString(data[i], (int) point.getX() + 2

@@ -54,8 +54,7 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 				if (carPainter.traffic != null) {
 					LinkedList<WaypointPolice> waypoints_ = carPainter.traffic.copList;
 					LinkedList<WaypointBus> busses = carPainter.traffic.busList;
-				//TEST
-				//LinkedList<WaypointBus> waypoints_b = carPainter.traffic.busList;
+					LinkedList<WaypointBusStop> busstops = carPainter.traffic.busstopList;
 
 					for (WaypointPolice waypoint : waypoints_) {
 						if (Traffic.clicked_map.get(waypoint.getID()) == null)
@@ -70,6 +69,7 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 							if (con_p.distance(e.getPoint()) < 22) {
 								WaypointPolice.on = true;
 								WaypointBus.on = false;
+								WaypointBusStop.on = false;
 							} else {
 								WaypointPolice.on = false;
 							}
@@ -87,8 +87,27 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 											.getY() - rect.y);
 							if (con_p.distance(e.getPoint()) < 22) {
 								WaypointBus.on = true;
+								WaypointBusStop.on = false;
 							} else {
 								WaypointBus.on = false;
+							}
+						}
+					}
+					//TEST
+					for (WaypointBusStop waypoint : busstops) {
+						if (Traffic.clicked_map.get(waypoint.getID()) == null)
+							return;
+						if (Traffic.clicked_map.get(waypoint.getID())) {
+							Point2D point = getTileFactory().geoToPixel(
+									waypoint.getPosition(), getZoom());
+							Rectangle rect = getViewportBounds();
+							Point con_p = new Point(
+									(int) point.getX() - rect.x, (int) point
+											.getY() - rect.y);
+							if (con_p.distance(e.getPoint()) < 22) {
+								WaypointBusStop.on = true;
+							} else {
+								WaypointBusStop.on = false;
 							}
 						}
 					}
@@ -105,9 +124,9 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 				Point2D gp_pt = null;
 				if (carPainter.traffic != null) {
 					LinkedList<WaypointPolice> waypoints_ = carPainter.traffic.copList;
-				LinkedList<WaypointBus> waypoints_b = carPainter.traffic.busList;
-			//	LinkedList<WaypointBusStop> waypoints_bt = carPainter.traffic.busstopList;
-				//TESTEND
+					LinkedList<WaypointBus> waypoints_b = carPainter.traffic.busList;
+				LinkedList<WaypointBusStop> waypoints_bt = carPainter.traffic.busstopList;
+
 					Map<Integer, Boolean> clicked_map = Traffic.clicked_map;
 					for (WaypointPolice waypoint : waypoints_) {
 						gp_pt = getTileFactory().geoToPixel(
@@ -128,7 +147,7 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 						}
 						//Traffic.clicked_map = clicked_map;
 					}
-					//TEST
+
 					for (WaypointBus waypoint : waypoints_b) {
 						gp_pt = getTileFactory().geoToPixel(
 								waypoint.getPosition(), getZoom());
@@ -150,9 +169,25 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 							clicked_map.put(waypoint.getID(), false);
 						}
 						}
+					//TEST
+						for (WaypointBusStop waypoint : waypoints_bt) {
+							gp_pt = getTileFactory().geoToPixel(
+									waypoint.getPosition(), getZoom());
+
+//System.out.println(waypoint.getID());
+
+							Rectangle rect = getViewportBounds();
+							Point converted_gp_pt = new Point((int) gp_pt.getX()
+									- rect.x, (int) gp_pt.getY() - rect.y);
+
+							if (converted_gp_pt.distance(me.getPoint()) < 22) {
+								clicked_map.put(waypoint.getID(), true);
+							} else {
+								clicked_map.put(waypoint.getID(), false);
+							}
+						}
 					Traffic.clicked_map = clicked_map;
 					}
-					//TEST END
 				}
 
 		});

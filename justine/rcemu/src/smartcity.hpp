@@ -48,17 +48,12 @@
 
 #include <iomanip>
 
+#include "smartcity_defs.hpp"
+
 namespace justine
 {
 namespace robocar
 {
-
-  typedef boost::interprocess::managed_shared_memory::segment_manager segment_manager_Type;
-  typedef boost::interprocess::allocator<void, segment_manager_Type> void_allocator;
-  typedef boost::interprocess::allocator<unsigned int, segment_manager_Type> uint_allocator;
-  typedef boost::interprocess::vector<unsigned int, uint_allocator> uint_vector;
-  typedef boost::interprocess::allocator<uint_vector, segment_manager_Type> uint_vector_allocator;
-
   class SharedData
   {
   public:
@@ -75,10 +70,33 @@ namespace robocar
 
   };
 
+  struct SharedBusWay
+  {
+    char_string ref;
+
+    uint_vector nodesTo;
+    uint_vector nodesFrom;
+
+    SharedBusWay(std::string r, const void_allocator &void_alloc):
+      ref(r.c_str(), void_alloc),
+      nodesTo(void_alloc),
+      nodesFrom(void_alloc)
+    {}
+  };
+
   typedef std::pair<const unsigned int, SharedData> map_pair_Type;
+  typedef std::pair<const unsigned int, char_string > bus_stop_Type;
+
   typedef boost::interprocess::allocator<map_pair_Type, segment_manager_Type> map_pair_Type_allocator;
+  typedef boost::interprocess::allocator<bus_stop_Type, segment_manager_Type> bus_stop_Type_allocator;
+  typedef boost::interprocess::allocator<SharedBusWay, segment_manager_Type> bus_way_Type_allocator;
   typedef boost::interprocess::map< unsigned int, SharedData, std::less<unsigned int>,
   map_pair_Type_allocator> shm_map_Type;
+
+  typedef boost::interprocess::vector<SharedBusWay, bus_way_Type_allocator> shm_bus_way_Type;
+
+  typedef boost::interprocess::map< unsigned int, char_string, std::less<unsigned int>,
+                                    bus_stop_Type_allocator> bus_stop_map_Type;
 
   class SmartCity
   {
@@ -92,6 +110,14 @@ namespace robocar
         gpsFile << loc.first
                 << " " << loc.second.lat()
                 <<  " " << loc.second.lon() << std::endl;
+      }
+
+      for  (auto loc : m_busStopNodesMap)
+      {
+        gpsFile << loc.first
+                << " " << loc.second.lat()
+                << " " << loc.second.lon()
+                << std::endl;
       }
 
       gpsFile.close ();
@@ -112,8 +138,63 @@ namespace robocar
         OSMReader osm_reader ( osm_file, alist, palist,
           m_waynode_locations,
           m_busWayNodesMap,
-          m_way2nodes );
-          estimated_size = 20*3*osm_reader.get_estimated_memory();
+          m_way2nodes,
+          m_busStopNodesMap,
+          m_busstops,
+          m_busWayVector);
+          estimated_size = 7*3*osm_reader.get_estimated_memory(); //20*3
+
+
+          #ifdef DEBUG
+
+          for (const auto& obw : m_busWayVector)
+          {
+            std::cout << obw.ref << std::endl;
+            std::cout << "\tTo: " << obw.nodesTo.size()
+                      << " From: " << obw.nodesFrom.size()
+                      << std::endl;
+          }
+
+          std::cout << "m_busWayNodesMap" << std::endl;
+          for(std::map<std::string, std::vector<osmium::unsigned_object_id_type>>::iterator it = m_busWayNodesMap.begin(); it != m_busWayNodesMap.end(); ++it)
+          {
+              std::cout << (*it).first << std::endl;
+              std::vector<osmium::unsigned_object_id_type> inVect = (*it).second;
+              for (unsigned j=0; j<inVect.size(); j++)
+                  std::cout << inVect[j] << " - ";
+
+                  std::cout << std::endl;
+                  std::cout << "-------------------------------------------------------------------" << std::endl;
+          }
+
+          std::cout << "m_way2nodes" << std::endl;
+          for(std::map<osmium::unsigned_object_id_type, std::vector<osmium::unsigned_object_id_type>>::iterator it = m_way2nodes.begin(); it != m_way2nodes.end(); ++it)
+          {
+              std::cout << (*it).first << std::endl;
+              std::vector<osmium::unsigned_object_id_type> inVect = (*it).second;
+              for (unsigned j=0; j<inVect.size(); j++)
+                  std::cout << inVect[j] << " - ";
+
+                  std::cout << std::endl;
+                  std::cout << "-------------------------------------------------------------------" << std::endl;
+          }
+
+        #endif
+
+        #ifdef DEBUG
+
+          for  (auto bstp : m_busstops)
+          {
+            std::cout << "idk.push_back(" << bstp.first << ");" << std::endl;
+          }
+
+          for  (auto bstp : m_busstops)
+          {
+            std::cout << "nevek.push_back(\"" << bstp.second << "\");" << std::endl;
+          }
+
+        #endif
+
 
         #ifdef DEBUG
         std::cout << " Processing OSM: "
@@ -147,8 +228,110 @@ namespace robocar
       segment->construct<shm_map_Type>
       ( "JustineMap" ) ( std::less<unsigned int>(), alloc_obj );
 
+
+      bus_stop_map_Type* bus_stop_map_bs =
+      segment->construct<bus_stop_map_Type>
+      ( "BusStops" ) ( std::less<unsigned int>(), alloc_obj );
+
+      shm_bus_way_Type* bus_way_vector =
+      segment->construct<shm_bus_way_Type>
+      ( "BusWays" ) (alloc_obj);
+
       try
       {
+        for ( BusWayVector::iterator iter = m_busWayVector.begin();
+              iter != m_busWayVector.end(); ++iter)
+        {
+          SharedBusWay sbw(iter->ref, alloc_obj);
+
+          std::vector<osmium::unsigned_object_id_type> temp;
+
+          for (std::size_t i = 0; i < iter->nodesFrom.size(); ++i)
+          {
+            // igen, másolatot akarunk
+            std::vector<osmium::unsigned_object_id_type> vec = m_way2nodes[iter->nodesFrom[i]];
+
+            if (vec.size() == 0)
+            {
+              continue;
+            }
+
+            if (temp.size() != 0)
+            {
+              if (i == 1)
+              {
+                if ((temp[0] == vec[0]) || (temp[0] == vec.back()))
+                {
+                  std::reverse(temp.begin(), temp.end());
+                }
+              }
+
+              if (temp.back() != vec[0])
+              {
+                std::reverse(vec.begin(), vec.end());
+              }
+            }
+
+            for (std::size_t j = 0; j < vec.size(); ++j)
+            {
+                temp.push_back(vec[j]);
+            }
+          }
+
+          if (temp.size() > 0)
+          {
+            std::unique(temp.begin(), temp.end());
+
+            for (std::size_t i = 0; i < temp.size(); ++i)
+            {
+              sbw.nodesFrom.push_back(temp[i]);
+            }
+          }
+
+          temp.clear();
+
+
+          for (std::size_t i = 0; i < iter->nodesTo.size(); ++i)
+          {
+            // újabb másolat
+            std::vector<osmium::unsigned_object_id_type> vec = m_way2nodes[iter->nodesTo[i]];
+
+            if (vec.size() == 0)
+            {
+              continue;
+            }
+
+            if (temp.size() != 0)
+            {
+              if (temp.back() != vec[0])
+              {
+                std::reverse(vec.begin(), vec.end());
+              }
+            }
+
+            for (std::size_t j = 0; j < vec.size(); ++j)
+            {
+                temp.push_back(vec[j]);
+            }
+          }
+
+          if (temp.size() > 0)
+          {
+            std::unique(temp.begin(), temp.end());
+
+            for (std::size_t i = 0; i < temp.size(); ++i)
+            {
+              sbw.nodesTo.push_back(temp[i]);
+            }
+          }
+
+          #ifdef DEBUG
+          std::cout << sbw.ref << " | " << sbw.nodesFrom.size()
+                    << " - " << sbw.nodesTo.size() << std::endl;
+          #endif
+
+          bus_way_vector->push_back(sbw);
+        }
 
         for ( AdjacencyList::iterator iter=alist.begin();
               iter!=alist.end(); ++iter )
@@ -177,10 +360,18 @@ namespace robocar
           shm_map_n->insert ( p );
         }
 
+        for  (auto bstp : m_busstops)
+        {
+            bus_stop_Type p(bstp.first, char_string(bstp.second.c_str(), alloc_obj));
+            bus_stop_map_bs->insert(p);
+        }
+
         #ifdef DEBUG
         std::cout << " alist.size = " << alist.size() << " (deg- >= 1)"<< std::endl;
         std::cout << " SHM/alist.size = " << shm_map_n->size() << std::endl;
         #endif
+
+
       }
       catch ( boost::interprocess::bad_alloc e )
       {
@@ -217,6 +408,7 @@ namespace robocar
       #endif
 
       shm_map = segment->find<shm_map_Type> ( "JustineMap" ).first;
+      bus_stop_map = segment->find<bus_stop_map_Type> ("BusStops").first;
 
       m_cv.notify_one();
     }
@@ -286,7 +478,6 @@ namespace robocar
 
     virtual void city_run()
     {
-
       // activities that may occur in the city
 
       // std::cout << *this;
@@ -298,6 +489,7 @@ namespace robocar
   protected:
     boost::interprocess::managed_shared_memory *segment;
     boost::interprocess::offset_ptr<shm_map_Type> shm_map;
+    boost::interprocess::offset_ptr<bus_stop_map_Type> bus_stop_map;
 
     int m_delay {5000};
     bool m_run {true};
@@ -310,6 +502,9 @@ namespace robocar
     WaynodeLocations m_waynode_locations;
     WayNodesMap m_busWayNodesMap;
     Way2Nodes m_way2nodes;
+    NodesMap m_busStopNodesMap;
+    BusStops m_busstops;
+    BusWayVector m_busWayVector;
 
     struct shm_remove
     {

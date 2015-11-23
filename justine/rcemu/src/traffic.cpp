@@ -29,8 +29,13 @@
  *
  */
 
+<<<<<<< HEAD
 #include "traffic.hpp"
 #include "robocar.pb.h"
+=======
+#include <traffic.hpp>
+#include "src/robocar.pb.h"
+>>>>>>> origin/bus
 
 void justine::robocar::Traffic::OpenLogStream(void)
 {
@@ -141,6 +146,58 @@ void justine::robocar::Traffic::InitializePedestrians(void)
   #endif
 }
 
+void justine::robocar::Traffic::InitializeBuses(void)
+{
+  // TODO read bus line data
+
+  int bus_stop_id = 5000;
+  for (auto p: *bus_stop_map_)
+  {
+
+    std::shared_ptr<BusStop> busStop = std::make_shared<BusStop>(p.first, bus_stop_id, p.second.c_str());
+    //std::cout << "bs_id: " << bus_stop_id << std::endl;
+    bus_stop_id++;
+    immovableObjects.push_back(std::dynamic_pointer_cast<ImmovableObject>(busStop));
+  }
+
+    int bus_id = 1;
+  for (auto sbw : *bus_way_vector_)
+  {
+
+    if (sbw.nodesFrom.size() > 0)
+    {
+    std::shared_ptr<Car> bus(new Bus({*this, true, sbw.ref.c_str(), bus_id}));
+  //std::cout << "id: " << bus_id << std::endl;
+    bus_id++;
+    std::shared_ptr<SmartCar> b = std::dynamic_pointer_cast<SmartCar>(bus);
+    b->set_type(CarType::BUS);
+    b->init();
+
+    std::shared_ptr<Bus> b2 = std::dynamic_pointer_cast<Bus>( bus);
+
+    std::vector<long unsigned int> lol;
+
+    for (std::size_t i = 0; i < sbw.nodesFrom.size(); ++i)
+    {
+        b2->routeWayFrom.push_back(sbw.nodesFrom[i]);
+        lol.push_back(sbw.nodesFrom[i]);
+    }
+
+    for (std::size_t i = 0; i < sbw.nodesTo.size(); ++i)
+    {
+        b2->routeWayTo.push_back(sbw.nodesTo[i]);
+    }
+
+    b2->init(b2->routeWayFrom[1]);
+
+    b2->set_route(b2->routeWayFrom);
+
+    cars.push_back(bus);
+    }
+  }
+
+}
+
 void justine::robocar::Traffic::SimulationLoop(void)
 {
   std::unique_lock<std::mutex> lock(m_mutex);
@@ -209,23 +266,32 @@ void justine::robocar::Traffic::StepCars()
 {
   std::lock_guard<std::mutex> lock(cars_mutex);
 
+<<<<<<< HEAD
   for(auto car:cars)car->step();
+=======
+  for(auto car:cars)
+    car->step();
+>>>>>>> origin/bus
 
   int msg_length = 0;
   TrafficStateHeader traffic_state_header;
   traffic_state_header.set_time_minutes(simulationSettings.minutes);
   traffic_state_header.set_time_elapsed(running_time_elapsed_);
   traffic_state_header.set_num_cars(cars.size());
+  traffic_state_header.set_num_objects(immovableObjects.size());
 
   std::stringbuf buf;
   std::ostream os(&buf);
   traffic_state_header.SerializeToOstream(&os);
   msg_length = buf.str().length();
+  //std::cout << "Header: " << msg_length << std::endl;
   const char *char_len = reinterpret_cast<const char*>(&msg_length);
   logfile_stream_->write(char_len, 4);
+
   const std::string& tmp = buf.str();
   const char* data = tmp.c_str();
   logfile_stream_->write(data,msg_length);
+
   for(auto car:cars)
   {
     CarData car_data;
@@ -236,6 +302,7 @@ void justine::robocar::Traffic::StepCars()
     car->assign(&car_data, simulationSettings.fullLog);
     car_data.SerializeToOstream(&os);
     msg_length = buf.str().length();
+  //  std::cout << "Car: " << msg_length << std::endl;
     const char *char_len = reinterpret_cast<const char*>(&msg_length);
     logfile_stream_->write(char_len,4);
     const std::string& tmp = buf.str();
@@ -243,6 +310,22 @@ void justine::robocar::Traffic::StepCars()
     logfile_stream_->write(data,msg_length);
   }
 
+  for(const auto obj : immovableObjects)
+  {
+    ImmovableObjectData objData;
+    std::stringbuf buf;
+    std::ostream os(&buf);
+
+    obj->assign(&objData);
+    objData.SerializeToOstream(&os);
+    msg_length = buf.str().length();
+    const char *char_len = reinterpret_cast<const char*>(&msg_length);
+    logfile_stream_->write(char_len,4);
+    //std::cout << "Obj: " << msg_length << std::endl;
+    const std::string& tmp = buf.str();
+    const char* data = tmp.c_str();
+    logfile_stream_->write(data,msg_length);
+  }
 
 }
 
@@ -291,16 +374,28 @@ int justine::robocar::Traffic::alist_inv(osmium::unsigned_object_id_type from, o
 
   int ret = -1;
 
+#ifdef DEBUG
+  std::cout << "ADJECENT: ";
+#endif
   for(uint_vector::iterator noderefi = iter->second.m_alist.begin();
         noderefi!=iter->second.m_alist.end();
         ++noderefi)
   {
+    #ifdef DEBUG
+      std::cout << *noderefi<< " ";
+    #endif
     if(to == *noderefi)
     {
       ret = std::distance(iter->second.m_alist.begin(), noderefi);
+      #ifdef DEBUG
+        std::cout << " --- Ret: " << ret << " ";
+      #endif
       break;
     }
   }
+  #ifdef DEBUG
+  std::cout << std::endl;
+  #endif
 
   return ret;
 }
@@ -648,6 +743,9 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
 
     cars_copy = cars;
 
+    std::vector<std::shared_ptr<ImmovableObject>> objs_copy;
+
+    objs_copy = immovableObjects;
 
 
     // A TrafficStateHeader küldjük el előszor, ez fogja tartalmazni, hogy hány
@@ -660,6 +758,8 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
     traffic_state_header.set_time_elapsed(running_time_elapsed_);
 
     traffic_state_header.set_num_cars(cars_copy.size());
+
+    traffic_state_header.set_num_objects(objs_copy.size());
 
     // vegigmegyunk a masolaton es leptetjuk a kocsikat
     for(auto car:cars_copy)
@@ -718,6 +818,29 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
       // innentől kezdve ugyanazt csináljuk, mint a TrafficStateHeader
       // esetén, csak a CarData objektummal
       car_data.SerializeToOstream(&os);
+      msg_length = buf.size();
+
+      #ifdef DEBUG
+      std::cout << msg_length << "\n";
+      #endif
+
+      char_len = reinterpret_cast<char*>(msg_length);
+
+      boost::asio::write(client_socket, boost::asio::buffer(&char_len, 4));
+      sent_bytes = boost::asio::write(client_socket, buf);
+
+      #ifdef DEBUG
+      std::cout << "Sent: " << sent_bytes << "/" << msg_length << std::endl;
+      #endif
+    }
+
+    for(auto obj : objs_copy)
+    {
+      ImmovableObjectData objData;
+
+      obj->assign(&objData);
+
+      objData.SerializeToOstream(&os);
       msg_length = buf.size();
 
       #ifdef DEBUG

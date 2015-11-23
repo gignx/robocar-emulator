@@ -54,10 +54,31 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
+<<<<<<< HEAD
 #include "carlexer.hpp"
 #include "smartcity.hpp"
 #include "car.hpp"
 #include "robocar.pb.h"
+=======
+#include <carlexer.hpp>
+#include <smartcity.hpp>
+#include <car.hpp>
+#include "immovableObject.hpp"
+
+#include <cstdlib>
+#include <iterator>
+
+#include <robocar.pb.h>
+
+#include <boost/asio.hpp>
+
+#include <limits>
+#include <memory>
+
+#include <fstream>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/filesystem.hpp>
+>>>>>>> origin/bus
 
 namespace justine
 {
@@ -110,6 +131,12 @@ public:
     shm_map_ =
       shm_segment_->find<shm_map_Type>("JustineMap").first;
 
+    bus_stop_map_ =
+      shm_segment_->find<bus_stop_map_Type>("BusStops").first;
+
+    bus_way_vector_ =
+      shm_segment_->find<shm_bus_way_Type>("BusWays").first;
+
     running_time_elapsed_ = 0;
 
     // infinite mode
@@ -122,6 +149,7 @@ public:
       running_time_allowed_ = simulationSettings.minutes * 60 * 1000;
     }
 
+<<<<<<< HEAD
     if (entitySettings.pedestriansEnabled)
     {
       InitializePedestrians();
@@ -131,6 +159,13 @@ public:
     {
       InitializeRoutineCars();
     }
+=======
+    InitializePedestrians();
+
+    InitializeRoutineCars();
+
+    InitializeBuses();
+>>>>>>> origin/bus
 
     OpenLogStream();
 
@@ -147,6 +182,7 @@ public:
 
     m_thread.join();
     shm_segment_->destroy<shm_map_Type>("JustineMap");
+    shm_segment_->destroy<bus_stop_map_Type>("BusStops");
 
     delete shm_segment_;
   }
@@ -217,6 +253,8 @@ public:
   void InitializeRoutineCars(void);
 
   void InitializePedestrians(void);
+
+  void InitializeBuses(void);
 
   void SimulationLoop(void);
 
@@ -298,6 +336,13 @@ public:
   int get_time() const;
 
 protected:
+<<<<<<< HEAD
+=======
+  boost::interprocess::managed_shared_memory *shm_segment_;
+  boost::interprocess::offset_ptr<bus_stop_map_Type> bus_stop_map_;
+  boost::interprocess::offset_ptr<shm_map_Type> shm_map_;
+  boost::interprocess::offset_ptr<shm_bus_way_Type> bus_way_vector_;
+>>>>>>> origin/bus
   bool is_running_;
 
   boost::interprocess::managed_shared_memory *shm_segment_;
@@ -352,6 +397,8 @@ private:
   std::vector<std::shared_ptr<Car>> cars;
   std::vector<std::shared_ptr<SmartCar>> m_smart_cars;
   std::vector<std::shared_ptr<CopCar>> m_cop_cars;
+
+  std::vector<std::shared_ptr<ImmovableObject> > immovableObjects;
 
   std::map<int, std::shared_ptr<SmartCar>> m_smart_cars_map;
   std::map<int, char*> authenticated_teams_;

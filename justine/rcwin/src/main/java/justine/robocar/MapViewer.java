@@ -34,7 +34,7 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 					VirtualEarthTileFactoryInfo.SATELLITE)),
 			new DefaultTileFactory(new VirtualEarthTileFactoryInfo(
 					VirtualEarthTileFactoryInfo.HYBRID)) };
-	
+
 	public MapViewer(final CarPainter carPainter) {
 		super();
 		setDoubleBuffered(false);
@@ -53,6 +53,8 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 			public void mouseMoved(MouseEvent e) {
 				if (carPainter.traffic != null) {
 					LinkedList<WaypointPolice> waypoints_ = carPainter.traffic.copList;
+					LinkedList<WaypointBus> busses = carPainter.traffic.busList;
+					LinkedList<WaypointBusStop> busstops = carPainter.traffic.busstopList;
 
 					for (WaypointPolice waypoint : waypoints_) {
 						if (Traffic.clicked_map.get(waypoint.getID()) == null)
@@ -66,8 +68,46 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 											.getY() - rect.y);
 							if (con_p.distance(e.getPoint()) < 22) {
 								WaypointPolice.on = true;
+								WaypointBus.on = false;
+								WaypointBusStop.on = false;
 							} else {
 								WaypointPolice.on = false;
+							}
+						}
+					}
+					for (WaypointBus waypoint : busses) {
+						if (Traffic.clicked_map.get(waypoint.getID()) == null)
+							return;
+						if (Traffic.clicked_map.get(waypoint.getID())) {
+							Point2D point = getTileFactory().geoToPixel(
+									waypoint.getPosition(), getZoom());
+							Rectangle rect = getViewportBounds();
+							Point con_p = new Point(
+									(int) point.getX() - rect.x, (int) point
+											.getY() - rect.y);
+							if (con_p.distance(e.getPoint()) < 22) {
+								WaypointBus.on = true;
+								WaypointBusStop.on = false;
+							} else {
+								WaypointBus.on = false;
+							}
+						}
+					}
+					//TEST
+					for (WaypointBusStop waypoint : busstops) {
+						if (Traffic.clicked_map.get(waypoint.getID()) == null)
+							return;
+						if (Traffic.clicked_map.get(waypoint.getID())) {
+							Point2D point = getTileFactory().geoToPixel(
+									waypoint.getPosition(), getZoom());
+							Rectangle rect = getViewportBounds();
+							Point con_p = new Point(
+									(int) point.getX() - rect.x, (int) point
+											.getY() - rect.y);
+							if (con_p.distance(e.getPoint()) < 22) {
+								WaypointBusStop.on = true;
+							} else {
+								WaypointBusStop.on = false;
 							}
 						}
 					}
@@ -84,7 +124,14 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 				Point2D gp_pt = null;
 				if (carPainter.traffic != null) {
 					LinkedList<WaypointPolice> waypoints_ = carPainter.traffic.copList;
+					LinkedList<WaypointBus> waypoints_b = carPainter.traffic.busList;
+				LinkedList<WaypointBusStop> waypoints_bt = carPainter.traffic.busstopList;
+
 					Map<Integer, Boolean> clicked_map = Traffic.clicked_map;
+					for (WaypointPolice waypoint : waypoints_) {
+						gp_pt = getTileFactory().geoToPixel(
+								waypoint.getPosition(), getZoom());
+					}
 					for (WaypointPolice waypoint : waypoints_) {
 						gp_pt = getTileFactory().geoToPixel(
 								waypoint.getPosition(), getZoom());
@@ -98,11 +145,51 @@ public class MapViewer extends JXMapViewer implements KeyListener {
 						} else {
 							clicked_map.put(waypoint.getID(), false);
 						}
-						Traffic.clicked_map = clicked_map;
+						//Traffic.clicked_map = clicked_map;
+					}
+
+					for (WaypointBus waypoint : waypoints_b) {
+						gp_pt = getTileFactory().geoToPixel(
+								waypoint.getPosition(), getZoom());
+
+
+						Rectangle rect = getViewportBounds();
+						Point converted_gp_pt = new Point((int) gp_pt.getX()
+								- rect.x, (int) gp_pt.getY() - rect.y);
+
+						if (converted_gp_pt.distance(me.getPoint()) < 22) {
+							clicked_map.put(waypoint.getID(), true);
+							for(WaypointBusStop stop : carPainter.traffic.busstopList){
+								if(waypoint.stops.contains(stop.getID()))
+									Traffic.bus_stop_on_map.put(stop.getID(), true);
+								else
+									Traffic.bus_stop_on_map.put(stop.getID(), false);
+							}
+						} else {
+							clicked_map.put(waypoint.getID(), false);
+						}
+						}
+					//TEST
+						for (WaypointBusStop waypoint : waypoints_bt) {
+							gp_pt = getTileFactory().geoToPixel(
+									waypoint.getPosition(), getZoom());
+
+//System.out.println(waypoint.getID());
+
+							Rectangle rect = getViewportBounds();
+							Point converted_gp_pt = new Point((int) gp_pt.getX()
+									- rect.x, (int) gp_pt.getY() - rect.y);
+
+							if (converted_gp_pt.distance(me.getPoint()) < 22) {
+								clicked_map.put(waypoint.getID(), true);
+							} else {
+								clicked_map.put(waypoint.getID(), false);
+							}
+						}
+					Traffic.clicked_map = clicked_map;
 					}
 				}
 
-			}
 		});
 	}
 

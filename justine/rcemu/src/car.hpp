@@ -36,7 +36,7 @@
 #include <iostream>
 #include <vector>
 
-#include <robocar.pb.h>
+#include "src/robocar.pb.h"
 
 #include <osmreader.hpp>
 #include <algorithm>
@@ -49,7 +49,7 @@ namespace robocar
 
 enum class CarType: unsigned int
 {
-  NORMAL=0, POLICE, GANGSTER, CAUGHT, PEDESTRIAN
+  NORMAL=0, POLICE, GANGSTER, CAUGHT, PEDESTRIAN, BUS, BUSSTOP
 };
 
 class Traffic;
@@ -123,11 +123,12 @@ public:
     return os;
   }
 
-protected:
+public:
   Traffic & traffic;
   CarType m_type {CarType::NORMAL};
   osmium::unsigned_object_id_type m_from {3130863972};
   osmium::unsigned_object_id_type m_to {0};
+  osmium::unsigned_object_id_type m_old_step {1};
   osmium::unsigned_object_id_type m_step {0};
 
 private:
@@ -176,6 +177,8 @@ public:
 private:
   bool rnd {true};
 };
+
+
 
 
 class Pedestrian : public Car
@@ -267,7 +270,7 @@ public:
   {
     return this->id_;
   }
-private:
+protected:
   bool m_guided {false};
   bool m_routed {false};
 
@@ -341,6 +344,122 @@ protected:
   std::string team_name_;
 
   int num_gangsters_caught_;
+};
+
+class Bus : public SmartCar
+{
+public:
+  Bus (Traffic & traffic, bool guided, const char *name , int id);
+
+  void init(osmium::unsigned_object_id_type place);
+
+  virtual void step()
+  {
+    nextGuidedEdge();
+
+    long unsigned int last;
+
+    if (isGoingFrom)
+    {
+      last = routeWayFrom[routeWayFrom.size() - 2];
+    }
+    else
+    {
+      // safety not yolo
+      if (routeWayTo.size() > 0)
+      {
+        last = routeWayTo[routeWayTo.size() - 2];
+      }
+    }
+
+    if ((m_old_step == m_step) && (m_from == last))
+    {
+      if (isGoingFrom)
+      {
+        if (routeWayTo.size() > 0)
+        {
+          this->init(this->routeWayTo[0]);
+
+          this->set_route(this->routeWayTo);
+
+          isGoingFrom = false;
+        }
+        else
+        {
+          this->init(this->routeWayFrom[0]);
+
+          this->set_route(this->routeWayFrom);
+
+          isGoingFrom = true;
+        }
+      }
+      else
+      {
+        this->init(this->routeWayFrom[0]);
+
+        this->set_route(this->routeWayFrom);
+
+        isGoingFrom = true;
+      }
+    }
+
+    m_old_step = m_step;
+}
+
+
+  virtual void print (std::ostream & os) const
+  {
+    os << m_from
+       << " "
+       << to_node()
+       << " "
+       << get_max_steps()
+       << " "
+       << get_step()
+       << " "
+       << static_cast<unsigned int> (get_type())
+       << " "
+       << line_
+       << " "
+       << id_;
+  }
+
+  virtual void assign(CarData *car_data, bool full)
+  {
+    car_data->set_node_from(m_from);
+    car_data->set_node_to(to_node());
+    car_data->set_max_step(get_max_steps());
+    car_data->set_step(get_step());
+    car_data->set_type(static_cast<CarData::ProtoCarType>(get_type())); // safe
+    car_data->set_team(line_);
+    car_data->set_id(id_);
+    if(full){
+      car_data->set_num_stops(busstops.size());
+      for(auto it = busstops.begin();it!=busstops.end();it++)
+        car_data->add_busstops(*it);
+      car_data->set_size(route.size());
+      for(auto it = route.begin();it!=route.end();it++)
+        car_data->add_path(*it);
+    }else{
+      car_data->set_size(0);
+    }
+  }
+
+  std::string get_line() const
+  {
+    return line_;
+  }
+
+  // TODO: Ide jönnek az adott busz megállóinak ID-i
+  //       (azok amiket mi adtunk nekik) (relax, már el van küldve a JAVA-nak, csak feltölteni kell!!)
+
+
+  std::vector<int> busstops = {};
+  std::vector<long unsigned int> routeWayFrom, routeWayTo;
+protected:
+  std::string line_;
+private:
+  bool isGoingFrom;
 };
 
 }

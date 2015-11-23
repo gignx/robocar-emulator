@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 
 import justine.robocar.TrafficStateProtos.CarData;
 import justine.robocar.TrafficStateProtos.TrafficStateHeader;
+import justine.robocar.TrafficStateProtos.ImmovableObjectData;
 
 import org.jxmapviewer.viewer.GeoPosition;
 
@@ -73,6 +74,8 @@ public class NetworkThread extends Thread implements PlayBack {
 			byte[] buff = new byte[524288];
 
 			LinkedList<WaypointPolice> cop_list = new LinkedList<WaypointPolice>();
+			LinkedList<WaypointBus> bus_list = new LinkedList<WaypointBus>();
+			LinkedList<WaypointBusStop> busstop_list = new LinkedList<WaypointBusStop>();//
 			LinkedList<WaypointGangster> gangster_list = new LinkedList<WaypointGangster>();
 			LinkedList<WaypointCaught> caught_list = new LinkedList<WaypointCaught>();
 			LinkedList<WaypointNormal> default_list = new LinkedList<WaypointNormal>();
@@ -99,14 +102,16 @@ public class NetworkThread extends Thread implements PlayBack {
 				}
 				try {
 					cop_list.clear();
+					bus_list.clear();
+					busstop_list.clear();
 					gangster_list.clear();
 					caught_list.clear();
 					default_list.clear();
 					pedestrian_list.clear();
 					path.clear();
 
-					int time = 0, size = 0, minutes = 0;
-					long ref_from = 0, ref_to = 0;
+					int time = 0, size = 0, sizeObjs = 0, minutes = 0;
+					long ref_from = 0, ref_to = 0, objNode = 0;
 					long step = 0, maxstep = 100;
 					int id = 0, type = 0;
 					double lat, lon;
@@ -153,6 +158,8 @@ public class NetworkThread extends Thread implements PlayBack {
 					time = trafficStateHeader.getTimeElapsed();
 					size = trafficStateHeader.getNumCars();
 
+					sizeObjs = trafficStateHeader.getNumObjects();
+
 					for (CopTeamData value : cop_teams.values()) {
 						value.num_caught = 0;
 					}
@@ -197,7 +204,6 @@ public class NetworkThread extends Thread implements PlayBack {
 
 						lat += step * ((lat2 - lat) / maxstep);
 						lon += step * ((lon2 - lon) / maxstep);
-
 						switch (type) {
 						case 1:
 							num_captured_gangsters = carData.getCaught();
@@ -233,11 +239,59 @@ public class NetworkThread extends Thread implements PlayBack {
 						case 4:
 							pedestrian_list.add(new WaypointPedestrian(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_)));
 							break;
+						case 5:
+							path.clear();
+							int pathl = carData.getSize();
+							for (int j = 0; j < pathl; j++) {
+								path.add(lmap.get(carData.getPath(j)));
+							}
+							name = carData.getTeam();
+							id = carData.getId(); //YOLO
+							LinkedList<Integer> stops = new LinkedList<Integer>();
+							int num = carData.getNumStops();
+							for(int z = 0;z<num;z++){
+								stops.add((int)carData.getBusstops(z));
+							}
+							bus_list.add(new WaypointBus(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_), name, id, path, stops));
+
+							break;
+						case 6:
+							break;
 						default:
 							default_list.add(new WaypointNormal(new GeoPosition(lat, lon), new GeoPosition(lat_, lon_)));
 							break;
 						}
 
+					} // FOR_CARS
+
+					for (int i = 0; i < sizeObjs; ++i) {
+						// az üzenet mérete
+						bis.read(buff, 0, 4);
+						toRead = java.nio.ByteBuffer.wrap(buff).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+
+						// maga az üzenet
+						bis.read(buff, 0, toRead);
+
+						readFrom = new byte[toRead];
+
+						java.nio.ByteBuffer.wrap(buff).order(java.nio.ByteOrder.LITTLE_ENDIAN).get(readFrom, 0, toRead);
+
+						ImmovableObjectData objData = ImmovableObjectData.parseFrom(readFrom);
+
+						objNode = objData.getNode();
+						id = objData.getId();
+						name = objData.getName();
+
+						lat = lmap.get(objNode).lat;
+						lon = lmap.get(objNode).lon;
+						boolean asd;
+						if(Traffic.bus_stop_on_map.get(id) == null){
+							Traffic.bus_stop_on_map.put(id, false);
+							asd = false;
+						}else{
+							asd = Traffic.bus_stop_on_map.get(id);
+						}
+						busstop_list.add(new WaypointBusStop(new GeoPosition(lat, lon), name, id, asd));
 					}
 
 					if (time >= minutes * 60 * 1000 / 200) {
@@ -263,6 +317,8 @@ public class NetworkThread extends Thread implements PlayBack {
 
 					traffic = new Traffic();
 					traffic.copList = cop_list;
+					traffic.busList = bus_list;
+					traffic.busstopList = busstop_list;
 					traffic.gangsterList = gangster_list;
 					traffic.caughtList = caught_list;
 					traffic.defaultList = default_list;

@@ -36,10 +36,14 @@ public class CarPainter extends WaypointPainter<Waypoint> {
 		Point2D point = map.getTileFactory().geoToPixel(pos, map.getZoom());
 		g.translate(-(int) point.getX(), -(int) point.getY());
 		if (traffic != null) {
+			for (WaypointBus way : traffic.busList)
+				way.drawPath(g, map);
 			for (WaypointPolice way : traffic.copList)
 				way.drawPath(g, map);
 			for (WaypointPedestrian way : traffic.pedestrianList)
 					way.draw(g, map);
+			for (WaypointBusStop way : traffic.busstopList)
+							way.draw(g, map);
 			for (WaypointNormal way : traffic.defaultList)
 				way.draw(g, map);
 			for (WaypointCaught way : traffic.caughtList)
@@ -47,6 +51,8 @@ public class CarPainter extends WaypointPainter<Waypoint> {
 			for (WaypointGangster way : traffic.gangsterList)
 				way.draw(g, map);
 			for (WaypointPolice way : traffic.copList)
+				way.draw(g, map);
+			for (WaypointBus way : traffic.busList)
 				way.draw(g, map);
 
 			g.translate((int) point.getX(), (int) point.getY());

@@ -1,0 +1,2 @@
+killall smartcity
+killall traffic

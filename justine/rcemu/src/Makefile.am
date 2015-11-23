@@ -40,6 +40,7 @@ AM_FLEXFLEX=@AM_FLEXFLAGS@
 		{ gsub( "lex\.yy\.c", "$@" ); print; }' lex.yy.c > $@
 	rm -f lex.yy.c
 
+<<<<<<< HEAD
 traffic_out_CXXFLAGS = $(CXXFLAGS)
 traffic_out_LDFLAGS = $(BOOST_LDFLAGS) $(BOOST_DATE_TIME_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_THREAD_LDFLAGS) $(BOOST_ASIO_LDFLAGS) $(SHM_OPEN_LIBS) $(BOOST_LOG_LDFLAGS) $(LIBS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) -lprotobuf
 traffic_out_LIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_DATE_TIME_LIBS) $(BOOST_THREAD_LIBS) $(BOOST_ASIO_LIBS) $(SHM_OPEN_LIBS) $(LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_LOG_LIBS) $(BOOST_FILESYSTEM_LIBS) -lprotobuf
@@ -57,3 +58,22 @@ samplemyshmclient_out_LDFLAGS = $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LDFLAGS
 samplemyshmclient_out_LIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_THREAD_LIBS) $(BOOST_ASIO_LIBS) $(SHM_OPEN_LIBS) $(LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_LOG_LIBS)
 samplemyshmclient_out_LDADD = $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_THREAD_LDFLAGS) $(BOOST_ASIO_LDFLAGS) $(SHM_OPEN_LIBS) $(LIBS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_LOG_LDFLAGS)
 samplemyshmclient_out_SOURCES = server.hpp server.cpp graph.hpp graph.cpp extendedgraph.hpp extendedgraph.cpp smartcity.hpp car.hpp shmclient.hpp shmclient.cpp myshmclient.hpp myshmclient.cpp myshmclient-main.cpp
+=======
+traffic_CXXFLAGS = $(CXXFLAGS)
+traffic_LDFLAGS = $(BOOST_LDFLAGS) $(BOOST_DATE_TIME_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_THREAD_LDFLAGS) $(BOOST_ASIO_LDFLAGS) $(SHM_OPEN_LIBS) $(BOOST_LOG_LDFLAGS) $(LIBS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) -lprotobuf
+traffic_LIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_DATE_TIME_LIBS) $(BOOST_THREAD_LIBS) $(BOOST_ASIO_LIBS) $(SHM_OPEN_LIBS) $(LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_LOG_LIBS) $(BOOST_FILESYSTEM_LIBS) -lprotobuf
+traffic_LDADD = $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_DATE_TIME_LDFLAGS) $(BOOST_THREAD_LDFLAGS) $(BOOST_ASIO_LDFLAGS) $(SHM_OPEN_LIBS) $(LIBS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_LOG_LDFLAGS) $(BOOST_FILESYSTEM_LDFLAGS) -lprotobuf
+traffic_SOURCES = carlexer.ll carlexer.hpp smartcity.hpp traffic.hpp traffic.cpp traffic-main.cpp car.hpp car.cpp immovableObject.cpp robocar.pb.h robocar.pb.cc
+
+sampleshmclient_CXXFLAGS = $(CXXFLAGS)
+sampleshmclient_LDFLAGS = $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_THREAD_LDFLAGS) $(BOOST_ASIO_LDFLAGS) $(SHM_OPEN_LIBS) $(BOOST_LOG_LDFLAGS) $(LIBS) $(BOOST_SYSTEM_LDFLAGS)
+sampleshmclient_LIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_THREAD_LIBS) $(BOOST_ASIO_LIBS) $(SHM_OPEN_LIBS) $(LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_LOG_LIBS)
+sampleshmclient_LDADD = $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_THREAD_LDFLAGS) $(BOOST_ASIO_LDFLAGS) $(SHM_OPEN_LIBS) $(LIBS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_LOG_LDFLAGS)
+sampleshmclient_SOURCES = server.hpp server.cpp graph.hpp graph.cpp extendedgraph.hpp extendedgraph.cpp smartcity.hpp car.hpp shmclient.hpp shmclient.cpp shmclient-main.cpp
+
+samplemyshmclient_CXXFLAGS = $(CXXFLAGS)
+samplemyshmclient_LDFLAGS = $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LDFLAGS) $(BOOST_THREAD_LDFLAGS) $(BOOST_ASIO_LDFLAGS) $(SHM_OPEN_LIBS) $(BOOST_LOG_LDFLAGS) $(LIBS) $(BOOST_SYSTEM_LDFLAGS)
+samplemyshmclient_LIBS = $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_THREAD_LIBS) $(BOOST_ASIO_LIBS) $(SHM_OPEN_LIBS) $(LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_LOG_LIBS)
+samplemyshmclient_LDADD = $(BOOST_LDFLAGS) $(BOOST_PROGRAM_OPTIONS_LIBS) $(BOOST_THREAD_LDFLAGS) $(BOOST_ASIO_LDFLAGS) $(SHM_OPEN_LIBS) $(LIBS) $(BOOST_SYSTEM_LDFLAGS) $(BOOST_LOG_LDFLAGS)
+samplemyshmclient_SOURCES = server.hpp server.cpp graph.hpp graph.cpp extendedgraph.hpp extendedgraph.cpp smartcity.hpp car.hpp shmclient.hpp shmclient.cpp myshmclient.hpp myshmclient.cpp myshmclient-main.cpp
+>>>>>>> origin/bus

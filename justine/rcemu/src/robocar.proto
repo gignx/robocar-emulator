@@ -10,6 +10,8 @@ message CarData {
     GANGSTER  = 2;
     CAUGHT    = 3;
     PEDESTRIAN = 4;
+    BUS       = 5;
+    BUSSTOP =6;
   }
 
   required fixed64 node_from  = 1;
@@ -23,14 +25,23 @@ message CarData {
   optional int32 caught       = 6;
   optional string team        = 7;
   optional int32 id           = 8;
-  optional int32 size =9;
-  repeated fixed64 path = 10;
+  optional int32 size         = 9;
+  repeated fixed64 path       = 10;
+  optional int32 num_stops         = 11;
+  repeated fixed64 busstops   = 12;
 }
 
+message ImmovableObjectData {
+  required int32 id     = 1;
+  required fixed64 node = 2;
+
+  optional string name  = 3;
+}
 
 message TrafficStateHeader {
   required int32 time_minutes = 1;
   required int32 time_elapsed = 2;
 
   required int32 num_cars     = 3;
+  required int32 num_objects  = 4;
 }

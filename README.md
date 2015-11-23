@@ -98,9 +98,39 @@ There are some other options for all the applications listed above, so here they
 
 If you'd like to replay a log file, there's no need to start the other processes, just the Car Window with the `--playlog=x` option where `x` denotes a valid log file. If you've been running the simulation with full logging enabled, then the routes of the cop cars can be examined during the replay.
 
+<<<<<<< HEAD
 #### Configuration file
 From now on, `traffic.out` uses a JSON-format configuration file instead of the huge amount of command line parameters. 
 
 The default configuration file is fully specified. You may specify less settings, since for the unspecified settings the default values will be used. Unknown settings will be ignored without any note or warning. 
 
 **Even if you do not specify any settings, an empty configuration file must be given to the `traffic.out`!**
+=======
+
+`NEW` 
+#### Scripts
+There are some scripts, what you can use, if you want to do things more faster.
+The scripts:
+```
+./start.sh				-> this script will automatically start the stuff
+./kill.sh				-> this script, will run some killall commands, which kills the smartcity and the traffic processes
+./compile.sh [argument]*		-> this script, will compile the codes, but there is an argument list, that you need to know
+					-> this script, will play a funny sound, when finishes his works
+ 	
+*IMPORTANT!: one argument must be given to the script, but only one, otherwise the script will do nothing
+
+The argument list, for the compile.sh:
+->	[all]				compiles the rcemu and the rcwin folder's codes
+->	[rcemu]				compiles only the rcemu folder's codes	
+->	[rcwin]				compiles only the rcwin folder's codes
+->	[rcemu/src]			compiles only the rcemu/src folder's codes
+->	[all&start]			compiles the rcemu and the rcwin folder's codes, than starts the stuff
+->	[rcemu&start]			compiles only the rcemu folder's codes, than starts the stuff
+->	[rcwin&start]			compiles only the rcwin folder's codes, than starts the stuff
+->	[rcemu/src&start]		compiles only the rcemu/src folder's codes, than starts the stuff
+
+**IMPORTANT!: the scripts are located in the robocar-emulator/justine directory
+```
+
+
+>>>>>>> origin/bus

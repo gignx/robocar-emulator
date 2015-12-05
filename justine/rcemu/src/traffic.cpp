@@ -271,9 +271,10 @@ for(auto car:cars) //gangsters?
         		double dist = Distance2(car->m_from,obj->getNode());
     			//std::cout<<dist<<" "<<std::endl;
     			//car->print(std::cout);
-        		if (dist<100)
+        		if (dist<10)
         		{
-        			std::cout<<" car id "<<car->m_from<<" carfrom "<<obj->getId()<<" buszmegid "<<obj->getNode()<<" busznode "<<" tav "<<dist<<std::endl;
+        			//std::cout<<" car id "<<car->m_from<<" carfrom "<<obj->getId()<<" buszmegid "<<obj->getNode()<<" busznode "<<" tav "<<dist<<std::endl;
+        			//car->set_mehet_value(false);
         		}
     			
   			}

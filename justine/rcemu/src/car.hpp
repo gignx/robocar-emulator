@@ -355,7 +355,9 @@ public:
 
   virtual void step()
   {
-    nextGuidedEdge();
+    if (mehet)
+    {
+    	nextGuidedEdge();
 
     long unsigned int last;
 
@@ -404,8 +406,13 @@ public:
     }
 
     m_old_step = m_step;
-}
+    }
+  }
 
+  virtual void set_mehet_value (bool value)
+  {
+  	mehet = value;
+  }
 
   virtual void print (std::ostream & os) const
   {
@@ -462,6 +469,7 @@ protected:
   std::string line_;
 private:
   bool isGoingFrom;
+  bool mehet = true;
 };
 
 }

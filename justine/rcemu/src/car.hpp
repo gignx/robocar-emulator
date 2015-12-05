@@ -89,7 +89,7 @@ public:
   osmium::unsigned_object_id_type get_max_steps() const;
   virtual void nextEdge ( void );
   virtual void nextSmarterEdge ( void );
-  virtual void setMehetValue ( bool );
+  virtual void setMehetValue(bool) {};
 
   virtual void print ( std::ostream & os ) const
   {
@@ -235,6 +235,7 @@ public:
 
   virtual void step();
   virtual void init();
+  virtual void setMehetValue(){};
 
   virtual void print ( std::ostream & os ) const
   {
@@ -410,10 +411,7 @@ public:
     }
   }
 
-  virtual void setMehetValue(bool value)
-  {
-  	mehet = value;
-  }
+
 
   virtual void print (std::ostream & os) const
   {
@@ -454,6 +452,10 @@ public:
       car_data->set_size(0);
     }
   }
+  
+  virtual void setMehetValue(bool value){
+      mehet = value;
+      };
 
   std::string get_line() const
   {

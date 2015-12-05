@@ -8,10 +8,10 @@ public final class TrafficStateProtos {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface CarDataOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface CarDataOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:justine.robocar.CarData)
+      com.google.protobuf.MessageOrBuilder {
 
-    // required fixed64 node_from = 1;
     /**
      * <code>required fixed64 node_from = 1;</code>
      */
@@ -21,7 +21,6 @@ public final class TrafficStateProtos {
      */
     long getNodeFrom();
 
-    // required fixed64 node_to = 2;
     /**
      * <code>required fixed64 node_to = 2;</code>
      */
@@ -31,7 +30,6 @@ public final class TrafficStateProtos {
      */
     long getNodeTo();
 
-    // required fixed64 max_step = 3;
     /**
      * <code>required fixed64 max_step = 3;</code>
      */
@@ -41,7 +39,6 @@ public final class TrafficStateProtos {
      */
     long getMaxStep();
 
-    // required fixed64 step = 4;
     /**
      * <code>required fixed64 step = 4;</code>
      */
@@ -51,7 +48,6 @@ public final class TrafficStateProtos {
      */
     long getStep();
 
-    // required .justine.robocar.CarData.ProtoCarType type = 5;
     /**
      * <code>required .justine.robocar.CarData.ProtoCarType type = 5;</code>
      */
@@ -61,7 +57,6 @@ public final class TrafficStateProtos {
      */
     justine.robocar.TrafficStateProtos.CarData.ProtoCarType getType();
 
-    // optional int32 caught = 6;
     /**
      * <code>optional int32 caught = 6;</code>
      */
@@ -71,7 +66,6 @@ public final class TrafficStateProtos {
      */
     int getCaught();
 
-    // optional string team = 7;
     /**
      * <code>optional string team = 7;</code>
      */
@@ -86,7 +80,6 @@ public final class TrafficStateProtos {
     com.google.protobuf.ByteString
         getTeamBytes();
 
-    // optional int32 id = 8;
     /**
      * <code>optional int32 id = 8;</code>
      */
@@ -96,7 +89,6 @@ public final class TrafficStateProtos {
      */
     int getId();
 
-    // optional int32 size = 9;
     /**
      * <code>optional int32 size = 9;</code>
      */
@@ -106,7 +98,6 @@ public final class TrafficStateProtos {
      */
     int getSize();
 
-    // repeated fixed64 path = 10;
     /**
      * <code>repeated fixed64 path = 10;</code>
      */
@@ -120,7 +111,6 @@ public final class TrafficStateProtos {
      */
     long getPath(int index);
 
-    // optional int32 num_stops = 11;
     /**
      * <code>optional int32 num_stops = 11;</code>
      */
@@ -130,7 +120,6 @@ public final class TrafficStateProtos {
      */
     int getNumStops();
 
-    // repeated fixed64 busstops = 12;
     /**
      * <code>repeated fixed64 busstops = 12;</code>
      */
@@ -148,8 +137,9 @@ public final class TrafficStateProtos {
    * Protobuf type {@code justine.robocar.CarData}
    */
   public static final class CarData extends
-      com.google.protobuf.GeneratedMessage
-      implements CarDataOrBuilder {
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:justine.robocar.CarData)
+      CarDataOrBuilder {
     // Use CarData.newBuilder() to construct.
     private CarData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -232,8 +222,9 @@ public final class TrafficStateProtos {
               break;
             }
             case 58: {
+              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000040;
-              team_ = input.readBytes();
+              team_ = bs;
               break;
             }
             case 64: {
@@ -466,7 +457,6 @@ public final class TrafficStateProtos {
     }
 
     private int bitField0_;
-    // required fixed64 node_from = 1;
     public static final int NODE_FROM_FIELD_NUMBER = 1;
     private long nodeFrom_;
     /**
@@ -482,7 +472,6 @@ public final class TrafficStateProtos {
       return nodeFrom_;
     }
 
-    // required fixed64 node_to = 2;
     public static final int NODE_TO_FIELD_NUMBER = 2;
     private long nodeTo_;
     /**
@@ -498,7 +487,6 @@ public final class TrafficStateProtos {
       return nodeTo_;
     }
 
-    // required fixed64 max_step = 3;
     public static final int MAX_STEP_FIELD_NUMBER = 3;
     private long maxStep_;
     /**
@@ -514,7 +502,6 @@ public final class TrafficStateProtos {
       return maxStep_;
     }
 
-    // required fixed64 step = 4;
     public static final int STEP_FIELD_NUMBER = 4;
     private long step_;
     /**
@@ -530,7 +517,6 @@ public final class TrafficStateProtos {
       return step_;
     }
 
-    // required .justine.robocar.CarData.ProtoCarType type = 5;
     public static final int TYPE_FIELD_NUMBER = 5;
     private justine.robocar.TrafficStateProtos.CarData.ProtoCarType type_;
     /**
@@ -546,7 +532,6 @@ public final class TrafficStateProtos {
       return type_;
     }
 
-    // optional int32 caught = 6;
     public static final int CAUGHT_FIELD_NUMBER = 6;
     private int caught_;
     /**
@@ -562,7 +547,6 @@ public final class TrafficStateProtos {
       return caught_;
     }
 
-    // optional string team = 7;
     public static final int TEAM_FIELD_NUMBER = 7;
     private java.lang.Object team_;
     /**
@@ -605,7 +589,6 @@ public final class TrafficStateProtos {
       }
     }
 
-    // optional int32 id = 8;
     public static final int ID_FIELD_NUMBER = 8;
     private int id_;
     /**
@@ -621,7 +604,6 @@ public final class TrafficStateProtos {
       return id_;
     }
 
-    // optional int32 size = 9;
     public static final int SIZE_FIELD_NUMBER = 9;
     private int size_;
     /**
@@ -637,7 +619,6 @@ public final class TrafficStateProtos {
       return size_;
     }
 
-    // repeated fixed64 path = 10;
     public static final int PATH_FIELD_NUMBER = 10;
     private java.util.List<java.lang.Long> path_;
     /**
@@ -660,7 +641,6 @@ public final class TrafficStateProtos {
       return path_.get(index);
     }
 
-    // optional int32 num_stops = 11;
     public static final int NUM_STOPS_FIELD_NUMBER = 11;
     private int numStops_;
     /**
@@ -676,7 +656,6 @@ public final class TrafficStateProtos {
       return numStops_;
     }
 
-    // repeated fixed64 busstops = 12;
     public static final int BUSSTOPS_FIELD_NUMBER = 12;
     private java.util.List<java.lang.Long> busstops_;
     /**
@@ -716,7 +695,8 @@ public final class TrafficStateProtos {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
 
       if (!hasNodeFrom()) {
         memoizedIsInitialized = 0;
@@ -924,8 +904,9 @@ public final class TrafficStateProtos {
      * Protobuf type {@code justine.robocar.CarData}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements justine.robocar.TrafficStateProtos.CarDataOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:justine.robocar.CarData)
+        justine.robocar.TrafficStateProtos.CarDataOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return justine.robocar.TrafficStateProtos.internal_static_justine_robocar_CarData_descriptor;
@@ -1175,7 +1156,6 @@ public final class TrafficStateProtos {
       }
       private int bitField0_;
 
-      // required fixed64 node_from = 1;
       private long nodeFrom_ ;
       /**
        * <code>required fixed64 node_from = 1;</code>
@@ -1208,7 +1188,6 @@ public final class TrafficStateProtos {
         return this;
       }
 
-      // required fixed64 node_to = 2;
       private long nodeTo_ ;
       /**
        * <code>required fixed64 node_to = 2;</code>
@@ -1241,7 +1220,6 @@ public final class TrafficStateProtos {
         return this;
       }
 
-      // required fixed64 max_step = 3;
       private long maxStep_ ;
       /**
        * <code>required fixed64 max_step = 3;</code>
@@ -1274,7 +1252,6 @@ public final class TrafficStateProtos {
         return this;
       }
 
-      // required fixed64 step = 4;
       private long step_ ;
       /**
        * <code>required fixed64 step = 4;</code>
@@ -1307,7 +1284,6 @@ public final class TrafficStateProtos {
         return this;
       }
 
-      // required .justine.robocar.CarData.ProtoCarType type = 5;
       private justine.robocar.TrafficStateProtos.CarData.ProtoCarType type_ = justine.robocar.TrafficStateProtos.CarData.ProtoCarType.NORMAL;
       /**
        * <code>required .justine.robocar.CarData.ProtoCarType type = 5;</code>
@@ -1343,7 +1319,6 @@ public final class TrafficStateProtos {
         return this;
       }
 
-      // optional int32 caught = 6;
       private int caught_ ;
       /**
        * <code>optional int32 caught = 6;</code>
@@ -1376,7 +1351,6 @@ public final class TrafficStateProtos {
         return this;
       }
 
-      // optional string team = 7;
       private java.lang.Object team_ = "";
       /**
        * <code>optional string team = 7;</code>
@@ -1390,9 +1364,12 @@ public final class TrafficStateProtos {
       public java.lang.String getTeam() {
         java.lang.Object ref = team_;
         if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          team_ = s;
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            team_ = s;
+          }
           return s;
         } else {
           return (java.lang.String) ref;
@@ -1450,7 +1427,6 @@ public final class TrafficStateProtos {
         return this;
       }
 
-      // optional int32 id = 8;
       private int id_ ;
       /**
        * <code>optional int32 id = 8;</code>
@@ -1483,7 +1459,6 @@ public final class TrafficStateProtos {
         return this;
       }
 
-      // optional int32 size = 9;
       private int size_ ;
       /**
        * <code>optional int32 size = 9;</code>
@@ -1516,7 +1491,6 @@ public final class TrafficStateProtos {
         return this;
       }
 
-      // repeated fixed64 path = 10;
       private java.util.List<java.lang.Long> path_ = java.util.Collections.emptyList();
       private void ensurePathIsMutable() {
         if (!((bitField0_ & 0x00000200) == 0x00000200)) {
@@ -1568,7 +1542,8 @@ public final class TrafficStateProtos {
       public Builder addAllPath(
           java.lang.Iterable<? extends java.lang.Long> values) {
         ensurePathIsMutable();
-        super.addAll(values, path_);
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, path_);
         onChanged();
         return this;
       }
@@ -1582,7 +1557,6 @@ public final class TrafficStateProtos {
         return this;
       }
 
-      // optional int32 num_stops = 11;
       private int numStops_ ;
       /**
        * <code>optional int32 num_stops = 11;</code>
@@ -1615,7 +1589,6 @@ public final class TrafficStateProtos {
         return this;
       }
 
-      // repeated fixed64 busstops = 12;
       private java.util.List<java.lang.Long> busstops_ = java.util.Collections.emptyList();
       private void ensureBusstopsIsMutable() {
         if (!((bitField0_ & 0x00000800) == 0x00000800)) {
@@ -1667,7 +1640,8 @@ public final class TrafficStateProtos {
       public Builder addAllBusstops(
           java.lang.Iterable<? extends java.lang.Long> values) {
         ensureBusstopsIsMutable();
-        super.addAll(values, busstops_);
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, busstops_);
         onChanged();
         return this;
       }
@@ -1692,10 +1666,10 @@ public final class TrafficStateProtos {
     // @@protoc_insertion_point(class_scope:justine.robocar.CarData)
   }
 
-  public interface ImmovableObjectDataOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface ImmovableObjectDataOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:justine.robocar.ImmovableObjectData)
+      com.google.protobuf.MessageOrBuilder {
 
-    // required int32 id = 1;
     /**
      * <code>required int32 id = 1;</code>
      */
@@ -1705,7 +1679,6 @@ public final class TrafficStateProtos {
      */
     int getId();
 
-    // required fixed64 node = 2;
     /**
      * <code>required fixed64 node = 2;</code>
      */
@@ -1715,7 +1688,6 @@ public final class TrafficStateProtos {
      */
     long getNode();
 
-    // optional string name = 3;
     /**
      * <code>optional string name = 3;</code>
      */
@@ -1734,8 +1706,9 @@ public final class TrafficStateProtos {
    * Protobuf type {@code justine.robocar.ImmovableObjectData}
    */
   public static final class ImmovableObjectData extends
-      com.google.protobuf.GeneratedMessage
-      implements ImmovableObjectDataOrBuilder {
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:justine.robocar.ImmovableObjectData)
+      ImmovableObjectDataOrBuilder {
     // Use ImmovableObjectData.newBuilder() to construct.
     private ImmovableObjectData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -1792,8 +1765,9 @@ public final class TrafficStateProtos {
               break;
             }
             case 26: {
+              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000004;
-              name_ = input.readBytes();
+              name_ = bs;
               break;
             }
           }
@@ -1836,7 +1810,6 @@ public final class TrafficStateProtos {
     }
 
     private int bitField0_;
-    // required int32 id = 1;
     public static final int ID_FIELD_NUMBER = 1;
     private int id_;
     /**
@@ -1852,7 +1825,6 @@ public final class TrafficStateProtos {
       return id_;
     }
 
-    // required fixed64 node = 2;
     public static final int NODE_FIELD_NUMBER = 2;
     private long node_;
     /**
@@ -1868,7 +1840,6 @@ public final class TrafficStateProtos {
       return node_;
     }
 
-    // optional string name = 3;
     public static final int NAME_FIELD_NUMBER = 3;
     private java.lang.Object name_;
     /**
@@ -1919,7 +1890,8 @@ public final class TrafficStateProtos {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
 
       if (!hasId()) {
         memoizedIsInitialized = 0;
@@ -2048,8 +2020,9 @@ public final class TrafficStateProtos {
      * Protobuf type {@code justine.robocar.ImmovableObjectData}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements justine.robocar.TrafficStateProtos.ImmovableObjectDataOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:justine.robocar.ImmovableObjectData)
+        justine.robocar.TrafficStateProtos.ImmovableObjectDataOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return justine.robocar.TrafficStateProtos.internal_static_justine_robocar_ImmovableObjectData_descriptor;
@@ -2190,7 +2163,6 @@ public final class TrafficStateProtos {
       }
       private int bitField0_;
 
-      // required int32 id = 1;
       private int id_ ;
       /**
        * <code>required int32 id = 1;</code>
@@ -2223,7 +2195,6 @@ public final class TrafficStateProtos {
         return this;
       }
 
-      // required fixed64 node = 2;
       private long node_ ;
       /**
        * <code>required fixed64 node = 2;</code>
@@ -2256,7 +2227,6 @@ public final class TrafficStateProtos {
         return this;
       }
 
-      // optional string name = 3;
       private java.lang.Object name_ = "";
       /**
        * <code>optional string name = 3;</code>
@@ -2270,9 +2240,12 @@ public final class TrafficStateProtos {
       public java.lang.String getName() {
         java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          name_ = s;
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            name_ = s;
+          }
           return s;
         } else {
           return (java.lang.String) ref;
@@ -2341,10 +2314,10 @@ public final class TrafficStateProtos {
     // @@protoc_insertion_point(class_scope:justine.robocar.ImmovableObjectData)
   }
 
-  public interface TrafficStateHeaderOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface TrafficStateHeaderOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:justine.robocar.TrafficStateHeader)
+      com.google.protobuf.MessageOrBuilder {
 
-    // required int32 time_minutes = 1;
     /**
      * <code>required int32 time_minutes = 1;</code>
      */
@@ -2354,7 +2327,6 @@ public final class TrafficStateProtos {
      */
     int getTimeMinutes();
 
-    // required int32 time_elapsed = 2;
     /**
      * <code>required int32 time_elapsed = 2;</code>
      */
@@ -2364,7 +2336,6 @@ public final class TrafficStateProtos {
      */
     int getTimeElapsed();
 
-    // required int32 num_cars = 3;
     /**
      * <code>required int32 num_cars = 3;</code>
      */
@@ -2374,7 +2345,6 @@ public final class TrafficStateProtos {
      */
     int getNumCars();
 
-    // required int32 num_objects = 4;
     /**
      * <code>required int32 num_objects = 4;</code>
      */
@@ -2388,8 +2358,9 @@ public final class TrafficStateProtos {
    * Protobuf type {@code justine.robocar.TrafficStateHeader}
    */
   public static final class TrafficStateHeader extends
-      com.google.protobuf.GeneratedMessage
-      implements TrafficStateHeaderOrBuilder {
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:justine.robocar.TrafficStateHeader)
+      TrafficStateHeaderOrBuilder {
     // Use TrafficStateHeader.newBuilder() to construct.
     private TrafficStateHeader(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -2495,7 +2466,6 @@ public final class TrafficStateProtos {
     }
 
     private int bitField0_;
-    // required int32 time_minutes = 1;
     public static final int TIME_MINUTES_FIELD_NUMBER = 1;
     private int timeMinutes_;
     /**
@@ -2511,7 +2481,6 @@ public final class TrafficStateProtos {
       return timeMinutes_;
     }
 
-    // required int32 time_elapsed = 2;
     public static final int TIME_ELAPSED_FIELD_NUMBER = 2;
     private int timeElapsed_;
     /**
@@ -2527,7 +2496,6 @@ public final class TrafficStateProtos {
       return timeElapsed_;
     }
 
-    // required int32 num_cars = 3;
     public static final int NUM_CARS_FIELD_NUMBER = 3;
     private int numCars_;
     /**
@@ -2543,7 +2511,6 @@ public final class TrafficStateProtos {
       return numCars_;
     }
 
-    // required int32 num_objects = 4;
     public static final int NUM_OBJECTS_FIELD_NUMBER = 4;
     private int numObjects_;
     /**
@@ -2568,7 +2535,8 @@ public final class TrafficStateProtos {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
 
       if (!hasTimeMinutes()) {
         memoizedIsInitialized = 0;
@@ -2712,8 +2680,9 @@ public final class TrafficStateProtos {
      * Protobuf type {@code justine.robocar.TrafficStateHeader}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements justine.robocar.TrafficStateProtos.TrafficStateHeaderOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:justine.robocar.TrafficStateHeader)
+        justine.robocar.TrafficStateProtos.TrafficStateHeaderOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return justine.robocar.TrafficStateProtos.internal_static_justine_robocar_TrafficStateHeader_descriptor;
@@ -2869,7 +2838,6 @@ public final class TrafficStateProtos {
       }
       private int bitField0_;
 
-      // required int32 time_minutes = 1;
       private int timeMinutes_ ;
       /**
        * <code>required int32 time_minutes = 1;</code>
@@ -2902,7 +2870,6 @@ public final class TrafficStateProtos {
         return this;
       }
 
-      // required int32 time_elapsed = 2;
       private int timeElapsed_ ;
       /**
        * <code>required int32 time_elapsed = 2;</code>
@@ -2935,7 +2902,6 @@ public final class TrafficStateProtos {
         return this;
       }
 
-      // required int32 num_cars = 3;
       private int numCars_ ;
       /**
        * <code>required int32 num_cars = 3;</code>
@@ -2968,7 +2934,6 @@ public final class TrafficStateProtos {
         return this;
       }
 
-      // required int32 num_objects = 4;
       private int numObjects_ ;
       /**
        * <code>required int32 num_objects = 4;</code>
@@ -3012,17 +2977,17 @@ public final class TrafficStateProtos {
     // @@protoc_insertion_point(class_scope:justine.robocar.TrafficStateHeader)
   }
 
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_justine_robocar_CarData_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_justine_robocar_CarData_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_justine_robocar_ImmovableObjectData_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_justine_robocar_ImmovableObjectData_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_justine_robocar_TrafficStateHeader_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -3053,35 +3018,35 @@ public final class TrafficStateProtos {
       "robocarB\022TrafficStateProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
-        public com.google.protobuf.ExtensionRegistry assignDescriptors(
-            com.google.protobuf.Descriptors.FileDescriptor root) {
-          descriptor = root;
-          internal_static_justine_robocar_CarData_descriptor =
-            getDescriptor().getMessageTypes().get(0);
-          internal_static_justine_robocar_CarData_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_justine_robocar_CarData_descriptor,
-              new java.lang.String[] { "NodeFrom", "NodeTo", "MaxStep", "Step", "Type", "Caught", "Team", "Id", "Size", "Path", "NumStops", "Busstops", });
-          internal_static_justine_robocar_ImmovableObjectData_descriptor =
-            getDescriptor().getMessageTypes().get(1);
-          internal_static_justine_robocar_ImmovableObjectData_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_justine_robocar_ImmovableObjectData_descriptor,
-              new java.lang.String[] { "Id", "Node", "Name", });
-          internal_static_justine_robocar_TrafficStateHeader_descriptor =
-            getDescriptor().getMessageTypes().get(2);
-          internal_static_justine_robocar_TrafficStateHeader_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_justine_robocar_TrafficStateHeader_descriptor,
-              new java.lang.String[] { "TimeMinutes", "TimeElapsed", "NumCars", "NumObjects", });
-          return null;
-        }
-      };
+        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
+          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+              com.google.protobuf.Descriptors.FileDescriptor root) {
+            descriptor = root;
+            return null;
+          }
+        };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
+    internal_static_justine_robocar_CarData_descriptor =
+      getDescriptor().getMessageTypes().get(0);
+    internal_static_justine_robocar_CarData_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_justine_robocar_CarData_descriptor,
+        new java.lang.String[] { "NodeFrom", "NodeTo", "MaxStep", "Step", "Type", "Caught", "Team", "Id", "Size", "Path", "NumStops", "Busstops", });
+    internal_static_justine_robocar_ImmovableObjectData_descriptor =
+      getDescriptor().getMessageTypes().get(1);
+    internal_static_justine_robocar_ImmovableObjectData_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_justine_robocar_ImmovableObjectData_descriptor,
+        new java.lang.String[] { "Id", "Node", "Name", });
+    internal_static_justine_robocar_TrafficStateHeader_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_justine_robocar_TrafficStateHeader_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_justine_robocar_TrafficStateHeader_descriptor,
+        new java.lang.String[] { "TimeMinutes", "TimeElapsed", "NumCars", "NumObjects", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

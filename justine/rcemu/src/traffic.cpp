@@ -29,20 +29,15 @@
  *
  */
 
-<<<<<<< HEAD
-#include "traffic.hpp"
-#include "robocar.pb.h"
-=======
 #include <traffic.hpp>
 #include "src/robocar.pb.h"
->>>>>>> origin/bus
 
 void justine::robocar::Traffic::OpenLogStream(void)
 {
   boost::posix_time::ptime now =
     boost::posix_time::second_clock::universal_time();
 
-  logfile_name_   = boost::posix_time::to_simple_string(now) + ".log";
+  logfile_name_   = boost::posix_time::to_simple_string(now);
   logfile_stream_ = new std::fstream(logfile_name_.c_str() , std::ios_base::out);
 }
 
@@ -64,7 +59,7 @@ void justine::robocar::Traffic::InitializeRoutineCars(void)
   std::cout << "Initializing routine cars ... " << std::endl;
   #endif
 
-  if (simulationSettings.trafficType != TrafficType::NORMAL)
+  if (traffic_type_ != TrafficType::NORMAL)
   {
     for (shm_map_Type::iterator iter=shm_map_->begin();
          iter!=shm_map_->end();
@@ -78,9 +73,9 @@ void justine::robocar::Traffic::InitializeRoutineCars(void)
     }
   }
 
-  for (int i {0}; i < entitySettings.routineCarCount; ++i)
+  for (int i {0}; i < num_cars_; ++i)
   {
-    if (simulationSettings.trafficType == TrafficType::NORMAL)
+    if (traffic_type_ == TrafficType::NORMAL)
     {
       std::shared_ptr<Car> car(new Car {*this});
 
@@ -107,7 +102,7 @@ void justine::robocar::Traffic::InitializePedestrians(void)
   std::cout << "Initializing pedestrians ... " << std::endl;
   #endif
 
-  if (simulationSettings.trafficType != TrafficType::NORMAL)
+  if (traffic_type_ != TrafficType::NORMAL)
   {
     for (shm_map_Type::iterator iter=shm_map_->begin();
          iter!=shm_map_->end();
@@ -121,14 +116,13 @@ void justine::robocar::Traffic::InitializePedestrians(void)
     }
   }
 
-  for (int i {0}; i < entitySettings.pedestrianCount; ++i)
+  for (int i {0}; i < num_cars_*5; ++i)
   {
-    if (simulationSettings.trafficType == TrafficType::NORMAL)
+    if (traffic_type_ == TrafficType::NORMAL)
     {
       std::shared_ptr<Car> car(new Pedestrian {*this});
       car->set_type(CarType::PEDESTRIAN);
       car->init();
-
       cars.push_back(car);
     }
     else
@@ -136,7 +130,6 @@ void justine::robocar::Traffic::InitializePedestrians(void)
       std::shared_ptr<Pedestrian> car(new Pedestrian {*this});
       car->set_type(CarType::PEDESTRIAN);
       car->init();
-
       cars.push_back(car);
     }
   }
@@ -153,9 +146,10 @@ void justine::robocar::Traffic::InitializeBuses(void)
   int bus_stop_id = 5000;
   for (auto p: *bus_stop_map_)
   {
-
+  	
     std::shared_ptr<BusStop> busStop = std::make_shared<BusStop>(p.first, bus_stop_id, p.second.c_str());
     //std::cout << "bs_id: " << bus_stop_id << std::endl;
+
     bus_stop_id++;
     immovableObjects.push_back(std::dynamic_pointer_cast<ImmovableObject>(busStop));
   }
@@ -167,7 +161,7 @@ void justine::robocar::Traffic::InitializeBuses(void)
     if (sbw.nodesFrom.size() > 0)
     {
     std::shared_ptr<Car> bus(new Bus({*this, true, sbw.ref.c_str(), bus_id}));
-  //std::cout << "id: " << bus_id << std::endl;
+  	//std::cout << "id: " << bus_id << std::endl;
     bus_id++;
     std::shared_ptr<SmartCar> b = std::dynamic_pointer_cast<SmartCar>(bus);
     b->set_type(CarType::BUS);
@@ -210,7 +204,7 @@ void justine::robocar::Traffic::SimulationLoop(void)
 
   while(is_running_)
   {
-    if (++running_time_elapsed_ > (running_time_allowed_ / simulationSettings.delay))
+    if (++running_time_elapsed_ > (running_time_allowed_ / delay_))
     {
       is_running_ = false;
 
@@ -220,7 +214,7 @@ void justine::robocar::Traffic::SimulationLoop(void)
     {
       UpdateTraffic();
 
-      std::this_thread::sleep_for(std::chrono::milliseconds(simulationSettings.delay));
+      std::this_thread::sleep_for(std::chrono::milliseconds(delay_));
     }
   }
 
@@ -254,28 +248,76 @@ osmium::unsigned_object_id_type justine::robocar::Traffic::node()
 
   return iter->first;
 }
+void justine::robocar::Traffic::Test()
+{	
+
+for(auto car:cars) //gangsters?
+    {
+
+    	if(car->get_type() == CarType::BUS)
+      	{
+        
+      		for(const auto obj : immovableObjects)
+  			{
+  				/*std::cout<<std::fixed;
+  				std::cout<<"carnode "<<car->m_from<<std::endl;
+  				std::cout<<"busznode "<<obj->getNode()<<std::endl;*/
+    			//dist=Distance(car->to_node(),obj->getId());
+  				//toGPS(car->to_node(), obj->getId(), car->get_step(), &lon2, &lat2);
+
+
+
+
+        		double dist = Distance2(car->m_from,obj->getNode());
+    			//std::cout<<dist<<" "<<std::endl;
+    			//car->print(std::cout);
+        		if (dist<100)
+        		{
+        			std::cout<<" car id "<<car->m_from<<" carfrom "<<obj->getId()<<" buszmegid "<<obj->getNode()<<" busznode "<<" tav "<<dist<<std::endl;
+        		}
+    			
+  			}
+
+        //std::cout<<car->to_node()<<std::endl;
+       
+        	//car->print(std::cout);
+      	}
+      
+    }
+    
+
+
+/*for(const auto obj : immovableObjects)
+  {
+  		std::cout<<obj->getId()<<std::endl;
+    		
+  }
+	//std::cout<<immovableObjects.size()<<std::endl;
+	//std::cout<<"asd";
+
+}*/
+
+  }
 
 void justine::robocar::Traffic::UpdateTraffic()
 {
   CheckIfCaught();
 
   StepCars();
+  
+  Test();
 }
 
 void justine::robocar::Traffic::StepCars()
 {
   std::lock_guard<std::mutex> lock(cars_mutex);
 
-<<<<<<< HEAD
-  for(auto car:cars)car->step();
-=======
   for(auto car:cars)
     car->step();
->>>>>>> origin/bus
 
   int msg_length = 0;
   TrafficStateHeader traffic_state_header;
-  traffic_state_header.set_time_minutes(simulationSettings.minutes);
+  traffic_state_header.set_time_minutes(running_time_minutes_);
   traffic_state_header.set_time_elapsed(running_time_elapsed_);
   traffic_state_header.set_num_cars(cars.size());
   traffic_state_header.set_num_objects(immovableObjects.size());
@@ -299,7 +341,7 @@ void justine::robocar::Traffic::StepCars()
     std::stringbuf buf;
     std::ostream os(&buf);
 
-    car->assign(&car_data, simulationSettings.fullLog);
+    car->assign(&car_data, full_logging);
     car_data.SerializeToOstream(&os);
     msg_length = buf.str().length();
   //  std::cout << "Car: " << msg_length << std::endl;
@@ -325,7 +367,13 @@ void justine::robocar::Traffic::StepCars()
     const std::string& tmp = buf.str();
     const char* data = tmp.c_str();
     logfile_stream_->write(data,msg_length);
+  
   }
+
+
+
+
+
 
 }
 
@@ -344,7 +392,7 @@ void justine::robocar::Traffic::CheckIfCaught(void)
         toGPS(smart_car->from(), smart_car->to() , smart_car->get_step(), &lon2, &lat2);
         double d = Distance(lon1, lat1, lon2, lat2);
 
-        if(d < simulationSettings.catchDistance)
+        if(d < catch_distance_)
         {
           cop_car->GangsterCaught();
           smart_car->set_type(CarType::CAUGHT);
@@ -754,7 +802,7 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
     TrafficStateHeader traffic_state_header;
 
     // a protobuf által generált setter függvények
-    traffic_state_header.set_time_minutes(simulationSettings.minutes);
+    traffic_state_header.set_time_minutes(running_time_minutes_);
     traffic_state_header.set_time_elapsed(running_time_elapsed_);
 
     traffic_state_header.set_num_cars(cars_copy.size());
@@ -813,7 +861,7 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
       // az oroklődésnek és a polimorfiuzmusnak koszonhetően
       // a megfelelő adatok bele lesznek pakolva a CarData-ba
       // lsd.: Car.cpp Lines: 106, 257
-      car->assign(&car_data, simulationSettings.fullLog);
+      car->assign(&car_data, true);
 
       // innentől kezdve ugyanazt csináljuk, mint a TrafficStateHeader
       // esetén, csak a CarData objektummal
@@ -857,7 +905,7 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
       #endif
     }
     cars_mutex.unlock();
-    std::this_thread::sleep_for(std::chrono::milliseconds(simulationSettings.delay));
+    std::this_thread::sleep_for(std::chrono::milliseconds(delay_));
   }
 }
 
@@ -991,7 +1039,7 @@ void justine::robocar::Traffic::StartServer(void)
 {
   boost::asio::ip::tcp::acceptor acceptor(
       io_service_,
-      boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), connnectivitySettings.portNumber));
+      boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port_));
 
   for(;;)
   {
@@ -1010,9 +1058,29 @@ double justine::robocar::Traffic::Distance(
 
   shm_map_Type::iterator iter1=shm_map_->find(n1);
   shm_map_Type::iterator iter2=shm_map_->find(n2);
-
+  
   osmium::geom::Coordinates c1 {iter1->second.lon/10000000.0, iter1->second.lat/10000000.0};
   osmium::geom::Coordinates c2 {iter2->second.lon/10000000.0, iter2->second.lat/10000000.0};
+
+  return osmium::geom::haversine::distance(c1, c2);
+}
+double justine::robocar::Traffic::Distance2(
+  osmium::unsigned_object_id_type n1,
+  osmium::unsigned_object_id_type n2) const
+{
+  
+  shm_map_Type::iterator iter1=shm_map_->find(n1);
+  bus_stop_map2_Type::iterator iter2=bus_stop_map2_->find(n2);
+  
+  
+  /*std::cout<<std::setprecision(10)<<iter1->second.lat/10000000.0<<std::endl;
+  std::cout<<std::setprecision(10)<<iter2->second.lat<<std::endl;
+  std::cout<<std::setprecision(10)<<iter1->second.lon/10000000.0<<std::endl;
+  std::cout<<std::setprecision(10)<<iter2->second.lon<<std::endl;*/
+  
+  
+  osmium::geom::Coordinates c1 {iter1->second.lon/10000000.0, iter1->second.lat/10000000.0};
+  osmium::geom::Coordinates c2 {iter2->second.lon, iter2->second.lat};
 
   return osmium::geom::haversine::distance(c1, c2);
 }

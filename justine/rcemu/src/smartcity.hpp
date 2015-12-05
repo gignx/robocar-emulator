@@ -61,8 +61,8 @@ namespace robocar
     uint_vector m_salist;
     uint_vector m_palist;
 
-    int lon;
-    int lat;
+    double lon;
+    double lat;
 
     SharedData ( const void_allocator &void_alloc )
     :  m_alist ( void_alloc ), m_salist ( void_alloc ), m_palist ( void_alloc )
@@ -98,6 +98,12 @@ namespace robocar
   typedef boost::interprocess::map< unsigned int, char_string, std::less<unsigned int>,
                                     bus_stop_Type_allocator> bus_stop_map_Type;
 
+
+//op
+ typedef boost::interprocess::map< unsigned int, SharedData, std::less<unsigned int>,
+  map_pair_Type_allocator> bus_stop_map2_Type;
+
+
   class SmartCity
   {
   public:
@@ -119,7 +125,7 @@ namespace robocar
                 << " " << loc.second.lon()
                 << std::endl;
       }
-
+      std::cout<<"lefutottam"<<std::endl;
       gpsFile.close ();
     }
 
@@ -222,6 +228,8 @@ namespace robocar
         shm_segment,
         estimated_size );
 
+
+
       void_allocator  alloc_obj ( segment->get_segment_manager() );
 
       shm_map_Type* shm_map_n =
@@ -236,6 +244,10 @@ namespace robocar
       shm_bus_way_Type* bus_way_vector =
       segment->construct<shm_bus_way_Type>
       ( "BusWays" ) (alloc_obj);
+
+      bus_stop_map2_Type* bus_stop_map2_bs =
+      segment->construct<bus_stop_map2_Type>
+      ( "BusStops2" ) ( std::less<unsigned int>(), alloc_obj );
 
       try
       {
@@ -359,9 +371,37 @@ namespace robocar
           map_pair_Type p ( iter->first, v );
           shm_map_n->insert ( p );
         }
+        //////////////////////////////////////////////////////////////////////////////////////
+
+        for ( auto loc : m_busStopNodesMap )
+        {
+
+          SharedData v2 ( alloc_obj );
+
+         
+
+          v2.lat = loc.second.lat();
+          v2.lon = loc.second.lon();
+          //std::cout<<loc.first<<std::endl;
+          //std::cout<<v2.lat<<std::endl;
+          //std::cout<<v2.lon<<std::endl;
+          map_pair_Type p ( loc.first, v2 );
+          bus_stop_map2_bs->insert ( p );
+        }
+
+
+
+        /////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
         for  (auto bstp : m_busstops)
         {
+            
+
+
+
             bus_stop_Type p(bstp.first, char_string(bstp.second.c_str(), alloc_obj));
             bus_stop_map_bs->insert(p);
         }
@@ -420,6 +460,8 @@ namespace robocar
 
       delete segment;
       delete m_remover;
+      
+      
     }
 
     void processes ( )
@@ -490,6 +532,7 @@ namespace robocar
     boost::interprocess::managed_shared_memory *segment;
     boost::interprocess::offset_ptr<shm_map_Type> shm_map;
     boost::interprocess::offset_ptr<bus_stop_map_Type> bus_stop_map;
+    
 
     int m_delay {5000};
     bool m_run {true};

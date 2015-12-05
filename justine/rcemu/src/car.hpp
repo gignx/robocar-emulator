@@ -409,7 +409,7 @@ public:
 
   virtual void print (std::ostream & os) const
   {
-    os << m_from
+    /*os << m_from
        << " "
        << to_node()
        << " "
@@ -421,7 +421,9 @@ public:
        << " "
        << line_
        << " "
-       << id_;
+       << id_;*/
+
+       os<<" "<<id_<<" ";
   }
 
   virtual void assign(CarData *car_data, bool full)

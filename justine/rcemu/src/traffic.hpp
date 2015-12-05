@@ -169,6 +169,7 @@ public:
     shm_segment_->destroy<shm_map_Type>("JustineMap");
     shm_segment_->destroy<bus_stop_map_Type>("BusStops");
     shm_segment_->destroy<bus_stop_map2_Type>("BusStops2");
+    shm_segment_->destroy<shm_bus_way_Type>("BusWays");
 
     delete shm_segment_;
   }

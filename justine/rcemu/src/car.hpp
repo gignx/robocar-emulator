@@ -89,6 +89,7 @@ public:
   osmium::unsigned_object_id_type get_max_steps() const;
   virtual void nextEdge ( void );
   virtual void nextSmarterEdge ( void );
+  virtual void setMehetValue ( bool );
 
   virtual void print ( std::ostream & os ) const
   {
@@ -409,7 +410,7 @@ public:
     }
   }
 
-  virtual void set_mehet_value (bool value)
+  virtual void setMehetValue(bool value)
   {
   	mehet = value;
   }

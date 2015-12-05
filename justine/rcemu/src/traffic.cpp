@@ -274,7 +274,7 @@ for(auto car:cars) //gangsters?
         		if (dist<10)
         		{
         			//std::cout<<" car id "<<car->m_from<<" carfrom "<<obj->getId()<<" buszmegid "<<obj->getNode()<<" busznode "<<" tav "<<dist<<std::endl;
-        			//car->set_mehet_value(false);
+        			car->setMehetValue(false);
         		}
     			
   			}

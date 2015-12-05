@@ -24,6 +24,11 @@ carlexer.cc
 
 justine/rcemu/src/.deps/*
 
+justine/rcemu/src/samplemyshmclient
+justine/rcemu/src/sampleshmclient
+justine/rcemu/src/smartcity
+justine/rcemu/src/traffic
+
 *.pb.cc
 *.pb.h
 *.out

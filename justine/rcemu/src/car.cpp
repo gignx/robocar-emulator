@@ -637,6 +637,7 @@ void justine::robocar::SmartCar::step()
       nextGuidedEdge();
     else
       nextEdge();
+    std::cout<<"smartcar step"<<std::endl;
   }
   else if ( m_type == CarType::CAUGHT )
   {

@@ -270,12 +270,29 @@ for(auto car:cars) //gangsters?
 
         		double dist = Distance2(car->m_from,obj->getNode());
     			//std::cout<<dist<<" "<<std::endl;
-    			//car->print(std::cout);
-        		if (dist<10)
+    			 
+        		if (dist<=1.0)
         		{
+              car->print(std::cout);
         			//std::cout<<" car id "<<car->m_from<<" carfrom "<<obj->getId()<<" buszmegid "<<obj->getNode()<<" busznode "<<" tav "<<dist<<std::endl;
-        			car->setMehetValue(false);
+              //std::cout<<" car id "<<obj->getId()<<" buszmegid "<<obj->getNode()<<" tav "<<dist;
+              //std::cout<<" állok "<<std::endl;
+
+        			car->setMehetValue(0);
+              std::cout<<" "<<car->mehet<<std::endl;
+              
+              break;
         		}
+            else
+            {
+              car->print(std::cout);
+              car->setMehetValue(1);
+              std::cout<<" "<<car->mehet<<std::endl;
+              //car->print(std::cout);
+              //std::cout<<" car id "<<car->m_from<<" carfrom "<<obj->getId()<<" buszmegid "<<obj->getNode()<<" busznode "<<" tav "<<dist<<std::endl;
+              //std::cout<<" car id "<<obj->getId()<<" buszmegid "<<obj->getNode()<<" tav "<<dist;
+              //std::cout<<" megyek "<<std::endl;
+            }
     			
   			}
 

@@ -31,7 +31,6 @@
  * desc
  *
  */
-
 #include <osmium/osm/types.hpp>
 #include <iostream>
 #include <vector>
@@ -89,7 +88,10 @@ public:
   osmium::unsigned_object_id_type get_max_steps() const;
   virtual void nextEdge ( void );
   virtual void nextSmarterEdge ( void );
-  virtual void setMehetValue ( bool );
+  virtual void setMehetValue (int value)
+  {
+    mehet=value;
+  }
 
   virtual void print ( std::ostream & os ) const
   {
@@ -125,6 +127,7 @@ public:
   }
 
 public:
+  int mehet;
   Traffic & traffic;
   CarType m_type {CarType::NORMAL};
   osmium::unsigned_object_id_type m_from {3130863972};
@@ -133,7 +136,7 @@ public:
   osmium::unsigned_object_id_type m_step {0};
 
 private:
-
+  
 };
 
 class AntCar : public Car
@@ -356,9 +359,74 @@ public:
 
   virtual void step()
   {
-    if (mehet)
+
+    std::cout<<mehet<<" mehet "<<std::endl;
+    if (mehet==0)
     {
-    	nextGuidedEdge();
+      
+
+    /*clock_t Tick = clock_t(float(clock()) / float(CLOCKS_PER_SEC) * 1000.f);
+    
+    clock_t Now = clock_t(float(clock()) / float(CLOCKS_PER_SEC) * 1000.f);
+    
+    while( (Now - Tick) < 10 )
+    {
+        Now = clock_t(float(clock()) / float(CLOCKS_PER_SEC) * 1000.f);
+        
+    }
+    
+    nextGuidedEdge();
+
+    long unsigned int last;
+
+    if (isGoingFrom)
+    {
+      last = routeWayFrom[routeWayFrom.size() - 2];
+    }
+    else
+    {
+      // safety not yolo
+      if (routeWayTo.size() > 0)
+      {
+        last = routeWayTo[routeWayTo.size() - 2];
+      }
+    }
+
+    if ((m_old_step == m_step) && (m_from == last))
+    {
+      if (isGoingFrom)
+      {
+        if (routeWayTo.size() > 0)
+        {
+          this->init(this->routeWayTo[0]);
+
+          this->set_route(this->routeWayTo);
+
+          isGoingFrom = false;
+        }
+        else
+        {
+          this->init(this->routeWayFrom[0]);
+
+          this->set_route(this->routeWayFrom);
+
+          isGoingFrom = true;
+        }
+      }
+      else
+      {
+        this->init(this->routeWayFrom[0]);
+
+        this->set_route(this->routeWayFrom);
+
+        isGoingFrom = true;
+      }
+    }
+
+    m_old_step = m_step;*/
+  }
+    else{
+          nextGuidedEdge();
 
     long unsigned int last;
 
@@ -409,11 +477,9 @@ public:
     m_old_step = m_step;
     }
   }
+  
 
-  virtual void setMehetValue(bool value)
-  {
-  	mehet = value;
-  }
+
 
   virtual void print (std::ostream & os) const
   {
@@ -463,14 +529,14 @@ public:
   // TODO: Ide jönnek az adott busz megállóinak ID-i
   //       (azok amiket mi adtunk nekik) (relax, már el van küldve a JAVA-nak, csak feltölteni kell!!)
 
-
+  int mehet;
   std::vector<int> busstops = {};
   std::vector<long unsigned int> routeWayFrom, routeWayTo;
 protected:
   std::string line_;
 private:
   bool isGoingFrom;
-  bool mehet = true;
+  
 };
 
 }

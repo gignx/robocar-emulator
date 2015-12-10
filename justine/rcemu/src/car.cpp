@@ -515,6 +515,52 @@ void justine::robocar::Bus::init(osmium::unsigned_object_id_type place)
     Car::init();
 }
 
+void justine::robocar::Bus::setMehetValue (int value)
+  {
+    //std::cout<<"lefutottam value"<<std::endl;
+      mehet=value;
+      //std::cout<<mehet<<std::endl;
+  }
+void justine::robocar::Bus::currentTime()
+  {
+
+     time(&time1);
+    
+     //std::cout<<time1<<" time1 "<<std::endl;
+    
+  }
+void justine::robocar::Bus::canIGo()
+  {
+
+      time(&time2);
+      //std::cout<<time2<<" time2 "<<std::endl;
+      //this->seconds = difftime(time2,time1);
+      //std::cout<<std::fixed;
+      seconds = difftime(time2,time1);
+      //std::cout<<seconds<<"seconds "<<std::endl;
+      if (seconds>=10.0)
+      {
+        //std::cout<<"mehet = 1 canigoba"<<std::endl;
+        mehet=1;
+      }
+      else
+        mehet=0;
+    
+    
+  }  
+  void justine::robocar::Bus::setLastNode(long unsigned int node)
+  {
+    last_node=node;
+  }
+  bool justine::robocar::Bus::checkLastNode(long unsigned int node)
+  {
+    if (last_node==node)
+    {
+      return true;
+    }
+    else
+      return false;
+  }
 void justine::robocar::SmartCar::nextEdge ( void )
 {
   if ( traffic.hasNode ( to_node() ) )
@@ -631,7 +677,8 @@ void justine::robocar::SmartCar::nextGuidedEdge ( void )
 
 void justine::robocar::SmartCar::step()
 {
-  if ( (m_type == CarType::POLICE) || (m_type == CarType::BUS) )
+  if ( (m_type == CarType::POLICE) || (m_type == CarType::BUS)
+   )
   {
     if ( m_guided )
       nextGuidedEdge();

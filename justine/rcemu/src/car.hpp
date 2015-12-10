@@ -39,7 +39,8 @@
 
 #include <osmreader.hpp>
 #include <algorithm>
-
+#include <time.h> 
+#include <unistd.h>
 
 namespace justine
 {
@@ -89,8 +90,36 @@ public:
   virtual void nextEdge ( void );
   virtual void nextSmarterEdge ( void );
   virtual void setMehetValue (int value)
-  {
+   {
     mehet=value;
+  }
+  virtual void currentTime()
+  {
+      std::cout<<"szar"<<std::endl;
+     time(&time1);
+    
+    
+  }
+  virtual void canIGo()
+  {
+      time(&time2);
+      std::cout<<time2<<" szar time2 "<<std::endl;
+      this->seconds = difftime(time2,time1);
+      std::cout<<std::fixed;
+      std::cout<<seconds<<" szar seconds "<<std::endl;
+  }
+  virtual void setLastNode(long unsigned int node)
+  {
+    last_node=node;
+  }
+  virtual bool checkLastNode(long unsigned int node)
+  {
+    if (last_node==node)
+    {
+      return true;
+    }
+    else
+      return false;
   }
 
   virtual void print ( std::ostream & os ) const
@@ -128,6 +157,10 @@ public:
 
 public:
   int mehet;
+  long unsigned int last_node=0;
+  time_t time1;
+  time_t time2;
+  double seconds;
   Traffic & traffic;
   CarType m_type {CarType::NORMAL};
   osmium::unsigned_object_id_type m_from {3130863972};
@@ -356,77 +389,25 @@ public:
   Bus (Traffic & traffic, bool guided, const char *name , int id);
 
   void init(osmium::unsigned_object_id_type place);
-
+  virtual void setMehetValue (int value);
+  virtual void currentTime();
+  virtual void canIGo();
+  virtual void setLastNode(long unsigned int node);
+  virtual bool checkLastNode(long unsigned int node);
   virtual void step()
   {
 
-    std::cout<<mehet<<" mehet "<<std::endl;
+    //std::cout<<mehet<<" mehet "<<std::endl;
     if (mehet==0)
     {
-      
-
-    /*clock_t Tick = clock_t(float(clock()) / float(CLOCKS_PER_SEC) * 1000.f);
-    
-    clock_t Now = clock_t(float(clock()) / float(CLOCKS_PER_SEC) * 1000.f);
-    
-    while( (Now - Tick) < 10 )
-    {
-        Now = clock_t(float(clock()) / float(CLOCKS_PER_SEC) * 1000.f);
-        
+      //std::cout<<"nem mek"<<std::endl;
     }
+
     
+    else if (mehet==1)
+    {
+     //std::cout<<"1 vagyok"<<std::endl; 
     nextGuidedEdge();
-
-    long unsigned int last;
-
-    if (isGoingFrom)
-    {
-      last = routeWayFrom[routeWayFrom.size() - 2];
-    }
-    else
-    {
-      // safety not yolo
-      if (routeWayTo.size() > 0)
-      {
-        last = routeWayTo[routeWayTo.size() - 2];
-      }
-    }
-
-    if ((m_old_step == m_step) && (m_from == last))
-    {
-      if (isGoingFrom)
-      {
-        if (routeWayTo.size() > 0)
-        {
-          this->init(this->routeWayTo[0]);
-
-          this->set_route(this->routeWayTo);
-
-          isGoingFrom = false;
-        }
-        else
-        {
-          this->init(this->routeWayFrom[0]);
-
-          this->set_route(this->routeWayFrom);
-
-          isGoingFrom = true;
-        }
-      }
-      else
-      {
-        this->init(this->routeWayFrom[0]);
-
-        this->set_route(this->routeWayFrom);
-
-        isGoingFrom = true;
-      }
-    }
-
-    m_old_step = m_step;*/
-  }
-    else{
-          nextGuidedEdge();
 
     long unsigned int last;
 
@@ -496,9 +477,16 @@ public:
        << line_
        << " "
        << id_;*/
-
+       std::cout<<std::fixed;
+       std::cout<<std::endl;
        os<<" "<<id_<<" ";
-  }
+       os<<" "<<mehet<<" ";
+       os<<" "<<time1<<" ";
+       os<<" "<<time2<<" ";
+       os<<" "<<seconds<<" ";
+       os<<" "<<last_node<<" ";
+       std::cout<<std::endl;
+  } 
 
   virtual void assign(CarData *car_data, bool full)
   {
@@ -530,6 +518,10 @@ public:
   //       (azok amiket mi adtunk nekik) (relax, már el van küldve a JAVA-nak, csak feltölteni kell!!)
 
   int mehet;
+  long unsigned int last_node = 0;
+  time_t time1;
+  time_t time2;
+  double seconds;
   std::vector<int> busstops = {};
   std::vector<long unsigned int> routeWayFrom, routeWayTo;
 protected:

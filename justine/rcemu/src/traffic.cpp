@@ -271,23 +271,56 @@ for(auto car:cars) //gangsters?
         		double dist = Distance2(car->m_from,obj->getNode());
     			//std::cout<<dist<<" "<<std::endl;
     			 
-        		if (dist<=1.0)
+        		if (dist<=20.0)
         		{
-              car->print(std::cout);
+              
         			//std::cout<<" car id "<<car->m_from<<" carfrom "<<obj->getId()<<" buszmegid "<<obj->getNode()<<" busznode "<<" tav "<<dist<<std::endl;
               //std::cout<<" car id "<<obj->getId()<<" buszmegid "<<obj->getNode()<<" tav "<<dist;
               //std::cout<<" állok "<<std::endl;
+            
+             // car->currentTime();
+             // if (car->mehet==1 && car->last_node!=obj->getNode())
+              //{
+               // std::cout<<"mehet == 1"<<std::endl;
+                //car->setMehetValue(0);
+                //car->print(std::cout);
+                //car->last_node=obj->getNode();
+               // car->currentTime();
+             // }
+             // else if (car->mehet==0)
+              //{
+               // car->canIGo();
+             // }
+              //std::cout<<" "<<car->mehet<<std::endl;
 
-        			car->setMehetValue(0);
-              std::cout<<" "<<car->mehet<<std::endl;
+              if (car->checkLastNode(obj->getNode()))
+              {
+                car->canIGo();
+                //car->print(std::cout);
+              }
+              else
+              {
+                //std::cout<<"lefutok"<<std::endl;
+                                
+                car->setLastNode(obj->getNode());
+                car->currentTime();
+                car->setMehetValue(0);
+                //car->print(std::cout);
+
+              }
+
+
+
+
+
               
               break;
         		}
             else
             {
-              car->print(std::cout);
+              //car->print(std::cout);
               car->setMehetValue(1);
-              std::cout<<" "<<car->mehet<<std::endl;
+              //std::cout<<" "<<car->mehet<<std::endl;
               //car->print(std::cout);
               //std::cout<<" car id "<<car->m_from<<" carfrom "<<obj->getId()<<" buszmegid "<<obj->getNode()<<" busznode "<<" tav "<<dist<<std::endl;
               //std::cout<<" car id "<<obj->getId()<<" buszmegid "<<obj->getNode()<<" tav "<<dist;
@@ -319,11 +352,13 @@ for(auto car:cars) //gangsters?
 
 void justine::robocar::Traffic::UpdateTraffic()
 {
+  Test();
+
   CheckIfCaught();
 
   StepCars();
   
-  Test();
+  
 }
 
 void justine::robocar::Traffic::StepCars()
@@ -984,11 +1019,14 @@ void justine::robocar::Traffic::CommandListener(boost::asio::ip::tcp::socket cli
 
       if(error_code == boost::asio::error::eof)
       {
+        std::cout << "if: " << std::endl;
         break;
       }
       else if(error_code)
       {
+        std::cout << "elseif: " << std::endl;
         throw boost::system::system_error(error_code);
+        
       }
 
       std::istringstream pbuffer(buffer);
@@ -1048,7 +1086,7 @@ void justine::robocar::Traffic::CommandListener(boost::asio::ip::tcp::socket cli
   }
   catch(std::exception& e)
   {
-    std::cerr << "Ooops: " << e.what() << std::endl;
+    std::cerr << "Ooopsi: " << e.what() << std::endl;
     cars_mutex.unlock();
   }
 }

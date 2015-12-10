@@ -66,8 +66,9 @@ namespace justine
 
 namespace robocar
 {
-
+//524288
 constexpr int kMaxBufferLen = 524288;
+
 
 enum ClientCommand
 {

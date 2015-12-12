@@ -296,7 +296,7 @@ for(auto car:cars) //gangsters?
               if (car->checkLastNode(obj->getNode()))
               {
                 car->canIGo();
-                //car->print(std::cout);
+                car->print(std::cout);
               }
               else
               {
@@ -305,7 +305,7 @@ for(auto car:cars) //gangsters?
                 car->setLastNode(obj->getNode());
                 car->currentTime();
                 car->setMehetValue(0);
-                //car->print(std::cout);
+                car->print(std::cout);
 
               }
 
@@ -921,6 +921,7 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
       car_data.SerializeToOstream(&os);
       msg_length = buf.size();
 
+      
       #ifdef DEBUG
       std::cout << msg_length << "\n";
       #endif
@@ -944,6 +945,8 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
       objData.SerializeToOstream(&os);
       msg_length = buf.size();
 
+      std::cout <<" car " <<  msg_length << "\n";
+      
       #ifdef DEBUG
       std::cout << msg_length << "\n";
       #endif

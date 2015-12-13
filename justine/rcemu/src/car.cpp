@@ -518,7 +518,7 @@ void justine::robocar::Bus::init(osmium::unsigned_object_id_type place)
 void justine::robocar::Bus::setMehetValue (int value)
   {
     //std::cout<<"lefutottam value"<<std::endl;
-      mehet=value;
+      busgoing=value;
       //std::cout<<mehet<<std::endl;
   }
 void justine::robocar::Bus::currentTime()
@@ -541,10 +541,10 @@ void justine::robocar::Bus::canIGo()
       if (seconds>=10.0)
       {
         //std::cout<<"mehet = 1 canigoba"<<std::endl;
-        mehet=1;
+        busgoing=1;
       }
       else
-        mehet=0;
+        busgoing=0;
     
     
   }  

@@ -92,11 +92,11 @@ public:
 //asdasdas
   virtual void setMehetValue (int value)
    {
-    mehet=value;
+    busgoing=value;
   }
   virtual void currentTime()
   {
-      std::cout<<"szar"<<std::endl;
+      
      time(&time1);
     
     
@@ -104,10 +104,9 @@ public:
   virtual void canIGo()
   {
       time(&time2);
-      std::cout<<time2<<" szar time2 "<<std::endl;
+     
       this->seconds = difftime(time2,time1);
-      std::cout<<std::fixed;
-      std::cout<<seconds<<" szar seconds "<<std::endl;
+      
   }
   virtual void setLastNode(long unsigned int node)
   {
@@ -158,7 +157,7 @@ public:
   }
 
 public:
-  int mehet;
+  int busgoing;
   long unsigned int last_node=0;
   time_t time1;
   time_t time2;
@@ -401,13 +400,13 @@ public:
   {
 
     //std::cout<<mehet<<" mehet "<<std::endl;
-    if (mehet==0)
+    if (busgoing==0)
     {
       //std::cout<<"nem mek"<<std::endl;
     }
 
     
-    else if (mehet==1)
+    else if (busgoing==1)
     {
      //std::cout<<"1 vagyok"<<std::endl; 
     nextGuidedEdge();
@@ -485,7 +484,7 @@ public:
        std::cout<<std::endl;
        //os<<" "<<line_<<" ";
        os<<" "<<id_<<" ";
-       os<<" "<<mehet<<" ";
+       os<<" "<<busgoing<<" ";
        os<<" "<<time1<<" ";
        os<<" "<<time2<<" ";
        os<<" "<<seconds<<" ";
@@ -515,7 +514,7 @@ public:
   }
   
   virtual void setMehetValue(bool value){
-      mehet = value;
+      busgoing = value;
       };
 
   std::string get_line() const
@@ -526,7 +525,7 @@ public:
   // TODO: Ide jönnek az adott busz megállóinak ID-i
   //       (azok amiket mi adtunk nekik) (relax, már el van küldve a JAVA-nak, csak feltölteni kell!!)
 
-  int mehet;
+  int busgoing;
   long unsigned int last_node = 0;
   time_t time1;
   time_t time2;

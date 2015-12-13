@@ -186,7 +186,7 @@ public:
   void InitializeBuses(void);
 
   void SimulationLoop(void);
-  void Test(void);
+  void isTheBusStopNear(void);
 
   std::string get_title(std::string name);
 

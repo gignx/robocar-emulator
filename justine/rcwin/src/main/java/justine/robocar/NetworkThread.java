@@ -2,6 +2,7 @@ package justine.robocar;
 
 import java.awt.Color;
 import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,14 +53,14 @@ public class NetworkThread extends Thread implements PlayBack {
 		Socket trafficServer = null;
 
 		try {
-			BufferedInputStream bis;
+			DataInputStream bis;
 			InputStream is;
 			File f = null;
 			FileInputStream in = null;
 			if (CarWindow.log) {
 				f = new File(CarWindow.logfile);
 				in = new FileInputStream(f);
-				bis = new BufferedInputStream(in);
+				bis = new DataInputStream(in);
 			} else {
 				trafficServer = new Socket(hostname, port);
 				OutputStream os = trafficServer.getOutputStream();
@@ -67,7 +68,7 @@ public class NetworkThread extends Thread implements PlayBack {
 				dos.writeUTF("<disp>");
 
 				is = trafficServer.getInputStream();
-				bis = new BufferedInputStream(is);
+				bis = new DataInputStream(is);
 			}
 
 			// 512 KB
@@ -80,6 +81,8 @@ public class NetworkThread extends Thread implements PlayBack {
 			LinkedList<WaypointCaught> caught_list = new LinkedList<WaypointCaught>();
 			LinkedList<WaypointNormal> default_list = new LinkedList<WaypointNormal>();
 			LinkedList<WaypointPedestrian> pedestrian_list = new LinkedList<WaypointPedestrian>();
+
+			LinkedList<Integer> stops = new LinkedList<Integer>();
 
 			LinkedList<Loc> path = new LinkedList<Loc>();
 
@@ -95,7 +98,7 @@ public class NetworkThread extends Thread implements PlayBack {
 						bis.close();
 						in.close();
 						in = new FileInputStream(f);
-						bis = new BufferedInputStream(in);
+						bis = new DataInputStream(in);
 						bis.skip(neededPosition);
 						neededPosition = -1;
 					}
@@ -109,6 +112,9 @@ public class NetworkThread extends Thread implements PlayBack {
 					default_list.clear();
 					pedestrian_list.clear();
 					path.clear();
+					stops.clear();
+
+					int pathLength = 0;
 
 					int time = 0, size = 0, sizeObjs = 0, minutes = 0;
 					long ref_from = 0, ref_to = 0, objNode = 0;
@@ -121,7 +127,7 @@ public class NetworkThread extends Thread implements PlayBack {
 
 					// 4 bájtot olvasunk a bufferünkbe (0. indextől 3-ig)
 					// ez a 4 bájt az üzenet hossza, amit fogadunk
-					bis.read(buff, 0, 4);
+					bis.readFully(buff, 0, 4);
 					// a ByteBuffer static wrap() metódusával egy ByteBufferbe
 					// rakjuk
 					// a beolvasott adatot. Utána gondoskodunk, hogy biztosan
@@ -133,7 +139,7 @@ public class NetworkThread extends Thread implements PlayBack {
 
 					// annyit olvasunk a bufferbe, amennyit előzőleg kaptunk
 					// 0
-					bis.read(buff, 0, toRead);
+					bis.readFully(buff, 0, toRead);
 
 					// a protobufnak pontosan akkora méretű bufferra van
 					// szüksége,
@@ -166,11 +172,11 @@ public class NetworkThread extends Thread implements PlayBack {
 
 					for (int i = 0; i < size; ++i) {
 						// az üzenet mérete
-						bis.read(buff, 0, 4);
+						bis.readFully(buff, 0, 4);
 						toRead = java.nio.ByteBuffer.wrap(buff).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
 
 						// maga az üzenet
-						bis.read(buff, 0, toRead);
+						bis.readFully(buff, 0, toRead);
 
 						readFrom = new byte[toRead];
 
@@ -210,7 +216,7 @@ public class NetworkThread extends Thread implements PlayBack {
 							name = carData.getTeam();
 							id = carData.getId();
 							path.clear();
-							int pathLength = carData.getSize();
+							pathLength = carData.getSize();
 							for (int j = 0; j < pathLength; j++) {
 								path.add(lmap.get(carData.getPath(j)));
 							}
@@ -247,7 +253,7 @@ public class NetworkThread extends Thread implements PlayBack {
 							}
 							name = carData.getTeam();
 							id = carData.getId(); //YOLO
-							LinkedList<Integer> stops = new LinkedList<Integer>();
+							
 							int num = carData.getNumStops();
 							for(int z = 0;z<num;z++){
 								stops.add((int)carData.getBusstops(z));
@@ -266,11 +272,11 @@ public class NetworkThread extends Thread implements PlayBack {
 
 					for (int i = 0; i < sizeObjs; ++i) {
 						// az üzenet mérete
-						bis.read(buff, 0, 4);
+						bis.readFully(buff, 0, 4);
 						toRead = java.nio.ByteBuffer.wrap(buff).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
 
 						// maga az üzenet
-						bis.read(buff, 0, toRead);
+						bis.readFully(buff, 0, toRead);
 
 						readFrom = new byte[toRead];
 
@@ -338,12 +344,14 @@ public class NetworkThread extends Thread implements PlayBack {
 				}
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 
 		} finally {
 			try {
 				if (!CarWindow.log)
 					trafficServer.close();
 			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 

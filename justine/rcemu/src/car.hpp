@@ -483,7 +483,7 @@ public:
        << id_;*/
        std::cout<<std::fixed;
        std::cout<<std::endl;
-       os<<" "<<line_<<" ";
+       //os<<" "<<line_<<" ";
        os<<" "<<id_<<" ";
        os<<" "<<mehet<<" ";
        os<<" "<<time1<<" ";

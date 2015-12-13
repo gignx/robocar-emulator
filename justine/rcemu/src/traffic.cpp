@@ -271,7 +271,7 @@ for(auto car:cars) //gangsters?
         		double dist = Distance2(car->m_from,obj->getNode());
     			//std::cout<<dist<<" "<<std::endl;
     			 
-        		if (dist<=20.0)
+        		if (dist<=30.0)
         		{
               
         			//std::cout<<" car id "<<car->m_from<<" carfrom "<<obj->getId()<<" buszmegid "<<obj->getNode()<<" busznode "<<" tav "<<dist<<std::endl;
@@ -296,7 +296,8 @@ for(auto car:cars) //gangsters?
               if (car->checkLastNode(obj->getNode()))
               {
                 car->canIGo();
-                car->print(std::cout);
+                /*car->print(std::cout);
+                std::cout<<" "<<dist<<std::endl;*/
               }
               else
               {
@@ -305,7 +306,7 @@ for(auto car:cars) //gangsters?
                 car->setLastNode(obj->getNode());
                 car->currentTime();
                 car->setMehetValue(0);
-                car->print(std::cout);
+                
 
               }
 
@@ -320,6 +321,7 @@ for(auto car:cars) //gangsters?
             {
               //car->print(std::cout);
               car->setMehetValue(1);
+              
               //std::cout<<" "<<car->mehet<<std::endl;
               //car->print(std::cout);
               //std::cout<<" car id "<<car->m_from<<" carfrom "<<obj->getId()<<" buszmegid "<<obj->getNode()<<" busznode "<<" tav "<<dist<<std::endl;
@@ -945,7 +947,6 @@ void justine::robocar::Traffic::DispCmdHandler(boost::asio::ip::tcp::socket &cli
       objData.SerializeToOstream(&os);
       msg_length = buf.size();
 
-      std::cout <<" car " <<  msg_length << "\n";
       
       #ifdef DEBUG
       std::cout << msg_length << "\n";

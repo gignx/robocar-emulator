@@ -1,7 +1,6 @@
 package justine.robocar;
 
 import java.awt.Color;
-import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -14,6 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -301,7 +301,7 @@ public class NetworkThread extends Thread implements PlayBack {
 					}
 
 					if (time >= minutes * 60 * 1000 / 200) {
-						throw new Exception();
+						throw new TimeoutException();
 					}
 
 					StringBuilder sb = new StringBuilder();
@@ -338,13 +338,21 @@ public class NetworkThread extends Thread implements PlayBack {
 					if (onNewTrafficListener != null)
 						onNewTrafficListener.onNewTraffic(Traffic.create(traffic));
 
-				} catch (Exception e) {
-					if (!CarWindow.log)
-						throw e;
+				}catch (TimeoutException e) {
+					if (!CarWindow.log){
+						System.out.println("The traffic simulation is over.");
+						throw e;}
+				}
+				catch (Exception a) {
+					if (!CarWindow.log){
+						a.printStackTrace();
+						throw a;}
+				
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			
 
 		} finally {
 			try {
